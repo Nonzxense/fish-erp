@@ -1,4 +1,4 @@
-module fishflow
+module fish
 
 go 1.23
 

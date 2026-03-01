@@ -1,0 +1,12 @@
+{
+  "title": "ระบบจัดการร้านปลา",
+  "subtitle": "Fish shop management",
+  "home": "หน้าหลัก",
+  "iae": "รายรับ-รายจ่าย",
+  "purchase-invoice": "บิลซื้อ",
+  "sales-invoice": "บิลขาย",
+  "truck-invoice": "บิลรถบรรทุก",
+  "crate": "จัดการลังปลา",
+  "party": "บุคคล",
+  "settings": "การตั้งค่า"
+}

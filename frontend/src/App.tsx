@@ -1,28 +1,24 @@
-import { useState } from 'react';
-import logo from './assets/images/logo-universal.png';
-import './App.css';
-import { Greet } from "../wailsjs/go/main/App";
+import { Route, Routes } from 'react-router-dom';
+import AppSidebar from './components/Sidebar';
+import { ConfigProvider } from 'antd';
 
 const App = () => {
-    const [resultText, setResultText] = useState("Please enter your name below 👇");
-    const [name, setName] = useState('');
-    const updateName = (e: any) => setName(e.target.value);
-    const updateResultText = (result: string) => setResultText(result);
-
-    function greet() {
-        Greet(name).then(updateResultText);
-    }
-
-    return (
-        <div id="App">
-            <img src={logo} id="logo" alt="logo" />
-            <div id="result" className="result">{resultText}</div>
-            <div id="input" className="input-box">
-                <input id="name" className="input" onChange={updateName} autoComplete="off" name="input" type="text" />
-                <button className="btn" onClick={greet}>Greet</button>
-            </div>
-        </div>
-    )
+  return (
+    <ConfigProvider>
+      <Routes>
+        <Route element={<AppSidebar />}>
+          <Route path="/" element={<div>Page</div>} />
+          <Route path="/income-and-expense" element={<div>Page</div>} />
+          <Route path="/purchase-invoices" element={<div>Page</div>} />
+          <Route path="/sales-invoices" element={<div>Page</div>} />
+          <Route path="/truck-invoices" element={<div>Page</div>} />
+          <Route path="crates" element={<div>Page</div>} />
+          <Route path="/parties" element={<div>Page</div>} />
+          <Route path="/settings" element={<div>Page</div>} />
+        </Route>
+      </Routes>
+    </ConfigProvider>
+  )
 }
 
 export default App
