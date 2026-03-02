@@ -1,0 +1,15 @@
+{
+  "button-create": "เพิ่มรายการ",
+  "button-export": "ส่งออก",
+  "button-filter": "กรอง",
+  "filter": {
+    "today": "วันนี้",
+    "current-month": "เดือนนี้",
+    "three-months": "3 เดือน",
+    "six-months": "6 เดือน",
+    "one-year": "1 ปี",
+    "all-time": "ตลอดเวลา",
+    "button-search": "ค้นหา",
+    "button-clear": "ล้างการกรอง"
+  }
+}

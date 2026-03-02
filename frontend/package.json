@@ -11,6 +11,7 @@
   "dependencies": {
     "@eslint/js": "^9.39.2",
     "antd": "^6.3.0",
+    "dayjs": "^1.11.19",
     "eslint": "^9.39.2",
     "i18next": "^25.8.13",
     "i18next-browser-languagedetector": "^8.2.1",
