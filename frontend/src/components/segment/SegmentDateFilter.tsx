@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 
 const SegmentDateFilter = ({ onChange, ...rest }: SegmentDateFilterProp) => {
   const { t: localT } = useTranslation('common')
+  const allTime = dayjs('1000-01-01').format()
 
   return (
     <Segmented<string>
@@ -15,10 +16,11 @@ const SegmentDateFilter = ({ onChange, ...rest }: SegmentDateFilterProp) => {
         { label: localT('filter.three-months'), value: dayjs().startOf('day').subtract(3, 'month').format() },
         { label: localT('filter.six-months'), value: dayjs().startOf('day').subtract(6, 'month').format() },
         { label: localT('filter.one-year'), value: dayjs().startOf('day').subtract(1, 'year').format() },
-        { label: localT('filter.all-time'), value: dayjs('1000-01-01').format() },
+        { label: localT('filter.all-time'), value: allTime },
       ]}
-      defaultValue={dayjs('1000-01-01').format()}
+      defaultValue={allTime}
       onChange={onChange}
+      className='select-none'
     />
   )
 }

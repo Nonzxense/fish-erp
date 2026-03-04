@@ -2,98 +2,39 @@ import { useTranslation } from "react-i18next"
 import PageTitle from "../../components/page-title/PageTitle"
 import { Button, Card, Col, DatePicker, Flex, Form, Row, Select, Space, Statistic, Table, TableColumnsType, Tag, Typography } from "antd"
 import { ListFilter, Plus, Upload } from "lucide-react"
-import { useMemo, useState } from "react"
-import { Transaction } from "./interface"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import dayjs from "dayjs"
 import { formatDate, formatTHB } from "../../utils/formatter"
 import SegmentDateFilter from "../../components/segment/SegmentDateFilter"
 import { getTransactionTypeColor } from "../../utils/getTagColor"
 import TransactionFormModal from "./components/modal/TransactionFormModal"
-
-
-const mockTransactions: Transaction[] = [
-  {
-    id: "tx-001",
-    type: "income",
-    category: "ขายปลา",
-    amount: 12500,
-    occuredAt: dayjs().subtract(1, "day"),
-    note: "ขายปลาไหล",
-  },
-  {
-    id: "tx-002",
-    billId: "bill-1001",
-    type: "expense",
-    category: "น้ำมัน",
-    amount: -1800,
-    occuredAt: dayjs().subtract(2, "day"),
-    note: "ค่าน้ำมัน",
-  },
-  {
-    id: "tx-003",
-    type: "income",
-    category: "ขายปลา",
-    amount: 22000,
-    occuredAt: dayjs().subtract(3, "day"),
-  },
-  {
-    id: "tx-004",
-    type: "expense",
-    category: "น้ำแข็ง",
-    amount: -950,
-    occuredAt: dayjs().subtract(4, "day"),
-    note: "น้ำแข็ง",
-  },
-  {
-    id: "tx-005",
-    billId: "bill-1002",
-    type: "income",
-    category: "ขายปลา",
-    amount: 7800,
-    occuredAt: dayjs().subtract(5, "day"),
-  },
-  {
-    id: "tx-006",
-    type: "expense",
-    category: "ซ่อมรถ",
-    amount: -3200,
-    occuredAt: dayjs().subtract(6, "day"),
-  },
-  {
-    id: "tx-007",
-    type: "income",
-    amount: -6400,
-    category: "ลัง",
-    occuredAt: dayjs().subtract(7, "day"),
-    note: "ซื้อลัง"
-  },
-  {
-    id: "tx-008",
-    type: "expense",
-    category: "ลัง",
-    amount: -1100,
-    occuredAt: dayjs().subtract(8, "day"),
-    note: "ซื้อลัง"
-  },
-]
+import { GetTransactions } from "../../../wailsjs/go/main/App"
+import { domain } from "../../../wailsjs/go/models"
 
 const { Text } = Typography
 
 const IncomeAndExpense = () => {
+  const allTime = dayjs('1000-01-01').format()
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
   const [isOpenModalCreate, setIsOpenModalCreate] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [transactions, setTransactions] = useState<domain.Transaction[]>([])
   const [income, _setIncome] = useState<number>(0)
   const [expense, _setExpense] = useState<number>(0)
   const [profit, _setProfit] = useState<number>(0)
+  const [segmentValue, setSegmentValue] = useState<string>(allTime)
   const { t: localT } = useTranslation('income-and-expense')
   const { t: commonT } = useTranslation('common')
+  const [form] = Form.useForm()
 
-  const columns: TableColumnsType<Transaction> = useMemo(
+  const occurredAt = Form.useWatch('occurredAt', form)
+
+  const columns: TableColumnsType<domain.Transaction> = useMemo(
     () => [
       {
         title: localT('table.date'),
-        key: 'occuredAt',
-        dataIndex: 'occuredAt',
+        key: 'occurredAt',
+        dataIndex: 'occurredAt',
         width: 180,
         render: (val: Date) => <Text>{formatDate(val)}</Text>,
       },
@@ -131,9 +72,44 @@ const IncomeAndExpense = () => {
       },
     ], [localT])
 
+  const handleClick = async () => {
+
+  }
+
+  const handleResetFilters = useCallback(() => {
+
+  }, [])
+
+  const loadTransactions = async () => {
+    try {
+      setIsLoading(true)
+      const data = await GetTransactions()
+      setTransactions(data)
+    } catch {
+      // handle in interceptor
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadTransactions()
+  }, [])
+
+  useEffect(() => {
+    if (occurredAt && occurredAt.length) {
+      setSegmentValue(allTime)
+    }
+  }, [allTime, occurredAt])
+
+
   return (
     <>
-      <TransactionFormModal isOpen={isOpenModalCreate} setIsOpen={(val) => setIsOpenModalCreate(val)} onChange={async () => { }} />
+      <TransactionFormModal
+        isOpen={isOpenModalCreate}
+        setIsOpen={(val) => setIsOpenModalCreate(val)}
+        onChange={loadTransactions}
+      />
       <Space orientation="vertical" size="large" className="w-full">
         <Flex align="center" className="w-full">
           <PageTitle
@@ -166,15 +142,37 @@ const IncomeAndExpense = () => {
           wrap="wrap"
           gap={16}
         >
-          <SegmentDateFilter onChange={async (val) => { console.log(val) }} />
+          <SegmentDateFilter
+            value={segmentValue}
+            disabled={!!(occurredAt && occurredAt.length)}
+            onChange={(val) => {
+              setSegmentValue(val)
+              form.setFieldsValue({ occurredAt: null })
+            }}
+          />
           <Space size="middle">
-            <Button onClick={() => setIsShowFilters((isShow) => !isShow)} size="large" icon={<ListFilter size={16} />} variant="outlined" color="primary" className="min-w-[140px]">
+            <Button
+              onClick={() => setIsShowFilters((isShow) => !isShow)}
+              size="large" icon={<ListFilter size={16} />}
+              variant="outlined"
+              color="primary"
+              className="min-w-[140px]">
               {commonT('button-filter')}
             </Button>
-            <Button size="large" icon={<Upload size={16} />} variant="outlined" color="primary" className="min-w-[140px]">
+            <Button
+              onClick={handleClick}
+              size="large"
+              icon={<Upload size={16} />}
+              variant="outlined"
+              color="primary"
+              className="min-w-[140px]">
               {commonT('button-export')}
             </Button>
-            <Button onClick={() => setIsOpenModalCreate(true)} size="large" icon={<Plus size={16} />} className="min-w-[140px] gradient-btn">
+            <Button
+              onClick={() => setIsOpenModalCreate(true)}
+              size="large"
+              icon={<Plus size={16} />}
+              className="min-w-[140px] gradient-btn">
               {commonT('button-create')}
             </Button>
           </Space>
@@ -188,15 +186,17 @@ const IncomeAndExpense = () => {
       >
         <Card>
           <Form
+            form={form}
             layout="vertical"
+            onReset={handleResetFilters}
           >
             <Row gutter={16}>
               <Col span={6}>
                 <Form.Item
                   label={localT('form.date.label')}
-                  name="occuredAt"
+                  name="occurredAt"
                 >
-                  <DatePicker.RangePicker maxDate={dayjs()} className="!w-full" />
+                  <DatePicker.RangePicker maxDate={dayjs()} className="!w-full" placeholder={[commonT("range-picker.start"), commonT("range-picker.end")]} />
                 </Form.Item>
               </Col>
               <Col span={6}>
@@ -210,7 +210,7 @@ const IncomeAndExpense = () => {
               <Col span={6}>
                 <Form.Item
                   label={localT('form.category.label')}
-                  name="type"
+                  name="category"
                 >
                   <Select placeholder={localT('form.category.placeholder')} />
                 </Form.Item>
@@ -228,7 +228,7 @@ const IncomeAndExpense = () => {
                     <Button
                       color="primary"
                       variant="outlined"
-                      htmlType="button"
+                      htmlType="reset"
                       className="w-full">
                       {commonT('filter.button-clear')}
                     </Button>
@@ -241,9 +241,10 @@ const IncomeAndExpense = () => {
       </div>
       <Table
         columns={columns}
-        dataSource={mockTransactions}
+        dataSource={transactions}
         scroll={{ x: 'max-content' }}
         rowKey={(record) => record.id}
+        loading={isLoading}
       />
     </>
   )

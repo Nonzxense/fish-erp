@@ -11,5 +11,9 @@
     "all-time": "ตลอดเวลา",
     "button-search": "ค้นหา",
     "button-clear": "ล้างการกรอง"
+  },
+  "range-picker": {
+    "start": "วันที่เริ่ม",
+    "end": "วันที่สิ้นสุด"
   }
 }

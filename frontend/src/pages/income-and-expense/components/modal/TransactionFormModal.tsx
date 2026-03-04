@@ -1,20 +1,30 @@
 import { Button, DatePicker, Form, Input, InputNumber, Modal, Select, Space } from "antd"
-import { TransactionFormModalProp } from "./interface"
+import { FormValues, TransactionFormModalProp } from "./interface"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { CreateTransaction } from "../../../../../wailsjs/go/main/App"
+import { transaction } from "../../../../../wailsjs/go/models"
 
 const TransactionFormModal = ({ isOpen, setIsOpen, onChange }: TransactionFormModalProp) => {
   const [isLoading, _setIsLoading] = useState<boolean>(false)
-  const [form] = Form.useForm()
+  const [form] = Form.useForm<FormValues>()
   const { t: localT } = useTranslation('income-and-expense')
 
-  const handleSubmit = useCallback(
-    async () => {
-      console.log(form.getFieldsValue())
-      onChange()
-    },
-    [form, onChange],
-  )
+  const handleSubmit = async (values: FormValues) => {
+    const payload = new transaction.CreateTransactionInput({
+      occurredAt: values.occurredAt.toISOString(),
+      type: values.type,
+      amount: Number(values.amount),
+      category: values.category ?? undefined,
+      note: values.note ?? undefined,
+    })
+    
+    await CreateTransaction(payload)
+
+    onChange()
+    form.resetFields()
+    setIsOpen(false)
+  }
 
   const handleCloseModal = useCallback(async () => {
     form.resetFields()
@@ -26,7 +36,7 @@ const TransactionFormModal = ({ isOpen, setIsOpen, onChange }: TransactionFormMo
       open={isOpen}
       onCancel={handleCloseModal}
       footer={null}
-      mask={{closable: !isLoading}}
+      mask={{ closable: !isLoading }}
       classNames={{
         container: 'pb-1!',
       }}
@@ -39,7 +49,7 @@ const TransactionFormModal = ({ isOpen, setIsOpen, onChange }: TransactionFormMo
         disabled={isLoading}
       >
         <Form.Item
-          name="date"
+          name="occurredAt"
           label={localT('form.date.label')}
           rules={[{ required: true }]}
         >
