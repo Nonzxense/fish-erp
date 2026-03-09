@@ -10,6 +10,7 @@ import { getTransactionTypeColor } from "../../utils/getTagColor"
 import TransactionFormModal from "./components/modal/TransactionFormModal"
 import { GetTransactions } from "../../../wailsjs/go/main/App"
 import { domain } from "../../../wailsjs/go/models"
+import { TransactionFilter, TransactionFilterFormValues } from "./interface"
 
 const { Text } = Typography
 
@@ -19,6 +20,7 @@ const IncomeAndExpense = () => {
   const [isOpenModalCreate, setIsOpenModalCreate] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [transactions, setTransactions] = useState<domain.Transaction[]>([])
+  const [filter, setFilter] = useState<TransactionFilter>({})
   const [income, _setIncome] = useState<number>(0)
   const [expense, _setExpense] = useState<number>(0)
   const [profit, _setProfit] = useState<number>(0)
@@ -26,8 +28,18 @@ const IncomeAndExpense = () => {
   const { t: localT } = useTranslation('income-and-expense')
   const { t: commonT } = useTranslation('common')
   const [form] = Form.useForm()
-
   const occurredAt = Form.useWatch('occurredAt', form)
+
+  const transactionTypeOptions = useMemo(() => [
+    {
+      value: "income",
+      label: localT("income")
+    },
+    {
+      value: "expense",
+      label: localT("expense")
+    }
+  ], [localT])
 
   const columns: TableColumnsType<domain.Transaction> = useMemo(
     () => [
@@ -72,36 +84,43 @@ const IncomeAndExpense = () => {
       },
     ], [localT])
 
-  const handleClick = async () => {
-
-  }
-
   const handleResetFilters = useCallback(() => {
-
+    setFilter({})
   }, [])
 
-  const loadTransactions = async () => {
+  const handleSearchFilter = useCallback((filters: TransactionFilterFormValues) => {
+    const newFilters: TransactionFilter = {
+      type: filters?.type ? filters.type : undefined,
+      category: filters?.category ? filters.category : undefined,
+      fromDate: filters?.occurredAt?.[0]
+        ? dayjs(filters.occurredAt[0]).toISOString()
+        : null,
+      toDate: filters?.occurredAt?.[1] ? dayjs(filters.occurredAt[1]).toISOString()
+        : null,
+    }
+    setFilter(newFilters)
+  }, [])
+
+  const loadTransactions = useCallback(async () => {
     try {
       setIsLoading(true)
-      const data = await GetTransactions()
+      const goFilter = new domain.TransactionFilter(filter)
+      const data = await GetTransactions(goFilter)
       setTransactions(data)
-    } catch {
-      // handle in interceptor
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [filter])
 
   useEffect(() => {
     loadTransactions()
-  }, [])
+  }, [loadTransactions])
 
   useEffect(() => {
     if (occurredAt && occurredAt.length) {
       setSegmentValue(allTime)
     }
   }, [allTime, occurredAt])
-
 
   return (
     <>
@@ -160,7 +179,7 @@ const IncomeAndExpense = () => {
               {commonT('button-filter')}
             </Button>
             <Button
-              onClick={handleClick}
+              onClick={() => { }}
               size="large"
               icon={<Upload size={16} />}
               variant="outlined"
@@ -189,6 +208,7 @@ const IncomeAndExpense = () => {
             form={form}
             layout="vertical"
             onReset={handleResetFilters}
+            onFinish={handleSearchFilter}
           >
             <Row gutter={16}>
               <Col span={6}>
@@ -196,7 +216,7 @@ const IncomeAndExpense = () => {
                   label={localT('form.date.label')}
                   name="occurredAt"
                 >
-                  <DatePicker.RangePicker maxDate={dayjs()} className="!w-full" placeholder={[commonT("range-picker.start"), commonT("range-picker.end")]} />
+                  <DatePicker.RangePicker className="!w-full" placeholder={[commonT("range-picker.start"), commonT("range-picker.end")]} />
                 </Form.Item>
               </Col>
               <Col span={6}>
@@ -204,7 +224,9 @@ const IncomeAndExpense = () => {
                   label={localT('form.type.label')}
                   name="type"
                 >
-                  <Select placeholder={localT('form.type.placeholder')} />
+                  <Select
+                    options={transactionTypeOptions}
+                    placeholder={localT('form.type.placeholder')} />
                 </Form.Item>
               </Col>
               <Col span={6}>

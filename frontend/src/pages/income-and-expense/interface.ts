@@ -6,6 +6,23 @@ export interface Transaction {
   type: 'income' | 'expense'
   category?: string
   amount: number
-  occuredAt: Dayjs
+  occurredAt: Dayjs
   note?: string
+}
+
+export interface TransactionFilter {
+  type?: string
+  category?: string
+  fromDate?: string | null
+  toDate?: string | null
+  minAmount?: number
+  maxAmount?: number
+
+  convertValues?: () => TransactionFilter
+}
+
+export type TransactionFilterFormValues = {
+  type?: string
+  category?: string
+  occurredAt?: [Dayjs, Dayjs]
 }

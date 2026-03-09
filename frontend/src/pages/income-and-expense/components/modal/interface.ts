@@ -7,7 +7,7 @@ export interface TransactionFormModalProp {
   onChange: () => Promise<void>
 }
 
-export type FormValues = {
+export type TransactionFormValues = {
   occurredAt: Dayjs
   type: string
   amount: number

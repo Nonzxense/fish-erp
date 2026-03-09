@@ -3,7 +3,6 @@ package transaction
 import (
 	"fish/internal/domain"
 	"fish/internal/repository"
-	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -17,7 +16,6 @@ func NewTransactionService(repo *repository.TransactionRepository) *TransactionS
 }
 
 func (s *TransactionService) CreateTransaction(input CreateTransactionInput) error {
-	fmt.Println(input)
 	tx := &domain.Transaction{
 		ID:         uuid.NewString(),
 		Type:       input.Type,
@@ -30,6 +28,6 @@ func (s *TransactionService) CreateTransaction(input CreateTransactionInput) err
 	return s.repo.Create(tx)
 }
 
-func (s *TransactionService) GetTransactions() ([]domain.Transaction, error) {
-	return s.repo.FindAll()
+func (s *TransactionService) GetTransactions(filter *domain.TransactionFilter) ([]domain.Transaction, error) {
+	return s.repo.FindAll(filter)
 }

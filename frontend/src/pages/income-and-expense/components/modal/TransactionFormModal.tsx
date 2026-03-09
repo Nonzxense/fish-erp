@@ -1,5 +1,5 @@
 import { Button, DatePicker, Form, Input, InputNumber, Modal, Select, Space } from "antd"
-import { FormValues, TransactionFormModalProp } from "./interface"
+import { TransactionFormValues, TransactionFormModalProp } from "./interface"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { CreateTransaction } from "../../../../../wailsjs/go/main/App"
@@ -7,10 +7,10 @@ import { transaction } from "../../../../../wailsjs/go/models"
 
 const TransactionFormModal = ({ isOpen, setIsOpen, onChange }: TransactionFormModalProp) => {
   const [isLoading, _setIsLoading] = useState<boolean>(false)
-  const [form] = Form.useForm<FormValues>()
+  const [form] = Form.useForm<TransactionFormValues>()
   const { t: localT } = useTranslation('income-and-expense')
 
-  const handleSubmit = async (values: FormValues) => {
+  const handleSubmit = async (values: TransactionFormValues) => {
     const payload = new transaction.CreateTransactionInput({
       occurredAt: values.occurredAt.toISOString(),
       type: values.type,

@@ -5,4 +5,4 @@ import {domain} from '../models';
 
 export function CreateTransaction(arg1:transaction.CreateTransactionInput):Promise<void>;
 
-export function GetTransactions():Promise<Array<domain.Transaction>>;
+export function GetTransactions(arg1:domain.TransactionFilter):Promise<Array<domain.Transaction>>;
