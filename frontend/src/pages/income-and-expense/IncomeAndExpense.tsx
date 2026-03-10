@@ -88,7 +88,7 @@ const IncomeAndExpense = () => {
         dataIndex: 'amount',
         align: 'right',
         width: 160,
-        render: (val: number) => <span className={val >= 0 ? "text-green-500" : "text-red-500"}>
+        render: (val: number, record: domain.Transaction) => <span className={record.type === 'income' ? "text-green-500" : "text-red-500"}>
           {formatTHB(val)}
         </span>
       },
@@ -202,17 +202,17 @@ const IncomeAndExpense = () => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12} lg={8}>
               <Card variant="borderless">
-                <Statistic title={localT('income')} value={formatTHB(totalIncome)} />
+                <Statistic title={localT('income')} value={formatTHB(totalIncome)} styles={{ content: { color: '#00c951' } }} />
               </Card>
             </Col>
             <Col xs={24} md={12} lg={8}>
               <Card variant="borderless">
-                <Statistic title={localT('expense')} value={formatTHB(totalExpense)} />
+                <Statistic title={localT('expense')} value={formatTHB(totalExpense)} styles={{ content: { color: '#fb2c36' } }} />
               </Card>
             </Col>
             <Col xs={24} md={24} lg={8}>
               <Card variant="borderless">
-                <Statistic title={localT('profit-loss')} value={formatTHB(profit)} />
+                <Statistic title={localT('profit-loss')} value={formatTHB(profit)} styles={{ content: { color: profit >= 0 ? '#00c951' : '#fb2c36' } }} />
               </Card>
             </Col>
           </Row>
@@ -286,7 +286,7 @@ const IncomeAndExpense = () => {
             <Row gutter={16}>
               <Col span={6}>
                 <Form.Item
-                  label={localT('form.date.label')}
+                  label={localT('form.occurred-at.label')}
                   name="occurredAt"
                 >
                   <DatePicker.RangePicker className="!w-full" placeholder={[commonT("range-picker.start"), commonT("range-picker.end")]} />
