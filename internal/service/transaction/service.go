@@ -31,3 +31,7 @@ func (s *TransactionService) CreateTransaction(input CreateTransactionInput) err
 func (s *TransactionService) GetTransactions(filter *domain.TransactionFilter) ([]domain.Transaction, error) {
 	return s.repo.FindAll(filter)
 }
+
+func (s *TransactionService) GetTransactionSummary() (domain.TransactionSummary, error) {
+	return s.repo.FindSummary()
+}

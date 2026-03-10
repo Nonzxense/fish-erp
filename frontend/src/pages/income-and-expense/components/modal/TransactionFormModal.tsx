@@ -18,9 +18,7 @@ const TransactionFormModal = ({ isOpen, setIsOpen, onChange }: TransactionFormMo
       category: values.category ?? undefined,
       note: values.note ?? undefined,
     })
-    
     await CreateTransaction(payload)
-
     onChange()
     form.resetFields()
     setIsOpen(false)

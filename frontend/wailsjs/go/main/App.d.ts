@@ -5,4 +5,6 @@ import {domain} from '../models';
 
 export function CreateTransaction(arg1:transaction.CreateTransactionInput):Promise<void>;
 
+export function GetTransactionSummary():Promise<domain.TransactionSummary>;
+
 export function GetTransactions(arg1:domain.TransactionFilter):Promise<Array<domain.Transaction>>;

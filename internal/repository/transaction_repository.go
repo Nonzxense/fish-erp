@@ -19,7 +19,6 @@ func (r *TransactionRepository) Create(tx *domain.Transaction) error {
 
 func (r *TransactionRepository) FindAll(filter *domain.TransactionFilter) ([]domain.Transaction, error) {
 	var transactions []domain.Transaction
-
 	query := r.db.Model(&domain.Transaction{})
 
 	if filter != nil {
@@ -53,4 +52,19 @@ func (r *TransactionRepository) FindAll(filter *domain.TransactionFilter) ([]dom
 		Find(&transactions).Error
 
 	return transactions, err
+}
+
+func (r *TransactionRepository) FindSummary() (domain.TransactionSummary, error) {
+	var summary domain.TransactionSummary
+
+	err := r.db.Model(&domain.Transaction{}).
+		Select(`
+			COALESCE(SUM(CASE WHEN type = 'income' THEN amount END), 0) AS total_income,
+			COALESCE(SUM(CASE WHEN type = 'expense' THEN amount END), 0) AS total_expense
+		`).
+		Scan(&summary).Error
+
+	summary.Profit = summary.TotalIncome - summary.TotalExpense
+
+	return summary, err
 }

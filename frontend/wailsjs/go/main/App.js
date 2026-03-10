@@ -6,6 +6,10 @@ export function CreateTransaction(arg1) {
   return window['go']['main']['App']['CreateTransaction'](arg1);
 }
 
+export function GetTransactionSummary() {
+  return window['go']['main']['App']['GetTransactionSummary']();
+}
+
 export function GetTransactions(arg1) {
   return window['go']['main']['App']['GetTransactions'](arg1);
 }

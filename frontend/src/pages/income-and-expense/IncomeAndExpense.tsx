@@ -8,23 +8,22 @@ import { formatDate, formatTHB } from "../../utils/formatter"
 import SegmentDateFilter from "../../components/segment/SegmentDateFilter"
 import { getTransactionTypeColor } from "../../utils/getTagColor"
 import TransactionFormModal from "./components/modal/TransactionFormModal"
-import { GetTransactions } from "../../../wailsjs/go/main/App"
+import { GetTransactions, GetTransactionSummary } from "../../../wailsjs/go/main/App"
 import { domain } from "../../../wailsjs/go/models"
 import { TransactionFilter, TransactionFilterFormValues } from "./interface"
 
 const { Text } = Typography
 
 const IncomeAndExpense = () => {
-  const allTime = dayjs('1000-01-01').format()
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
   const [isOpenModalCreate, setIsOpenModalCreate] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [transactions, setTransactions] = useState<domain.Transaction[]>([])
   const [filter, setFilter] = useState<TransactionFilter>({})
-  const [income, _setIncome] = useState<number>(0)
-  const [expense, _setExpense] = useState<number>(0)
-  const [profit, _setProfit] = useState<number>(0)
-  const [segmentValue, setSegmentValue] = useState<string>(allTime)
+  const [totalIncome, setTotalIncome] = useState<number>(0)
+  const [totalExpense, setTotalExpense] = useState<number>(0)
+  const [profit, setProfit] = useState<number>(0)
+  const [fromDate, setFromDate] = useState<string>(dayjs('1000-01-01').toISOString())
   const { t: localT } = useTranslation('income-and-expense')
   const { t: commonT } = useTranslation('common')
   const [form] = Form.useForm()
@@ -104,23 +103,25 @@ const IncomeAndExpense = () => {
   const loadTransactions = useCallback(async () => {
     try {
       setIsLoading(true)
-      const goFilter = new domain.TransactionFilter(filter)
-      const data = await GetTransactions(goFilter)
-      setTransactions(data)
+      const goFilter = new domain.TransactionFilter({
+        ...filter,
+        fromDate: filter.fromDate ?? fromDate,
+        toDate: dayjs().endOf('day').toISOString()
+      })
+      const transactions = await GetTransactions(goFilter)
+      const { totalIncome, totalExpense, profit } = await GetTransactionSummary()
+      setTotalIncome(totalIncome)
+      setTotalExpense(totalExpense)
+      setProfit(profit)
+      setTransactions(transactions)
     } finally {
       setIsLoading(false)
     }
-  }, [filter])
+  }, [filter, fromDate])
 
   useEffect(() => {
     loadTransactions()
   }, [loadTransactions])
-
-  useEffect(() => {
-    if (occurredAt && occurredAt.length) {
-      setSegmentValue(allTime)
-    }
-  }, [allTime, occurredAt])
 
   return (
     <>
@@ -140,17 +141,17 @@ const IncomeAndExpense = () => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12} lg={8}>
               <Card variant="borderless">
-                <Statistic title={localT('income')} value={income} />
+                <Statistic title={localT('income')} value={formatTHB(totalIncome)} />
               </Card>
             </Col>
             <Col xs={24} md={12} lg={8}>
               <Card variant="borderless">
-                <Statistic title={localT('expense')} value={expense} />
+                <Statistic title={localT('expense')} value={formatTHB(totalExpense)} />
               </Card>
             </Col>
             <Col xs={24} md={24} lg={8}>
               <Card variant="borderless">
-                <Statistic title={localT('profit-loss')} value={profit} />
+                <Statistic title={localT('profit-loss')} value={formatTHB(profit)} />
               </Card>
             </Col>
           </Row>
@@ -162,10 +163,10 @@ const IncomeAndExpense = () => {
           gap={16}
         >
           <SegmentDateFilter
-            value={segmentValue}
+            value={fromDate}
             disabled={!!(occurredAt && occurredAt.length)}
             onChange={(val) => {
-              setSegmentValue(val)
+              setFromDate(val)
               form.setFieldsValue({ occurredAt: null })
             }}
           />
