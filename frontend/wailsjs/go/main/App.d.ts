@@ -6,6 +6,10 @@ import {domain} from '../models';
 
 export function CreateTransaction(arg1:transaction.CreateTransactionInput):Promise<void>;
 
+export function DeleteTransactions(arg1:Array<string>):Promise<void>;
+
 export function GetTransactionSummary(arg1:time.Time,arg2:time.Time):Promise<domain.TransactionSummary>;
 
 export function GetTransactions(arg1:domain.TransactionFilter):Promise<Array<domain.Transaction>>;
+
+export function UpdateTransaction(arg1:string,arg2:transaction.CreateTransactionInput):Promise<void>;

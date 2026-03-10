@@ -36,3 +36,20 @@ func (s *TransactionService) GetTransactions(filter *domain.TransactionFilter) (
 func (s *TransactionService) GetTransactionSummary(fromDate *time.Time, toDate *time.Time) (domain.TransactionSummary, error) {
 	return s.repo.FindSummary(fromDate, toDate)
 }
+
+func (s *TransactionService) UpdateTransaction(id string, input CreateTransactionInput) error {
+	tx := &domain.Transaction{
+		ID:         uuid.NewString(),
+		Type:       input.Type,
+		Amount:     (input.Amount),
+		Category:   input.Category,
+		OccurredAt: input.OccurredAt,
+		Note:       input.Note,
+	}
+
+	return s.repo.UpdateTransaction(id, tx)
+}
+
+func (s *TransactionService) DeleteTransactions(ids []string) error {
+	return s.repo.DeleteTransactions(ids)
+}

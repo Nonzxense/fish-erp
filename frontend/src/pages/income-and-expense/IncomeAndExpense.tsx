@@ -1,14 +1,14 @@
 import { useTranslation } from "react-i18next"
 import PageTitle from "../../components/page-title/PageTitle"
-import { Button, Card, Col, DatePicker, Flex, Form, Row, Select, Space, Statistic, Table, TableColumnsType, Tag, Typography } from "antd"
-import { ListFilter, Plus, Upload } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { App, Button, Card, Col, DatePicker, Flex, Form, Row, Select, Space, Statistic, Table, TableColumnsType, Tag, Tooltip, Typography } from "antd"
+import { ListFilter, PencilLine, Plus, Trash2, Upload } from "lucide-react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import dayjs from "dayjs"
 import { formatDate, formatTHB } from "../../utils/formatter"
 import SegmentDateFilter from "../../components/segment/SegmentDateFilter"
 import { getTransactionTypeColor } from "../../utils/getTagColor"
 import TransactionFormModal from "./components/modal/TransactionFormModal"
-import { GetTransactions, GetTransactionSummary } from "../../../wailsjs/go/main/App"
+import { DeleteTransactions, GetTransactions, GetTransactionSummary } from "../../../wailsjs/go/main/App"
 import { domain } from "../../../wailsjs/go/models"
 import { TransactionFilter, TransactionFilterFormValues } from "./interface"
 
@@ -16,18 +16,24 @@ const { Text } = Typography
 
 const IncomeAndExpense = () => {
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
-  const [isOpenModalCreate, setIsOpenModalCreate] = useState<boolean>(false)
+  const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
+  const [selectedTransactionEdit, setSelectedTransactionEdit] = useState<domain.Transaction>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [transactions, setTransactions] = useState<domain.Transaction[]>([])
   const [filter, setFilter] = useState<TransactionFilter>({})
   const [totalIncome, setTotalIncome] = useState<number>(0)
   const [totalExpense, setTotalExpense] = useState<number>(0)
   const [profit, setProfit] = useState<number>(0)
-  const [fromDate, setFromDate] = useState<string>(dayjs('1000-01-01').toISOString())
+  const [segmentRange, setSegmentRange] = useState({
+    fromDate: dayjs("1000-01-01").toISOString(),
+    toDate: dayjs().endOf("day").toISOString(),
+  })
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { t: localT } = useTranslation('income-and-expense')
   const { t: commonT } = useTranslation('common')
   const [form] = Form.useForm()
   const occurredAt = Form.useWatch('occurredAt', form)
+  const { modal } = App.useApp()
 
   const transactionTypeOptions = useMemo(() => [
     {
@@ -39,6 +45,11 @@ const IncomeAndExpense = () => {
       label: localT("expense")
     }
   ], [localT])
+
+  const handleEditTransaction = useCallback((transaction: domain.Transaction) => {
+    setSelectedTransactionEdit(transaction)
+    setIsOpenModalForm(true)
+  }, [])
 
   const columns: TableColumnsType<domain.Transaction> = useMemo(
     () => [
@@ -81,7 +92,35 @@ const IncomeAndExpense = () => {
           {formatTHB(val)}
         </span>
       },
-    ], [localT])
+      {
+        title: localT('table.manage'),
+        key: 'manage',
+        align: 'center',
+        width: 100,
+        render: (_, record: domain.Transaction) => {
+          return (
+            <Space>
+              <Tooltip title={localT('table.edit')}>
+                <Button
+                  hidden={!!record.billId}
+                  icon={<PencilLine size={16} />}
+                  variant="link"
+                  color="blue"
+                  onClick={() => handleEditTransaction(record)}
+                />
+              </Tooltip>
+            </Space>
+          )
+        }
+      }
+    ], [handleEditTransaction, localT])
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: React.Key[]) => {
+      setSelectedRowKeys(keys)
+    },
+  }
 
   const handleResetFilters = useCallback(() => {
     setFilter({})
@@ -100,18 +139,22 @@ const IncomeAndExpense = () => {
     setFilter(newFilters)
   }, [])
 
+  const handleCloseTransactionFormModal = useCallback(() => {
+    setSelectedTransactionEdit(undefined)
+    setIsOpenModalForm(false)
+  }, [])
+
   const loadTransactions = useCallback(async () => {
     try {
       setIsLoading(true)
       const goFilter = new domain.TransactionFilter({
         ...filter,
-        fromDate: filter.fromDate ?? fromDate,
-        toDate: filter.toDate ?? dayjs().endOf('day').toISOString()
+        fromDate: filter.fromDate ?? segmentRange.fromDate,
+        toDate: filter.toDate ?? segmentRange.toDate
       })
       const transactions = await GetTransactions(goFilter)
-      console.log(goFilter.fromDate ?? fromDate)
       const { totalIncome, totalExpense, profit } =
-        await GetTransactionSummary(goFilter.fromDate ?? fromDate, filter.toDate ?? dayjs().startOf('day').toISOString())
+        await GetTransactionSummary(goFilter.fromDate ?? segmentRange.fromDate, filter.toDate ?? segmentRange.toDate)
       setTotalIncome(totalIncome)
       setTotalExpense(totalExpense)
       setProfit(profit)
@@ -119,7 +162,22 @@ const IncomeAndExpense = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [filter, fromDate])
+  }, [filter, segmentRange.fromDate, segmentRange.toDate])
+
+  const handleBulkDelete = useCallback(async () => {
+    modal.confirm({
+      title: commonT('modal-delete.title'),
+      content: commonT('modal-delete.desc', { amount: selectedRowKeys.length }),
+      okText: commonT('modal-common.ok'),
+      cancelText: commonT('modal-common.cancel'),
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        await DeleteTransactions((selectedRowKeys).map((id) => String(id)))
+        setSelectedRowKeys([])
+        await loadTransactions()
+      },
+    })
+  }, [commonT, loadTransactions, modal, selectedRowKeys])
 
   useEffect(() => {
     loadTransactions()
@@ -128,9 +186,10 @@ const IncomeAndExpense = () => {
   return (
     <>
       <TransactionFormModal
-        isOpen={isOpenModalCreate}
-        setIsOpen={(val) => setIsOpenModalCreate(val)}
+        isOpen={isOpenModalForm}
+        onClose={handleCloseTransactionFormModal}
         onChange={loadTransactions}
+        transaction={selectedTransactionEdit}
       />
       <Space orientation="vertical" size="large" className="w-full">
         <Flex align="center" className="w-full">
@@ -165,17 +224,28 @@ const IncomeAndExpense = () => {
           gap={16}
         >
           <SegmentDateFilter
-            value={fromDate}
             disabled={!!(occurredAt && occurredAt.length)}
-            onChange={(val) => {
-              setFromDate(val)
+            onChange={(range) => {
+              const { fromDate, toDate } = JSON.parse(range)
+              setSegmentRange({ fromDate, toDate })
               form.setFieldsValue({ occurredAt: null })
             }}
           />
           <Space size="middle">
+            {selectedRowKeys.length > 0 && (
+              <Button
+                onClick={handleBulkDelete}
+                size="large"
+                icon={<Trash2 size={16} />}
+                danger
+                className="min-w-[140px]">
+                {commonT('button-delete')} ({selectedRowKeys.length})
+              </Button>
+            )}
             <Button
               onClick={() => setIsShowFilters((isShow) => !isShow)}
-              size="large" icon={<ListFilter size={16} />}
+              size="large"
+              icon={<ListFilter size={16} />}
               variant="outlined"
               color="primary"
               className="min-w-[140px]">
@@ -191,7 +261,7 @@ const IncomeAndExpense = () => {
               {commonT('button-export')}
             </Button>
             <Button
-              onClick={() => setIsOpenModalCreate(true)}
+              onClick={() => setIsOpenModalForm(true)}
               size="large"
               icon={<Plus size={16} />}
               className="min-w-[140px] gradient-btn">
@@ -266,6 +336,7 @@ const IncomeAndExpense = () => {
       </div>
       <Table
         columns={columns}
+        rowSelection={rowSelection}
         dataSource={transactions}
         scroll={{ x: 'max-content' }}
         rowKey={(record) => record.id}

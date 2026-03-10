@@ -1,33 +1,56 @@
-import { Button, DatePicker, Form, Input, InputNumber, Modal, Select, Space } from "antd"
+import { Button, DatePicker, Form, Input, InputNumber, Modal, Select } from "antd"
 import { TransactionFormValues, TransactionFormModalProp } from "./interface"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { CreateTransaction } from "../../../../../wailsjs/go/main/App"
-import { transaction } from "../../../../../wailsjs/go/models"
+import { CreateTransaction, UpdateTransaction } from "../../../../../wailsjs/go/main/App"
+import dayjs from "dayjs"
+import { transaction as transactionModel } from "../../../../../wailsjs/go/models"
 
-const TransactionFormModal = ({ isOpen, setIsOpen, onChange }: TransactionFormModalProp) => {
+const TransactionFormModal = ({ isOpen, onClose, onChange, transaction }: TransactionFormModalProp) => {
   const [isLoading, _setIsLoading] = useState<boolean>(false)
   const [form] = Form.useForm<TransactionFormValues>()
   const { t: localT } = useTranslation('income-and-expense')
+  const { t: commonT } = useTranslation('common')
+  const isEdit = !!transaction
 
   const handleSubmit = async (values: TransactionFormValues) => {
-    const payload = new transaction.CreateTransactionInput({
+    const payload = new transactionModel.CreateTransactionInput({
       occurredAt: values.occurredAt.toISOString(),
       type: values.type,
       amount: Number(values.amount),
       category: values.category ?? undefined,
       note: values.note ?? undefined,
     })
-    await CreateTransaction(payload)
+
+    if (isEdit && transaction) {
+      await UpdateTransaction(transaction.id, payload)
+    } else {
+      await CreateTransaction(payload)
+    }
+
     onChange()
     form.resetFields()
-    setIsOpen(false)
+    onClose()
   }
 
-  const handleCloseModal = useCallback(async () => {
+  const handleCloseModal = useCallback(() => {
+    onClose()
     form.resetFields()
-    setIsOpen(false)
-  }, [form, setIsOpen])
+  }, [onClose, form])
+
+  useEffect(() => {
+    if (isOpen && transaction) {
+      form.setFieldsValue({
+        occurredAt: dayjs(String(transaction.occurredAt)),
+        type: transaction.type,
+        category: transaction.category ?? undefined,
+        amount: Number(transaction.amount),
+        note: transaction.note ?? undefined,
+      })
+    } else if (isOpen && !transaction) {
+      form.resetFields()
+    }
+  }, [isOpen, transaction, form])
 
   return (
     <Modal
@@ -48,18 +71,18 @@ const TransactionFormModal = ({ isOpen, setIsOpen, onChange }: TransactionFormMo
       >
         <Form.Item
           name="occurredAt"
-          label={localT('form.date.label')}
-          rules={[{ required: true }]}
+          label={localT('form.occurred-at.label')}
+          rules={[{ required: true, message: localT('form.occurred-at.validate.required') }]}
         >
           <DatePicker
             className="w-full"
-            placeholder={localT('form.date.placeholder')}
+            placeholder={localT('form.occurred-at.placeholder')}
           />
         </Form.Item>
         <Form.Item
           name="type"
           label={localT('form.type.label')}
-          rules={[{ required: true }]}
+          rules={[{ required: true, message: localT('form.type.validate.required') }]}
         >
           <Select
             placeholder={localT('form.type.placeholder')}
@@ -81,17 +104,14 @@ const TransactionFormModal = ({ isOpen, setIsOpen, onChange }: TransactionFormMo
           name="amount"
           label={localT('form.amount.label')}
           rules={[
-            { required: true },
-            { type: 'number', min: 0, transform: (value) => Number(value) },
+            { required: true, message: localT('form.amount.validate.required') },
           ]}
         >
-          <Space.Compact className="w-full">
-            <InputNumber
-              min={0}
-              className="w-full"
-            />
-            <Space.Addon>฿</Space.Addon>
-          </Space.Compact>
+          <InputNumber
+            min={0}
+            className="w-full"
+            suffix="฿"
+          />
         </Form.Item>
         <Form.Item
           name="note"
@@ -104,7 +124,7 @@ const TransactionFormModal = ({ isOpen, setIsOpen, onChange }: TransactionFormMo
         </Form.Item>
         <Form.Item noStyle>
           <Button type="primary" htmlType="submit" loading={isLoading} block>
-            Submit
+            {commonT('modal-common.ok')}
           </Button>
         </Form.Item>
       </Form>

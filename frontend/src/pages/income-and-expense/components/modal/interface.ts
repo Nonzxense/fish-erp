@@ -1,10 +1,11 @@
 import { Dayjs } from "dayjs"
-import { Dispatch, SetStateAction } from "react"
+import { domain } from "../../../../../wailsjs/go/models"
 
 export interface TransactionFormModalProp {
   isOpen: boolean
-  setIsOpen: Dispatch<SetStateAction<boolean>>
+  onClose: () => void
   onChange: () => Promise<void>
+  transaction?: domain.Transaction | null
 }
 
 export type TransactionFormValues = {

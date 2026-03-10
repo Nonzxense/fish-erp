@@ -58,8 +58,9 @@ func (r *TransactionRepository) FindAll(filter *domain.TransactionFilter) ([]dom
 
 func (r *TransactionRepository) FindSummary(fromDate *time.Time, toDate *time.Time) (domain.TransactionSummary, error) {
 	var summary domain.TransactionSummary
+	query := r.db.Model(&domain.Transaction{})
 
-	err := r.db.Model(&domain.Transaction{}).
+	err := query.
 		Select(`
 		COALESCE(SUM(CASE WHEN type = 'income' AND occurred_at >= ? AND occurred_at <= ?  THEN amount ELSE 0 END), 0) AS total_income,
 		COALESCE(SUM(CASE WHEN type = 'expense' AND occurred_at >= ? AND occurred_at <= ? THEN amount ELSE 0 END), 0) AS total_expense
@@ -69,4 +70,17 @@ func (r *TransactionRepository) FindSummary(fromDate *time.Time, toDate *time.Ti
 	summary.Profit = summary.TotalIncome - summary.TotalExpense
 
 	return summary, err
+}
+
+func (r *TransactionRepository) UpdateTransaction(id string, tx *domain.Transaction) error {
+	return r.db.
+		Model(&domain.Transaction{}).
+		Where("id = ?", id).
+		Updates(tx).Error
+}
+
+func (r *TransactionRepository) DeleteTransactions(ids []string) error {
+	return r.db.
+		Where("id IN ?", ids).
+		Delete(&domain.Transaction{}).Error
 }

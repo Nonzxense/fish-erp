@@ -17,3 +17,11 @@ func (a *App) GetTransactions(filter *domain.TransactionFilter) ([]domain.Transa
 func (a *App) GetTransactionSummary(fromDate *time.Time, toDate *time.Time) (domain.TransactionSummary, error) {
 	return a.transactionService.GetTransactionSummary(fromDate, toDate)
 }
+
+func (a *App) UpdateTransaction(id string, transaction transaction.CreateTransactionInput) error {
+	return a.transactionService.UpdateTransaction(id, transaction)
+}
+
+func (a *App) DeleteTransactions(ids []string) error {
+	return a.transactionService.DeleteTransactions(ids)
+}

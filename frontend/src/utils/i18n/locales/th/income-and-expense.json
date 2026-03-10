@@ -9,16 +9,24 @@
     "type": "ประเภท",
     "category": "หมวดหมู่",
     "note": "หมายเหตุ",
-    "amount": "จำนวนเงิน"
+    "amount": "จำนวนเงิน",
+    "manage": "การจัดการ",
+    "edit": "แก้ไข"
   },
   "form": {
-    "date": {
+    "occurred-at": {
       "label": "วันที่",
-      "placeholder": "เลือกวันที่"
+      "placeholder": "เลือกวันที่",
+      "validate": {
+        "required": "กรุณาเลือกวันที่"
+      }
     },
     "type": {
       "label": "ประเภท",
-      "placeholder": "เลือกประเภท"
+      "placeholder": "เลือกประเภท",
+      "validate": {
+        "required": "กรุณาเลือกประเภท"
+      }
     },
     "category": {
       "label": "หมวดหมู่",
@@ -29,7 +37,10 @@
       "placeholder": "หมายเหตุเพิ่มเติม..."
     },
     "amount": {
-      "label": "จำนวนเงิน (บาท)"
+      "label": "จำนวนเงิน (บาท)",
+      "validate": {
+        "required": "กรุณากรอกจำนวนเงิน"
+      }
     }
   }
 }

@@ -2,6 +2,7 @@ export namespace domain {
 	
 	export class Transaction {
 	    id: string;
+	    billId?: string;
 	    type: string;
 	    amount: number;
 	    occurredAt: time.Time;
@@ -15,6 +16,7 @@ export namespace domain {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.billId = source["billId"];
 	        this.type = source["type"];
 	        this.amount = source["amount"];
 	        this.occurredAt = this.convertValues(source["occurredAt"], time.Time);

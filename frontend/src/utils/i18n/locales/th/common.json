@@ -2,6 +2,15 @@
   "button-create": "เพิ่มรายการ",
   "button-export": "ส่งออก",
   "button-filter": "กรอง",
+  "button-delete": "ลบรายการ",
+  "modal-common": {
+    "ok": "ยืนยัน",
+    "cancel": "ยกเลิก"
+  },
+  "modal-delete": {
+    "title": "ลบรายการ",
+    "desc": "คุณแน่ใจหรือไม่ว่าต้องการลบ {{amount}} รายการ?"
+  },
   "filter": {
     "today": "วันนี้",
     "current-month": "เดือนนี้",
