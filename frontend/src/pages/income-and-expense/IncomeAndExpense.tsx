@@ -106,10 +106,12 @@ const IncomeAndExpense = () => {
       const goFilter = new domain.TransactionFilter({
         ...filter,
         fromDate: filter.fromDate ?? fromDate,
-        toDate: dayjs().endOf('day').toISOString()
+        toDate: filter.toDate ?? dayjs().endOf('day').toISOString()
       })
       const transactions = await GetTransactions(goFilter)
-      const { totalIncome, totalExpense, profit } = await GetTransactionSummary()
+      console.log(goFilter.fromDate ?? fromDate)
+      const { totalIncome, totalExpense, profit } =
+        await GetTransactionSummary(goFilter.fromDate ?? fromDate, filter.toDate ?? dayjs().startOf('day').toISOString())
       setTotalIncome(totalIncome)
       setTotalExpense(totalExpense)
       setProfit(profit)

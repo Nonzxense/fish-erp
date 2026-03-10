@@ -6,8 +6,8 @@ export function CreateTransaction(arg1) {
   return window['go']['main']['App']['CreateTransaction'](arg1);
 }
 
-export function GetTransactionSummary() {
-  return window['go']['main']['App']['GetTransactionSummary']();
+export function GetTransactionSummary(arg1, arg2) {
+  return window['go']['main']['App']['GetTransactionSummary'](arg1, arg2);
 }
 
 export function GetTransactions(arg1) {

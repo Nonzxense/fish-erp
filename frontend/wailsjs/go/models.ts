@@ -4,8 +4,7 @@ export namespace domain {
 	    id: string;
 	    type: string;
 	    amount: number;
-	    // Go type: time
-	    occurredAt: any;
+	    occurredAt: time.Time;
 	    category?: string;
 	    note?: string;
 	
@@ -18,7 +17,7 @@ export namespace domain {
 	        this.id = source["id"];
 	        this.type = source["type"];
 	        this.amount = source["amount"];
-	        this.occurredAt = this.convertValues(source["occurredAt"], null);
+	        this.occurredAt = this.convertValues(source["occurredAt"], time.Time);
 	        this.category = source["category"];
 	        this.note = source["note"];
 	    }
@@ -44,10 +43,8 @@ export namespace domain {
 	export class TransactionFilter {
 	    type?: string;
 	    category?: string;
-	    // Go type: time
-	    fromDate?: any;
-	    // Go type: time
-	    toDate?: any;
+	    fromDate?: time.Time;
+	    toDate?: time.Time;
 	    minAmount?: number;
 	    maxAmount?: number;
 	
@@ -59,8 +56,8 @@ export namespace domain {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.type = source["type"];
 	        this.category = source["category"];
-	        this.fromDate = this.convertValues(source["fromDate"], null);
-	        this.toDate = this.convertValues(source["toDate"], null);
+	        this.fromDate = this.convertValues(source["fromDate"], time.Time);
+	        this.toDate = this.convertValues(source["toDate"], time.Time);
 	        this.minAmount = source["minAmount"];
 	        this.maxAmount = source["maxAmount"];
 	    }
@@ -102,11 +99,27 @@ export namespace domain {
 
 }
 
+export namespace time {
+	
+	export class Time {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new Time(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
+	    }
+	}
+
+}
+
 export namespace transaction {
 	
 	export class CreateTransactionInput {
-	    // Go type: time
-	    occurredAt: any;
+	    occurredAt: time.Time;
 	    type: string;
 	    amount: number;
 	    category?: string;
@@ -118,7 +131,7 @@ export namespace transaction {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.occurredAt = this.convertValues(source["occurredAt"], null);
+	        this.occurredAt = this.convertValues(source["occurredAt"], time.Time);
 	        this.type = source["type"];
 	        this.amount = source["amount"];
 	        this.category = source["category"];

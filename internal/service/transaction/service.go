@@ -3,6 +3,7 @@ package transaction
 import (
 	"fish/internal/domain"
 	"fish/internal/repository"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -32,6 +33,6 @@ func (s *TransactionService) GetTransactions(filter *domain.TransactionFilter) (
 	return s.repo.FindAll(filter)
 }
 
-func (s *TransactionService) GetTransactionSummary() (domain.TransactionSummary, error) {
-	return s.repo.FindSummary()
+func (s *TransactionService) GetTransactionSummary(fromDate *time.Time, toDate *time.Time) (domain.TransactionSummary, error) {
+	return s.repo.FindSummary(fromDate, toDate)
 }

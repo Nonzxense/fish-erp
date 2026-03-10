@@ -64,8 +64,8 @@ const TransactionFormModal = ({ isOpen, setIsOpen, onChange }: TransactionFormMo
           <Select
             placeholder={localT('form.type.placeholder')}
             options={[
-              { label: 'Income', value: 'income' },
-              { label: 'Expense', value: 'expense' },
+              { label: localT('income'), value: 'income' },
+              { label: localT('expense'), value: 'expense' },
             ]}
           />
         </Form.Item>

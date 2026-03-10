@@ -2,6 +2,8 @@ package repository
 
 import (
 	"fish/internal/domain"
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -54,14 +56,14 @@ func (r *TransactionRepository) FindAll(filter *domain.TransactionFilter) ([]dom
 	return transactions, err
 }
 
-func (r *TransactionRepository) FindSummary() (domain.TransactionSummary, error) {
+func (r *TransactionRepository) FindSummary(fromDate *time.Time, toDate *time.Time) (domain.TransactionSummary, error) {
 	var summary domain.TransactionSummary
 
 	err := r.db.Model(&domain.Transaction{}).
 		Select(`
-			COALESCE(SUM(CASE WHEN type = 'income' THEN amount END), 0) AS total_income,
-			COALESCE(SUM(CASE WHEN type = 'expense' THEN amount END), 0) AS total_expense
-		`).
+		COALESCE(SUM(CASE WHEN type = 'income' AND occurred_at >= ? AND occurred_at <= ?  THEN amount ELSE 0 END), 0) AS total_income,
+		COALESCE(SUM(CASE WHEN type = 'expense' AND occurred_at >= ? AND occurred_at <= ? THEN amount ELSE 0 END), 0) AS total_expense
+	`, fromDate, toDate, fromDate, toDate).
 		Scan(&summary).Error
 
 	summary.Profit = summary.TotalIncome - summary.TotalExpense

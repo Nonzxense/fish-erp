@@ -15,7 +15,7 @@ export const formatDateThai = (time: Date): string => {
 }
 
 export const formatTHB = (amount?: number): string => {
-  if (!amount) return '0.0'
+  if (!amount) return '฿0.0'
   return amount.toLocaleString('th-TH', {
     style: 'currency',
     currency: 'THB',

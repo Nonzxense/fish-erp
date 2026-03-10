@@ -3,6 +3,7 @@ package main
 import (
 	"fish/internal/domain"
 	"fish/internal/service/transaction"
+	"time"
 )
 
 func (a *App) CreateTransaction(input transaction.CreateTransactionInput) error {
@@ -13,6 +14,6 @@ func (a *App) GetTransactions(filter *domain.TransactionFilter) ([]domain.Transa
 	return a.transactionService.GetTransactions(filter)
 }
 
-func (a *App) GetTransactionSummary() (domain.TransactionSummary, error) {
-	return a.transactionService.GetTransactionSummary()
+func (a *App) GetTransactionSummary(fromDate *time.Time, toDate *time.Time) (domain.TransactionSummary, error) {
+	return a.transactionService.GetTransactionSummary(fromDate, toDate)
 }
