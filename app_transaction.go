@@ -10,7 +10,7 @@ func (a *App) CreateTransaction(input transaction.CreateTransactionInput) error 
 	return a.transactionService.CreateTransaction(input)
 }
 
-func (a *App) GetTransactions(filter *domain.TransactionFilter) ([]domain.Transaction, error) {
+func (a *App) GetTransactions(filter *domain.TransactionFilter) (domain.PageResult[domain.Transaction], error) {
 	return a.transactionService.GetTransactions(filter)
 }
 

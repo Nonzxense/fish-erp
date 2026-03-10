@@ -17,7 +17,6 @@ export interface TransactionFilter {
   toDate?: string | null
   minAmount?: number
   maxAmount?: number
-
   convertValues?: () => TransactionFilter
 }
 

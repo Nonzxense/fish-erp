@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import PageTitle from "../../components/page-title/PageTitle"
-import { App, Button, Card, Col, DatePicker, Flex, Form, Row, Select, Space, Statistic, Table, TableColumnsType, Tag, Tooltip, Typography } from "antd"
+import { App, Button, Card, Col, DatePicker, Flex, Form, Row, Select, Space, Statistic, Table, TableColumnsType, TableProps, Tag, Tooltip, Typography } from "antd"
 import { ListFilter, PencilLine, Plus, Trash2, Upload } from "lucide-react"
 import React, { useCallback, useEffect, useMemo, useState } from "react"
 import dayjs from "dayjs"
@@ -11,6 +11,8 @@ import TransactionFormModal from "./components/modal/TransactionFormModal"
 import { DeleteTransactions, GetTransactions, GetTransactionSummary } from "../../../wailsjs/go/main/App"
 import { domain } from "../../../wailsjs/go/models"
 import { TransactionFilter, TransactionFilterFormValues } from "./interface"
+import { Pagination } from "../../utils/types"
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "../../utils/constants"
 
 const { Text } = Typography
 
@@ -20,6 +22,11 @@ const IncomeAndExpense = () => {
   const [selectedTransactionEdit, setSelectedTransactionEdit] = useState<domain.Transaction>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [transactions, setTransactions] = useState<domain.Transaction[]>([])
+  const [pagination, setPagination] = useState<Pagination>({
+    page: DEFAULT_PAGE,
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: 0
+  })
   const [filter, setFilter] = useState<TransactionFilter>({})
   const [totalIncome, setTotalIncome] = useState<number>(0)
   const [totalExpense, setTotalExpense] = useState<number>(0)
@@ -45,6 +52,14 @@ const IncomeAndExpense = () => {
       label: localT("expense")
     }
   ], [localT])
+
+  const resetPagination = useCallback(() => {
+    setPagination((prev) => ({
+      ...prev,
+      page: DEFAULT_PAGE,
+      pageSize: DEFAULT_PAGE_SIZE,
+    }))
+  }, [])
 
   const handleEditTransaction = useCallback((transaction: domain.Transaction) => {
     setSelectedTransactionEdit(transaction)
@@ -137,7 +152,8 @@ const IncomeAndExpense = () => {
         : null,
     }
     setFilter(newFilters)
-  }, [])
+    resetPagination()
+  }, [resetPagination])
 
   const handleCloseTransactionFormModal = useCallback(() => {
     setSelectedTransactionEdit(undefined)
@@ -150,19 +166,25 @@ const IncomeAndExpense = () => {
       const goFilter = new domain.TransactionFilter({
         ...filter,
         fromDate: filter.fromDate ?? segmentRange.fromDate,
-        toDate: filter.toDate ?? segmentRange.toDate
+        toDate: filter.toDate ?? segmentRange.toDate,
+        page: pagination.page,
+        pageSize: pagination.pageSize
       })
-      const transactions = await GetTransactions(goFilter)
+      const res = await GetTransactions(goFilter)
       const { totalIncome, totalExpense, profit } =
         await GetTransactionSummary(goFilter.fromDate ?? segmentRange.fromDate, filter.toDate ?? segmentRange.toDate)
       setTotalIncome(totalIncome)
       setTotalExpense(totalExpense)
       setProfit(profit)
-      setTransactions(transactions)
+      setPagination((prev) => ({
+        ...prev,
+        total: res.total
+      }))
+      setTransactions(res.data)
     } finally {
       setIsLoading(false)
     }
-  }, [filter, segmentRange.fromDate, segmentRange.toDate])
+  }, [filter, pagination.page, pagination.pageSize, segmentRange.fromDate, segmentRange.toDate])
 
   const handleBulkDelete = useCallback(async () => {
     modal.confirm({
@@ -174,10 +196,31 @@ const IncomeAndExpense = () => {
       onOk: async () => {
         await DeleteTransactions((selectedRowKeys).map((id) => String(id)))
         setSelectedRowKeys([])
+        resetPagination()
         await loadTransactions()
       },
     })
-  }, [commonT, loadTransactions, modal, selectedRowKeys])
+  }, [commonT, loadTransactions, modal, selectedRowKeys, resetPagination])
+
+  const handleTableChange: TableProps<domain.Transaction>['onChange'] = (
+    pagination
+  ) => {
+    const page = pagination.current || DEFAULT_PAGE
+    const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE
+
+    setPagination((prev) => ({
+      ...prev,
+      page,
+      pageSize,
+    }))
+  }
+
+  const handleSegmentDateFilterChange = useCallback((range: string) => {
+    const { fromDate, toDate } = JSON.parse(range)
+    setSegmentRange({ fromDate, toDate })
+    form.setFieldsValue({ occurredAt: null })
+    resetPagination()
+  }, [form, resetPagination])
 
   useEffect(() => {
     loadTransactions()
@@ -225,11 +268,7 @@ const IncomeAndExpense = () => {
         >
           <SegmentDateFilter
             disabled={!!(occurredAt && occurredAt.length)}
-            onChange={(range) => {
-              const { fromDate, toDate } = JSON.parse(range)
-              setSegmentRange({ fromDate, toDate })
-              form.setFieldsValue({ occurredAt: null })
-            }}
+            onChange={handleSegmentDateFilterChange}
           />
           <Space size="middle">
             {selectedRowKeys.length > 0 && (
@@ -299,6 +338,7 @@ const IncomeAndExpense = () => {
                 >
                   <Select
                     options={transactionTypeOptions}
+                    allowClear
                     placeholder={localT('form.type.placeholder')} />
                 </Form.Item>
               </Col>
@@ -307,7 +347,9 @@ const IncomeAndExpense = () => {
                   label={localT('form.category.label')}
                   name="category"
                 >
-                  <Select placeholder={localT('form.category.placeholder')} />
+                  <Select
+                    allowClear
+                    placeholder={localT('form.category.placeholder')} />
                 </Form.Item>
               </Col>
               <Col span={6}>
@@ -340,7 +382,14 @@ const IncomeAndExpense = () => {
         dataSource={transactions}
         scroll={{ x: 'max-content' }}
         rowKey={(record) => record.id}
+        onChange={handleTableChange}
         loading={isLoading}
+        pagination={{
+          current: pagination.page,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          showSizeChanger: true,
+        }}
       />
     </>
   )

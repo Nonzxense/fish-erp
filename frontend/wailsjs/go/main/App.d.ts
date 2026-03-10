@@ -10,6 +10,6 @@ export function DeleteTransactions(arg1:Array<string>):Promise<void>;
 
 export function GetTransactionSummary(arg1:time.Time,arg2:time.Time):Promise<domain.TransactionSummary>;
 
-export function GetTransactions(arg1:domain.TransactionFilter):Promise<Array<domain.Transaction>>;
+export function GetTransactions(arg1:domain.TransactionFilter):Promise<domain.PageResult_fish_internal_domain_Transaction_>;
 
 export function UpdateTransaction(arg1:string,arg2:transaction.CreateTransactionInput):Promise<void>;

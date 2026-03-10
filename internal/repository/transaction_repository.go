@@ -19,8 +19,10 @@ func (r *TransactionRepository) Create(tx *domain.Transaction) error {
 	return r.db.Create(tx).Error
 }
 
-func (r *TransactionRepository) FindAll(filter *domain.TransactionFilter) ([]domain.Transaction, error) {
+func (r *TransactionRepository) FindAll(filter *domain.TransactionFilter) ([]domain.Transaction, int64, error) {
 	var transactions []domain.Transaction
+	var total int64
+
 	query := r.db.Model(&domain.Transaction{})
 
 	if filter != nil {
@@ -49,11 +51,21 @@ func (r *TransactionRepository) FindAll(filter *domain.TransactionFilter) ([]dom
 		}
 	}
 
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if filter.Page > 0 && filter.PageSize > 0 {
+		offset := (filter.Page - 1) * filter.PageSize
+		query = query.Offset(offset).Limit(filter.PageSize)
+	}
+
 	err := query.
 		Order("occurred_at DESC").
-		Find(&transactions).Error
+		Find(&transactions).
+		Error
 
-	return transactions, err
+	return transactions, total, err
 }
 
 func (r *TransactionRepository) FindSummary(fromDate *time.Time, toDate *time.Time) (domain.TransactionSummary, error) {

@@ -29,8 +29,13 @@ func (s *TransactionService) CreateTransaction(input CreateTransactionInput) err
 	return s.repo.Create(tx)
 }
 
-func (s *TransactionService) GetTransactions(filter *domain.TransactionFilter) ([]domain.Transaction, error) {
-	return s.repo.FindAll(filter)
+func (s *TransactionService) GetTransactions(filter *domain.TransactionFilter) (domain.PageResult[domain.Transaction], error) {
+	tx, total, err := s.repo.FindAll(filter)
+	pageResult := domain.PageResult[domain.Transaction]{
+		Data:  tx,
+		Total: total,
+	}
+	return pageResult, err
 }
 
 func (s *TransactionService) GetTransactionSummary(fromDate *time.Time, toDate *time.Time) (domain.TransactionSummary, error) {
