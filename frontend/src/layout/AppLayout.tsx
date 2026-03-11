@@ -3,7 +3,8 @@ import Sider from 'antd/es/layout/Sider'
 import React, { useMemo } from 'react'
 import { FileText, Fish, House, Package, Receipt, Settings, Truck, Users, Wallet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Content } from 'antd/es/layout/layout'
 
 type MenuItem = Required<MenuProps>['items'][number]
 
@@ -19,9 +20,12 @@ const siderStyle: React.CSSProperties = {
 
 const { Title, Text } = Typography
 
-const AppSidebar: React.FC = () => {
+const AppLayout = () => {
   const { t: localT } = useTranslation('sidebar')
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const selectedKey = location.pathname.split('/')[1] || 'home'
 
   const menuItems: MenuItem[] = useMemo(
     () => [
@@ -29,51 +33,49 @@ const AppSidebar: React.FC = () => {
         key: 'home',
         icon: <House size={20} />,
         label: localT('home'),
-        onClick: () => {navigate('/')}
       },
       {
-        key: 'iae',
+        key: 'income-and-expenses',
         icon: <Wallet size={20} />,
-        label: localT('iae'),
-        onClick: () => {navigate('/income-and-expense')}
+        label: localT('income-and-expense'),
       },
       {
-        key: 'purchase-invoice',
+        key: 'purchase-invoices',
         icon: <FileText size={20} />,
         label: localT('purchase-invoice'),
-        onClick: () => {navigate('/purchase-invoices')}
       },
       {
-        key: 'sales-invoice',
+        key: 'sales-invoices',
         icon: <Receipt size={20} />,
         label: localT('sales-invoice'),
-        onClick: () => {navigate('/sales-invoices')}
       },
       {
-        key: 'truck-invoice',
+        key: 'truck-invoices',
         icon: <Truck size={20} />,
         label: localT('sales-invoice'),
-        onClick: () => {navigate('/truck-invoices')}
       },
       {
-        key: 'crate',
+        key: 'crates',
         icon: <Package size={20} />,
         label: localT('crate'),
-        onClick: () => {navigate('/crates')}
       },
       {
-        key: 'party',
+        key: 'parties',
         icon: <Users size={20} />,
         label: localT('party'),
-        onClick: () => {navigate('/parties')}
       },
       {
         key: 'settings',
         icon: <Settings size={20} />,
         label: localT('settings'),
-        onClick: () => {navigate('/settings')}
       },
-    ], [localT, navigate])
+    ], [localT])
+
+  const onClickMenuItem: MenuProps['onClick'] = async (e) => {
+    if (e.key) {
+      await navigate(`/${e.key}`)
+    }
+  }
 
   return (
     <Layout className="min-h-screen! max-h-screen!">
@@ -104,12 +106,19 @@ const AppSidebar: React.FC = () => {
             mode="inline"
             defaultSelectedKeys={['home']}
             items={menuItems}
+            selectedKeys={[selectedKey]}
+            onClick={onClickMenuItem}
             className='select-none'
           />
         </div>
       </Sider>
+      <Layout>
+        <Content className="overflow-auto p-8 border">
+          <Outlet />
+        </Content>
+      </Layout>
     </Layout>
   )
 }
 
-export default AppSidebar
+export default AppLayout

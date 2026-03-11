@@ -1,0 +1,28 @@
+{
+  "button-create": "เพิ่มรายการ",
+  "button-export": "ส่งออก",
+  "button-filter": "กรอง",
+  "button-delete": "ลบรายการ",
+  "modal-common": {
+    "ok": "ยืนยัน",
+    "cancel": "ยกเลิก"
+  },
+  "modal-delete": {
+    "title": "ลบรายการ",
+    "desc": "คุณแน่ใจหรือไม่ว่าต้องการลบ {{amount}} รายการ?"
+  },
+  "filter": {
+    "today": "วันนี้",
+    "current-month": "เดือนนี้",
+    "three-months": "3 เดือน",
+    "six-months": "6 เดือน",
+    "one-year": "1 ปี",
+    "all-time": "ตลอดเวลา",
+    "button-search": "ค้นหา",
+    "button-clear": "ล้างการกรอง"
+  },
+  "range-picker": {
+    "start": "วันที่เริ่ม",
+    "end": "วันที่สิ้นสุด"
+  }
+}

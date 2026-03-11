@@ -1,0 +1,46 @@
+{
+  "title": "รายรับ-รายจ่าย",
+  "subtitle": "จัดการรายรับและรายจ่ายของร้าน",
+  "income": "รายรับ",
+  "expense": "รายจ่าย",
+  "profit-loss": "กำไร / ขาดทุน",
+  "table": {
+    "date": "วันที่",
+    "type": "ประเภท",
+    "category": "หมวดหมู่",
+    "note": "หมายเหตุ",
+    "amount": "จำนวนเงิน",
+    "manage": "การจัดการ",
+    "edit": "แก้ไข"
+  },
+  "form": {
+    "occurred-at": {
+      "label": "วันที่",
+      "placeholder": "เลือกวันที่",
+      "validate": {
+        "required": "กรุณาเลือกวันที่"
+      }
+    },
+    "type": {
+      "label": "ประเภท",
+      "placeholder": "เลือกประเภท",
+      "validate": {
+        "required": "กรุณาเลือกประเภท"
+      }
+    },
+    "category": {
+      "label": "หมวดหมู่",
+      "placeholder": "เลือกหมวดหมู่"
+    },
+    "note": {
+      "label": "หมายเหตุ",
+      "placeholder": "หมายเหตุเพิ่มเติม..."
+    },
+    "amount": {
+      "label": "จำนวนเงิน (บาท)",
+      "validate": {
+        "required": "กรุณากรอกจำนวนเงิน"
+      }
+    }
+  }
+}

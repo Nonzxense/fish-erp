@@ -4,7 +4,6 @@
 
 html {
   background-color: rgba(27, 38, 54, 1);
-  text-align: center;
   color: white;
   height: 100%;
   margin: 0;
@@ -40,6 +39,26 @@ body {
       #00D3F2 100%) !important;
   color: white !important;
   box-shadow: 0.0px 4.0px 5.0px hsl(0deg 0% 0% / 0.38) !important;
+}
+
+.ant-btn-icon {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.gradient-btn {
+  background: linear-gradient(90deg, #2B7FFF 0%, #00D3F2 100%);
+  border: none;
+  color: white;
+}
+
+.gradient-btn:hover {
+  opacity: 0.9 !important;
+  color: white !important;
+}
+
+.filter-collapse .ant-collapse-header {
+  display: none !important;
 }
 
 @font-face {

@@ -2,12 +2,19 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"fish/internal/database"
+	"fish/internal/repository"
+	"fish/internal/service/transaction"
+	"os"
+
+	"gorm.io/gorm"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx                context.Context
+	db                 *gorm.DB
+	transactionService *transaction.TransactionService
 }
 
 // NewApp creates a new App application struct
@@ -19,9 +26,36 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	db, _, err := database.NewDB()
+	if err != nil {
+		panic(err)
+	}
+
+	a.db = db
+
+	// Run schema if first run
+	var count int64
+	a.db.Raw(`
+		SELECT count(*) 
+		FROM sqlite_master 
+		WHERE type='table' AND name='transactions'
+	`).Scan(&count)
+
+	if count == 0 {
+		err = runSQLFile(a.db, "internal/database/schema.sql")
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	transactionRepo := repository.NewTransactionRepository(a.db)
+	a.transactionService = transaction.NewTransactionService(transactionRepo)
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
+func runSQLFile(db *gorm.DB, path string) error {
+	sqlBytes, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	return db.Exec(string(sqlBytes)).Error
 }
