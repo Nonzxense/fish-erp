@@ -33,7 +33,7 @@ const IncomeAndExpense = () => {
   const [profit, setProfit] = useState<number>(0)
   const [segmentRange, setSegmentRange] = useState({
     fromDate: dayjs("1000-01-01").toISOString(),
-    toDate: dayjs().endOf("day").toISOString(),
+    toDate: dayjs('9999-12-12').toISOString(),
   })
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { t: localT } = useTranslation('income-and-expense')
@@ -44,12 +44,12 @@ const IncomeAndExpense = () => {
 
   const transactionTypeOptions = useMemo(() => [
     {
-      value: "income",
-      label: localT("income")
+      label: localT('income'),
+      value: 'income'
     },
     {
-      value: "expense",
-      label: localT("expense")
+      label: localT('expense'),
+      value: 'expense'
     }
   ], [localT])
 
