@@ -9,7 +9,7 @@ import SegmentDateFilter from "../../components/segment/SegmentDateFilter"
 import { getTransactionTypeColor } from "../../utils/getTagColor"
 import TransactionFormModal from "./components/modal/TransactionFormModal"
 import { DeleteTransactions, GetTransactions, GetTransactionSummary } from "../../../wailsjs/go/main/App"
-import { domain } from "../../../wailsjs/go/models"
+import { transaction } from "../../../wailsjs/go/models"
 import { TransactionFilter, TransactionFilterFormValues } from "./interface"
 import { Pagination } from "../../utils/types"
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "../../utils/constants"
@@ -19,9 +19,9 @@ const { Text } = Typography
 const IncomeAndExpense = () => {
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
-  const [selectedTransactionEdit, setSelectedTransactionEdit] = useState<domain.Transaction>()
+  const [selectedTransactionEdit, setSelectedTransactionEdit] = useState<transaction.Transaction>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [transactions, setTransactions] = useState<domain.Transaction[]>([])
+  const [transactions, setTransactions] = useState<transaction.Transaction[]>([])
   const [pagination, setPagination] = useState<Pagination>({
     page: DEFAULT_PAGE,
     pageSize: DEFAULT_PAGE_SIZE,
@@ -61,12 +61,12 @@ const IncomeAndExpense = () => {
     }))
   }, [])
 
-  const handleEditTransaction = useCallback((transaction: domain.Transaction) => {
+  const handleEditTransaction = useCallback((transaction: transaction.Transaction) => {
     setSelectedTransactionEdit(transaction)
     setIsOpenModalForm(true)
   }, [])
 
-  const columns: TableColumnsType<domain.Transaction> = useMemo(
+  const columns: TableColumnsType<transaction.Transaction> = useMemo(
     () => [
       {
         title: localT('table.date'),
@@ -103,7 +103,7 @@ const IncomeAndExpense = () => {
         dataIndex: 'amount',
         align: 'right',
         width: 160,
-        render: (val: number, record: domain.Transaction) => <span className={record.type === 'income' ? "text-green-500" : "text-red-500"}>
+        render: (val: number, record: transaction.Transaction) => <span className={record.type === 'income' ? "text-green-500" : "text-red-500"}>
           {formatTHB(val)}
         </span>
       },
@@ -112,7 +112,7 @@ const IncomeAndExpense = () => {
         key: 'manage',
         align: 'center',
         width: 100,
-        render: (_, record: domain.Transaction) => {
+        render: (_, record: transaction.Transaction) => {
           return (
             <Space>
               <Tooltip title={localT('table.edit')}>
@@ -163,7 +163,7 @@ const IncomeAndExpense = () => {
   const loadTransactions = useCallback(async () => {
     try {
       setIsLoading(true)
-      const goFilter = new domain.TransactionFilter({
+      const goFilter = new transaction.TransactionFilter({
         ...filter,
         fromDate: filter.fromDate ?? segmentRange.fromDate,
         toDate: filter.toDate ?? segmentRange.toDate,
@@ -202,7 +202,7 @@ const IncomeAndExpense = () => {
     })
   }, [commonT, loadTransactions, modal, selectedRowKeys, resetPagination])
 
-  const handleTableChange: TableProps<domain.Transaction>['onChange'] = (
+  const handleTableChange: TableProps<transaction.Transaction>['onChange'] = (
     pagination
   ) => {
     const page = pagination.current || DEFAULT_PAGE

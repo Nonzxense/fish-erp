@@ -1,4 +1,4 @@
-package domain
+package container
 
 type Container struct {
 	ID     int     `json:"id" gorm:"primaryKey"`

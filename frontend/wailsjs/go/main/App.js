@@ -14,8 +14,8 @@ export function DeleteTransactions(arg1) {
   return window['go']['main']['App']['DeleteTransactions'](arg1);
 }
 
-export function GetContainers() {
-  return window['go']['main']['App']['GetContainers']();
+export function GetContainers(arg1) {
+  return window['go']['main']['App']['GetContainers'](arg1);
 }
 
 export function GetTransactionSummary(arg1, arg2) {

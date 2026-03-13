@@ -2,6 +2,7 @@ package main
 
 import (
 	"fish/internal/domain"
+	containerDomain "fish/internal/domain/container"
 	"fish/internal/service/container"
 )
 
@@ -9,6 +10,6 @@ func (a *App) CreateContainer(input container.CreateContainerInput) error {
 	return a.containerService.CreateContainer(input)
 }
 
-func (a *App) GetContainers() (domain.PageResult[domain.Container], error) {
-	return a.containerService.GetContainers()
+func (a *App) GetContainers(filter *containerDomain.ContainerFilter) (domain.PageResult[containerDomain.Container], error) {
+	return a.containerService.GetContainers(filter)
 }

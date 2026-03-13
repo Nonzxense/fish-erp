@@ -3,9 +3,12 @@ import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
 import { ListFilter, Plus } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { domain } from '../../../wailsjs/go/models'
+import { container } from '../../../wailsjs/go/models'
 import ContainerFormModal from './components/modal/ContainerFormModal'
 import { GetContainers } from '../../../wailsjs/go/main/App'
+import { ContainerFilter } from './interface'
+import { Pagination } from '../../utils/types'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
 
 const { Text } = Typography
 
@@ -13,8 +16,15 @@ const Container = () => {
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [selectedContainerEdit, setSelectedContainerEdit] = useState<domain.Container>()
-  const [containers, setContainers] = useState<domain.Container[]>([])
+  const [selectedContainerEdit, setSelectedContainerEdit] = useState<container.Container>()
+  const [containers, setContainers] = useState<container.Container[]>([])
+  const [filter, setFilter] = useState<ContainerFilter>({})
+  const [segmentStatus, setSegmentStatus] = useState<string>('all')
+  const [pagination, setPagination] = useState<Pagination>({
+    page: DEFAULT_PAGE,
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: 0
+  })
   const { t: localT } = useTranslation('container')
   const { t: commonT } = useTranslation('common')
   const [form] = Form.useForm()
@@ -26,15 +36,23 @@ const Container = () => {
     },
     {
       label: localT('at-store'),
-      value: 'atStore'
+      value: 'at_store'
     },
     {
       label: localT('with-customer'),
-      value: 'atCustomer'
+      value: 'with_customer'
     },
   ], [localT])
 
-  const columns: TableColumnsType<domain.Container> = useMemo(
+  const typeOptions = useMemo(() => [
+    { label: commonT('plastic-l'), value: 'plastic_l' },
+    { label: commonT('plastic-s'), value: 'plastic_s' },
+    { label: commonT('foam-l'), value: 'foam_l' },
+    { label: commonT('foam-m'), value: 'foam_m' },
+    { label: commonT('foam-s'), value: 'foam_s' },
+  ], [commonT])
+
+  const columns: TableColumnsType<container.Container> = useMemo(
     () => [
       {
         title: localT('table.id'),
@@ -47,9 +65,12 @@ const Container = () => {
         key: 'type',
         dataIndex: 'type',
         width: 120,
-        render: (val: string) => (
-          <Text>{commonT(val)}</Text>
-        )
+        render: (val: string) => {
+          const type = val.replace('_', '-')
+          return (
+            <Text>{commonT(type)}</Text>
+          )
+        }
       },
       {
         title: localT('table.color'),
@@ -72,20 +93,50 @@ const Container = () => {
     ],
     [commonT, localT])
 
+  const resetPagination = useCallback(() => {
+    setPagination((prev) => ({
+      ...prev,
+      page: DEFAULT_PAGE,
+      pageSize: DEFAULT_PAGE_SIZE,
+    }))
+  }, [])
+
   const handleCloseContainerFormModal = useCallback(() => {
     setSelectedContainerEdit(undefined)
     setIsOpenModalForm(false)
   }, [])
 
+  const handleSearchFilter = useCallback((filters: ContainerFilter) => {
+    setFilter(filters)
+    resetPagination()
+  }, [resetPagination])
+
+  const handleResetFilters = useCallback(() => {
+    setFilter({})
+  }, [])
+
+  const handleSegmentStatusFilterChange = useCallback((status: string) => {
+    setSegmentStatus(status)
+    resetPagination()
+  }, [resetPagination])
+
   const loadContainers = useCallback(async () => {
     try {
       setIsLoading(true)
-      const res = await GetContainers()
+      const goFilter = new container.ContainerFilter({
+        id: filter.id ? Number(filter.id) : undefined,
+        type: filter.type ? filter.type : undefined,
+        color: filter.color ? filter.color : undefined,
+        status: segmentStatus === 'all' ? undefined : segmentStatus,
+        page: pagination.page,
+        pageSize: pagination.pageSize
+      })
+      const res = await GetContainers(goFilter)
       setContainers(res.data)
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [filter.color, filter.id, filter.type, pagination.page, pagination.pageSize, segmentStatus])
 
   useEffect(() => {
     loadContainers()
@@ -133,7 +184,8 @@ const Container = () => {
         >
           <Segmented
             options={segmentOptions}
-            defaultValue='all'
+            value={segmentStatus}
+            onChange={handleSegmentStatusFilterChange}
             className="select-none"
           />
           <Space size="middle">
@@ -166,8 +218,8 @@ const Container = () => {
           <Form
             form={form}
             layout="vertical"
-          // onReset={handleResetFilters}
-          // onFinish={handleSearchFilter}
+            onReset={handleResetFilters}
+            onFinish={handleSearchFilter}
           >
             <Row gutter={16}>
               <Col span={6}>
@@ -187,6 +239,7 @@ const Container = () => {
                   name="type"
                 >
                   <Select
+                    options={typeOptions}
                     allowClear
                     placeholder={localT('form.type.placeholder')}
                   />
@@ -200,17 +253,6 @@ const Container = () => {
                   <Input
                     allowClear
                     placeholder={localT('form.color.placeholder')}
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={6}>
-                <Form.Item
-                  label={localT('form.status.label')}
-                  name="status"
-                >
-                  <Select
-                    allowClear
-                    placeholder={localT('form.status.placeholder')}
                   />
                 </Form.Item>
               </Col>
@@ -241,16 +283,16 @@ const Container = () => {
         columns={columns}
         // rowSelection={rowSelection}
         dataSource={containers}
-        // scroll={{ x: 'max-content' }}
-        // rowKey={(record) => record.id}
+        scroll={{ x: 'max-content' }}
+        rowKey={(record) => record.id}
         // onChange={handleTableChange}
         loading={isLoading}
-      // pagination={{
-      //   current: pagination.page,
-      //   pageSize: pagination.pageSize,
-      //   total: pagination.total,
-      //   showSizeChanger: true,
-      // }}
+        pagination={{
+          current: pagination.page,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          showSizeChanger: true,
+        }}
       />
     </>
   )

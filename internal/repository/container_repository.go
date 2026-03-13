@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"fish/internal/domain"
+	domain "fish/internal/domain/container"
 
 	"gorm.io/gorm"
 )
@@ -18,50 +18,42 @@ func (r *ContainerRepository) CreateContainer(container *domain.Container) error
 	return r.db.Create(container).Error
 }
 
-func (r *ContainerRepository) FindAll() ([]domain.Container, int64, error) {
-	var container []domain.Container
+func (r *ContainerRepository) FindAll(filter *domain.ContainerFilter) ([]domain.Container, int64, error) {
+	var containers []domain.Container
 	var total int64
 
 	query := r.db.Model(&domain.Container{})
 
-	// if filter != nil {
-	// 	if filter.Type != nil {
-	// 		query = query.Where("type = ?", *filter.Type)
-	// 	}
+	if filter != nil {
+		if filter.ID != nil {
+			query = query.Where("id = ?", *filter.ID)
+		}
 
-	// 	if filter.Category != nil {
-	// 		query = query.Where("category = ?", *filter.Category)
-	// 	}
+		if filter.Type != nil {
+			query = query.Where("type = ?", *filter.Type)
+		}
 
-	// 	if filter.FromDate != nil {
-	// 		query = query.Where("occurred_at >= ?", *filter.FromDate)
-	// 	}
+		if filter.Color != nil {
+			query = query.Where("color = ?", *filter.Color)
+		}
 
-	// 	if filter.ToDate != nil {
-	// 		query = query.Where("occurred_at <= ?", *filter.ToDate)
-	// 	}
-
-	// 	if filter.MinAmount != nil {
-	// 		query = query.Where("amount >= ?", *filter.MinAmount)
-	// 	}
-
-	// 	if filter.MaxAmount != nil {
-	// 		query = query.Where("amount <= ?", *filter.MaxAmount)
-	// 	}
-	// }
+		if filter.Status != nil {
+			query = query.Where("status = ?", *filter.Status)
+		}
+	}
 
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// if filter.Page > 0 && filter.PageSize > 0 {
-	// 	offset := (filter.Page - 1) * filter.PageSize
-	// 	query = query.Offset(offset).Limit(filter.PageSize)
-	// }
+	if filter.Page > 0 && filter.PageSize > 0 {
+		offset := (filter.Page - 1) * filter.PageSize
+		query = query.Offset(offset).Limit(filter.PageSize)
+	}
 
 	err := query.
-		Find(&container).
+		Find(&containers).
 		Error
 
-	return container, total, err
+	return containers, total, err
 }

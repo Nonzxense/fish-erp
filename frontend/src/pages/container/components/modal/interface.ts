@@ -1,10 +1,10 @@
-import { domain } from "../../../../../wailsjs/go/models"
+import { container } from "../../../../../wailsjs/go/models"
 
 export interface ContainerFormModalProp {
   isOpen: boolean
   onClose: () => void
   onChange: () => Promise<void>
-  container?: domain.Container | null
+  container?: container.Container | null
 }
 
 export type ContainerFormValues = {

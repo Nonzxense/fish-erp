@@ -91,11 +91,11 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
           <Select
             placeholder={localT('form.type.placeholder')}
             options={[
-              { label: commonT('plastic_l'), value: 'plastic_l' },
-              { label: commonT('plastic_s'), value: 'plastic_s' },
-              { label: commonT('foam_l'), value: 'foam_l' },
-              { label: commonT('foam_m'), value: 'foam_m' },
-              { label: commonT('foam_s'), value: 'foam_s' },
+              { label: commonT('plastic-l'), value: 'plastic_l' },
+              { label: commonT('plastic-s'), value: 'plastic_s' },
+              { label: commonT('foam-l'), value: 'foam_l' },
+              { label: commonT('foam-m'), value: 'foam_m' },
+              { label: commonT('foam-s'), value: 'foam_s' },
             ]}
           />
         </Form.Item>

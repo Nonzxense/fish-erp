@@ -2,6 +2,7 @@ package container
 
 import (
 	"fish/internal/domain"
+	containerDomain "fish/internal/domain/container"
 	"fish/internal/repository"
 )
 
@@ -14,7 +15,7 @@ func NewContainerService(repo *repository.ContainerRepository) *ContainerService
 }
 
 func (s *ContainerService) CreateContainer(input CreateContainerInput) error {
-	container := &domain.Container{
+	container := &containerDomain.Container{
 		ID:     input.ID,
 		Color:  input.Color,
 		Type:   input.Type,
@@ -23,11 +24,11 @@ func (s *ContainerService) CreateContainer(input CreateContainerInput) error {
 	return s.repo.CreateContainer(container)
 }
 
-func (s *ContainerService) GetContainers() (domain.PageResult[domain.Container], error) {
-	tx, total, err := s.repo.FindAll()
+func (s *ContainerService) GetContainers(filter *containerDomain.ContainerFilter) (domain.PageResult[containerDomain.Container], error) {
+	containers, total, err := s.repo.FindAll(filter)
 
-	pageResult := domain.PageResult[domain.Container]{
-		Data:  tx,
+	pageResult := domain.PageResult[containerDomain.Container]{
+		Data:  containers,
 		Total: total,
 	}
 
