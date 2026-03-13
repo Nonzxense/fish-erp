@@ -328,7 +328,13 @@ const IncomeAndExpense = () => {
                   label={localT('form.occurred-at.label')}
                   name="occurredAt"
                 >
-                  <DatePicker.RangePicker className="!w-full" placeholder={[commonT("range-picker.start"), commonT("range-picker.end")]} />
+                  <DatePicker.RangePicker
+                    className="!w-full"
+                    placeholder={[
+                      commonT("range-picker.start"),
+                      commonT("range-picker.end")
+                    ]}
+                  />
                 </Form.Item>
               </Col>
               <Col span={6}>
@@ -339,7 +345,8 @@ const IncomeAndExpense = () => {
                   <Select
                     options={transactionTypeOptions}
                     allowClear
-                    placeholder={localT('form.type.placeholder')} />
+                    placeholder={localT('form.type.placeholder')}
+                  />
                 </Form.Item>
               </Col>
               <Col span={6}>
@@ -349,28 +356,28 @@ const IncomeAndExpense = () => {
                 >
                   <Select
                     allowClear
-                    placeholder={localT('form.category.placeholder')} />
+                    placeholder={localT('form.category.placeholder')}
+                  />
                 </Form.Item>
               </Col>
-              <Col span={6}>
-                <Form.Item label=" " colon={false}>
-                  <Flex gap={16} className="w-full">
-                    <Button
-                      type="primary"
-                      htmlType="submit"
-                      className="w-full"
-                    >
-                      {commonT('filter.button-search')}
-                    </Button>
-                    <Button
-                      color="primary"
-                      variant="outlined"
-                      htmlType="reset"
-                      className="w-full">
-                      {commonT('filter.button-clear')}
-                    </Button>
-                  </Flex>
-                </Form.Item>
+              <Col span={6} offset={18}>
+                <Flex gap={16}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    className="w-full"
+                  >
+                    {commonT('filter.button-search')}
+                  </Button>
+                  <Button
+                    htmlType="reset"
+                    color="primary"
+                    variant="outlined"
+                    className="w-full"
+                  >
+                    {commonT('filter.button-clear')}
+                  </Button>
+                </Flex>
               </Col>
             </Row>
           </Form>

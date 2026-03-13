@@ -6,7 +6,7 @@
   "purchase-invoice": "บิลซื้อ",
   "sales-invoice": "บิลขาย",
   "truck-invoice": "บิลรถบรรทุก",
-  "crate": "จัดการลังปลา",
+  "container": "จัดการลังปลา",
   "party": "บุคคล",
   "settings": "การตั้งค่า"
 }

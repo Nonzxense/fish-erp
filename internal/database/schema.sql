@@ -30,7 +30,9 @@ CREATE TABLE containers (
   id INTEGER PRIMARY KEY,
   color TEXT,
   type TEXT CHECK (type IN ('plastic_l','plastic_s','foam_l','foam_m','foam_s')),
-  status TEXT CHECK (status IN ('at_store','with_customer','lost'))
+  bill_id TEXT,
+  status TEXT CHECK (status IN ('at_store','with_customer','lost')),
+  FOREIGN KEY (bill_id) REFERENCES bills(id)
 );
 
 -- =========================
@@ -70,20 +72,6 @@ CREATE TABLE container_fish (
   price_per_kg REAL NOT NULL,
   FOREIGN KEY (bill_item_id) REFERENCES bill_items(id),
   FOREIGN KEY (container_id) REFERENCES containers(id)
-);
-
--- =========================
--- container_movements
--- =========================
-CREATE TABLE container_movements (
-  id INTEGER PRIMARY KEY,
-  container_id INTEGER NOT NULL,
-  bill_id TEXT,
-  from_status TEXT CHECK (from_status IN ('at_store','with_customer','lost')),
-  to_status TEXT CHECK (to_status IN ('at_store','with_customer','lost')),
-  moved_at DATETIME NOT NULL,
-  FOREIGN KEY (container_id) REFERENCES containers(id),
-  FOREIGN KEY (bill_id) REFERENCES bills(id)
 );
 
 -- =========================

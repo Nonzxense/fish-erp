@@ -55,9 +55,9 @@ const AppLayout = () => {
         label: localT('sales-invoice'),
       },
       {
-        key: 'crates',
+        key: 'containers',
         icon: <Package size={20} />,
-        label: localT('crate'),
+        label: localT('container'),
       },
       {
         key: 'parties',
