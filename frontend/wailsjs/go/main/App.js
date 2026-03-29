@@ -10,8 +10,16 @@ export function CreateTransaction(arg1) {
   return window['go']['main']['App']['CreateTransaction'](arg1);
 }
 
+export function DeleteContainers(arg1) {
+  return window['go']['main']['App']['DeleteContainers'](arg1);
+}
+
 export function DeleteTransactions(arg1) {
   return window['go']['main']['App']['DeleteTransactions'](arg1);
+}
+
+export function GetContainerSummary() {
+  return window['go']['main']['App']['GetContainerSummary']();
 }
 
 export function GetContainers(arg1) {
@@ -24,6 +32,10 @@ export function GetTransactionSummary(arg1, arg2) {
 
 export function GetTransactions(arg1) {
   return window['go']['main']['App']['GetTransactions'](arg1);
+}
+
+export function UpdateContainer(arg1, arg2) {
+  return window['go']['main']['App']['UpdateContainer'](arg1, arg2);
 }
 
 export function UpdateTransaction(arg1, arg2) {

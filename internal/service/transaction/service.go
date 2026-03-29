@@ -45,7 +45,7 @@ func (s *TransactionService) GetTransactionSummary(fromDate *time.Time, toDate *
 
 func (s *TransactionService) UpdateTransaction(id string, input CreateTransactionInput) error {
 	tx := &transactionDomain.Transaction{
-		ID:         uuid.NewString(),
+		ID:         id,
 		Type:       input.Type,
 		Amount:     (input.Amount),
 		Category:   input.Category,

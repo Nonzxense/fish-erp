@@ -9,12 +9,18 @@ export function CreateContainer(arg1:container.CreateContainerInput):Promise<voi
 
 export function CreateTransaction(arg1:transaction.CreateTransactionInput):Promise<void>;
 
+export function DeleteContainers(arg1:Array<number>):Promise<void>;
+
 export function DeleteTransactions(arg1:Array<string>):Promise<void>;
+
+export function GetContainerSummary():Promise<container.ContainerSummary>;
 
 export function GetContainers(arg1:container.ContainerFilter):Promise<domain.PageResult_fish_internal_domain_container_Container_>;
 
 export function GetTransactionSummary(arg1:time.Time,arg2:time.Time):Promise<transaction.TransactionSummary>;
 
 export function GetTransactions(arg1:transaction.TransactionFilter):Promise<domain.PageResult_fish_internal_domain_transaction_Transaction_>;
+
+export function UpdateContainer(arg1:number,arg2:container.CreateContainerInput):Promise<void>;
 
 export function UpdateTransaction(arg1:string,arg2:transaction.CreateTransactionInput):Promise<void>;

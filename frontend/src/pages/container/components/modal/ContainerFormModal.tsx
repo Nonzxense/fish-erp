@@ -1,8 +1,8 @@
-import { Button, Form, Input, InputNumber, Modal, Select } from "antd"
+import { Button, Form, InputNumber, Modal, Select } from "antd"
 import { ContainerFormValues, ContainerFormModalProp } from "./interface"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { CreateContainer } from "../../../../../wailsjs/go/main/App"
+import { CreateContainer, UpdateContainer } from "../../../../../wailsjs/go/main/App"
 import { container as containerModel } from "../../../../../wailsjs/go/models"
 
 const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerFormModalProp) => {
@@ -11,6 +11,33 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
   const { t: localT } = useTranslation('container')
   const { t: commonT } = useTranslation('common')
   const isEdit = !!container
+
+  const containerColorOptions = useMemo(() => [
+    {
+      label: localT('color.blue'),
+      value: 'blue'
+    },
+    {
+      label: localT('color.light-green'),
+      value: 'light-green'
+    },
+    {
+      label: localT('color.green'),
+      value: 'green'
+    },
+    {
+      label: localT('color.orange'),
+      value: 'orange'
+    },
+    {
+      label: localT('color.yellow'),
+      value: 'yellow'
+    },
+    {
+      label: localT('color.red'),
+      value: 'red'
+    },
+  ], [localT])
 
   const handleSubmit = async (values: ContainerFormValues) => {
     const payload = new containerModel.CreateContainerInput({
@@ -21,7 +48,7 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
     })
 
     if (isEdit && container) {
-      // await UpdateContainer(container.id, payload)
+      await UpdateContainer(container.id, payload)
     } else {
       try {
         await CreateContainer(payload)
@@ -70,7 +97,6 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
         onFinish={handleSubmit}
         disabled={isLoading}
       >
-
         <Form.Item
           name="id"
           label={localT('form.id.label')}
@@ -82,7 +108,6 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
             disabled={isEdit}
           />
         </Form.Item>
-
         <Form.Item
           name="type"
           label={localT('form.type.label')}
@@ -99,16 +124,16 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
             ]}
           />
         </Form.Item>
-
         <Form.Item
           name="color"
           label={localT('form.color.label')}
         >
-          <Input
+          <Select
+            allowClear
+            options={containerColorOptions}
             placeholder={localT('form.color.placeholder')}
           />
         </Form.Item>
-
         <Form.Item
           name="status"
           label={localT('form.status.label')}
@@ -123,13 +148,11 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
             ]}
           />
         </Form.Item>
-
         <Form.Item noStyle>
           <Button type="primary" htmlType="submit" loading={isLoading} block>
             {commonT('modal-common.ok')}
           </Button>
         </Form.Item>
-
       </Form>
     </Modal>
   )

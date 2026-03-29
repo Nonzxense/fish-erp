@@ -1,11 +1,11 @@
-import { Button, Card, Col, Flex, Form, Input, Row, Segmented, Select, Space, Statistic, Table, TableColumnsType, Typography } from 'antd'
+import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Select, Space, Statistic, Table, TableColumnsType, TableProps, Tooltip, Typography } from 'antd'
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
-import { ListFilter, Plus } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ListFilter, PencilLine, Plus, Trash2 } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { container } from '../../../wailsjs/go/models'
 import ContainerFormModal from './components/modal/ContainerFormModal'
-import { GetContainers } from '../../../wailsjs/go/main/App'
+import { DeleteContainers, GetContainers, GetContainerSummary } from '../../../wailsjs/go/main/App'
 import { ContainerFilter } from './interface'
 import { Pagination } from '../../utils/types'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
@@ -18,6 +18,10 @@ const Container = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedContainerEdit, setSelectedContainerEdit] = useState<container.Container>()
   const [containers, setContainers] = useState<container.Container[]>([])
+  const [totalContainer, setTotalContainer] = useState<number>(0)
+  const [containerAtStore, setContainerAtStore] = useState<number>(0)
+  const [containerWithCustomer, setContainerWithCustomer] = useState<number>(0)
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [filter, setFilter] = useState<ContainerFilter>({})
   const [segmentStatus, setSegmentStatus] = useState<string>('all')
   const [pagination, setPagination] = useState<Pagination>({
@@ -28,6 +32,34 @@ const Container = () => {
   const { t: localT } = useTranslation('container')
   const { t: commonT } = useTranslation('common')
   const [form] = Form.useForm()
+  const { modal } = App.useApp()
+
+  const containerColorOptions = useMemo(() => [
+    {
+      label: localT('color.blue'),
+      value: 'blue'
+    },
+    {
+      label: localT('color.light-green'),
+      value: 'light-green'
+    },
+    {
+      label: localT('color.green'),
+      value: 'green'
+    },
+    {
+      label: localT('color.orange'),
+      value: 'orange'
+    },
+    {
+      label: localT('color.yellow'),
+      value: 'yellow'
+    },
+    {
+      label: localT('color.red'),
+      value: 'red'
+    },
+  ], [localT])
 
   const segmentOptions = useMemo(() => [
     {
@@ -51,6 +83,11 @@ const Container = () => {
     { label: commonT('foam-m'), value: 'foam_m' },
     { label: commonT('foam-s'), value: 'foam_s' },
   ], [commonT])
+
+  const handleEditContainer = useCallback((container: container.Container) => {
+    setSelectedContainerEdit(container)
+    setIsOpenModalForm(true)
+  }, [])
 
   const columns: TableColumnsType<container.Container> = useMemo(
     () => [
@@ -77,6 +114,9 @@ const Container = () => {
         key: 'color',
         dataIndex: 'color',
         width: 120,
+        render: (val: string) => (
+          <Text>{localT(`color.${val}`)}</Text>
+        )
       },
       {
         title: localT('table.status'),
@@ -90,8 +130,28 @@ const Container = () => {
           )
         }
       },
+      {
+        title: localT('table.manage'),
+        key: 'manage',
+        align: 'center',
+        width: 100,
+        render: (_, record: container.Container) => {
+          return (
+            <Space>
+              <Tooltip title={localT('table.edit')}>
+                <Button
+                  icon={<PencilLine size={16} />}
+                  variant="link"
+                  color="blue"
+                  onClick={() => handleEditContainer(record)}
+                />
+              </Tooltip>
+            </Space>
+          )
+        }
+      }
     ],
-    [commonT, localT])
+    [commonT, handleEditContainer, localT])
 
   const resetPagination = useCallback(() => {
     setPagination((prev) => ({
@@ -120,6 +180,26 @@ const Container = () => {
     resetPagination()
   }, [resetPagination])
 
+  const handleTableChange: TableProps<container.Container>['onChange'] = (
+    pagination
+  ) => {
+    const page = pagination.current || DEFAULT_PAGE
+    const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE
+
+    setPagination((prev) => ({
+      ...prev,
+      page,
+      pageSize,
+    }))
+  }
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: React.Key[]) => {
+      setSelectedRowKeys(keys)
+    },
+  }
+
   const loadContainers = useCallback(async () => {
     try {
       setIsLoading(true)
@@ -132,11 +212,35 @@ const Container = () => {
         pageSize: pagination.pageSize
       })
       const res = await GetContainers(goFilter)
+      const { total, atStore, withCustomer } = await GetContainerSummary()
       setContainers(res.data)
+      setPagination((prev) => ({
+        ...prev,
+        total: res.total
+      }))
+      setTotalContainer(total)
+      setContainerAtStore(atStore)
+      setContainerWithCustomer(withCustomer)
     } finally {
       setIsLoading(false)
     }
   }, [filter.color, filter.id, filter.type, pagination.page, pagination.pageSize, segmentStatus])
+
+  const handleBulkDelete = useCallback(async () => {
+    modal.confirm({
+      title: commonT('modal-delete.title'),
+      content: commonT('modal-delete.desc', { amount: selectedRowKeys.length }),
+      okText: commonT('modal-common.ok'),
+      cancelText: commonT('modal-common.cancel'),
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        await DeleteContainers((selectedRowKeys).map((id) => Number(id)))
+        setSelectedRowKeys([])
+        resetPagination()
+        await loadContainers()
+      },
+    })
+  }, [modal, commonT, selectedRowKeys, resetPagination, loadContainers])
 
   useEffect(() => {
     loadContainers()
@@ -161,17 +265,17 @@ const Container = () => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12} lg={8}>
               <Card variant="borderless">
-                <Statistic title={localT('all')} />
+                <Statistic title={localT('all')} value={totalContainer} />
               </Card>
             </Col>
             <Col xs={24} md={12} lg={8}>
               <Card variant="borderless">
-                <Statistic title={localT('at-store')} />
+                <Statistic title={localT('at-store')} value={containerAtStore} />
               </Card>
             </Col>
             <Col xs={24} md={24} lg={8}>
               <Card variant="borderless">
-                <Statistic title={localT('with-customer')} />
+                <Statistic title={localT('with-customer')} value={containerWithCustomer} />
               </Card>
             </Col>
           </Row>
@@ -189,6 +293,16 @@ const Container = () => {
             className="select-none"
           />
           <Space size="middle">
+            {selectedRowKeys.length > 0 && (
+              <Button
+                onClick={handleBulkDelete}
+                size="large"
+                icon={<Trash2 size={16} />}
+                danger
+                className="min-w-[140px]">
+                {commonT('button-delete')} ({selectedRowKeys.length})
+              </Button>
+            )}
             <Button
               onClick={() => setIsShowFilters((isShow) => !isShow)}
               size="large"
@@ -250,7 +364,8 @@ const Container = () => {
                   label={localT('form.color.label')}
                   name="color"
                 >
-                  <Input
+                  <Select
+                    options={containerColorOptions}
                     allowClear
                     placeholder={localT('form.color.placeholder')}
                   />
@@ -281,11 +396,11 @@ const Container = () => {
       </div>
       <Table
         columns={columns}
-        // rowSelection={rowSelection}
+        rowSelection={rowSelection}
         dataSource={containers}
         scroll={{ x: 'max-content' }}
         rowKey={(record) => record.id}
-        // onChange={handleTableChange}
+        onChange={handleTableChange}
         loading={isLoading}
         pagination={{
           current: pagination.page,

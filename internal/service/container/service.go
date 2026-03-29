@@ -34,3 +34,21 @@ func (s *ContainerService) GetContainers(filter *containerDomain.ContainerFilter
 
 	return pageResult, err
 }
+
+func (s *ContainerService) GetContainerSummary() (containerDomain.ContainerSummary, error) {
+	return s.repo.FindSummary()
+}
+
+func (s *ContainerService) UpdateContainer(id int, input CreateContainerInput) error {
+	container := &containerDomain.Container{
+		ID:     id,
+		Color:  input.Color,
+		Type:   input.Type,
+		Status: input.Status,
+	}
+	return s.repo.UpdateContainer(id, container)
+}
+
+func (s *ContainerService) DeleteContainers(ids []int) error {
+	return s.repo.DeleteContainers(ids)
+}

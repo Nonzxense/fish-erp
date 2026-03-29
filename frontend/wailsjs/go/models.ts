@@ -40,6 +40,22 @@ export namespace container {
 	        this.pageSize = source["pageSize"];
 	    }
 	}
+	export class ContainerSummary {
+	    total: number;
+	    atStore: number;
+	    withCustomer: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ContainerSummary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.total = source["total"];
+	        this.atStore = source["atStore"];
+	        this.withCustomer = source["withCustomer"];
+	    }
+	}
 	export class CreateContainerInput {
 	    id: number;
 	    color: string;
