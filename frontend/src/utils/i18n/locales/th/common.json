@@ -3,6 +3,11 @@
   "button-export": "ส่งออก",
   "button-filter": "กรอง",
   "button-delete": "ลบรายการ",
+  "plastic-l": "พลาสติกใหญ่",
+  "plastic-s": "พลาสติกเล็ก",
+  "foam-l": "โฟมใหญ่",
+  "foam-m": "โฟมกลาง",
+  "foam-s": "โฟมเล็ก",
   "modal-common": {
     "ok": "ยืนยัน",
     "cancel": "ยกเลิก"

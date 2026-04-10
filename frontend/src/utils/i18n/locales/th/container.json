@@ -1,0 +1,41 @@
+{
+  "title": "ลังปลา",
+  "subtitle": "จัดการลังปลา",
+  "all": "ทั้งหมด",
+  "at-store": "อยู่ที่ร้าน",
+  "with-customer": "อยู่ที่ลูกค้า",
+  "lost": "หาย",
+  "color": {
+    "blue": "สีน้ำเงิน",
+    "light-green": "สีเขียวอ่อน",
+    "green": "สีเขียวเข้ม",
+    "orange": "สีส้ม",
+    "yellow": "สีเหลือง",
+    "red": "สีแดง"
+  },
+  "table": {
+    "id": "เลขลัง",
+    "type": "ประเภท",
+    "color": "สี",
+    "status": "สถานะ",
+    "manage": "การจัดการ"
+  },
+  "form": {
+    "id": {
+      "label": "เลขลัง",
+      "placeholder": "เลขลัง"
+    },
+    "type": {
+      "label": "ประเภท",
+      "placeholder": "เลือกประเภท"
+    },
+    "color": {
+      "label": "สี",
+      "placeholder": "เลือกสี"
+    },
+    "status": {
+      "label": "สถานะ",
+      "placeholder": "เลือกสถานะ"
+    }
+  }
+}

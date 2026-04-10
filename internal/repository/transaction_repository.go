@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"fish/internal/domain"
+	domain "fish/internal/domain/transaction"
 	"time"
 
 	"gorm.io/gorm"

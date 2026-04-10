@@ -1,4 +1,4 @@
-package domain
+package transaction
 
 type TransactionSummary struct {
 	TotalIncome  float64 `json:"totalIncome"`

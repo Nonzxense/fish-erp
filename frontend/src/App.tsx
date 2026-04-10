@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import AppLayout from './layout/AppLayout';
 import { App as AntApp, ConfigProvider } from 'antd';
 import IncomeAndExpense from "./pages/income-and-expense/IncomeAndExpense"
+import Container from './pages/container/Container';
 
 const App = () => {
   return (
@@ -15,7 +16,7 @@ const App = () => {
             <Route path="/purchase-invoices" element={<div>Page</div>} />
             <Route path="/sales-invoices" element={<div>Page</div>} />
             <Route path="/truck-invoices" element={<div>Page</div>} />
-            <Route path="crates" element={<div>Page</div>} />
+            <Route path="/containers" element={<Container />} />
             <Route path="/parties" element={<div>Page</div>} />
             <Route path="/settings" element={<div>Page</div>} />
           </Route>

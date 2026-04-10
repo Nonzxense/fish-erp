@@ -4,6 +4,7 @@ import (
 	"context"
 	"fish/internal/database"
 	"fish/internal/repository"
+	"fish/internal/service/container"
 	"fish/internal/service/transaction"
 	"os"
 
@@ -15,6 +16,7 @@ type App struct {
 	ctx                context.Context
 	db                 *gorm.DB
 	transactionService *transaction.TransactionService
+	containerService   *container.ContainerService
 }
 
 // NewApp creates a new App application struct
@@ -50,6 +52,9 @@ func (a *App) startup(ctx context.Context) {
 
 	transactionRepo := repository.NewTransactionRepository(a.db)
 	a.transactionService = transaction.NewTransactionService(transactionRepo)
+
+	containerRepo := repository.NewContainerRepository(a.db)
+	a.containerService = container.NewContainerService(containerRepo)
 }
 
 func runSQLFile(db *gorm.DB, path string) error {

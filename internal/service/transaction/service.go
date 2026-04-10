@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	transactionDomain "fish/internal/domain/transaction"
 	"fish/internal/domain"
 	"fish/internal/repository"
 	"time"
@@ -17,7 +18,7 @@ func NewTransactionService(repo *repository.TransactionRepository) *TransactionS
 }
 
 func (s *TransactionService) CreateTransaction(input CreateTransactionInput) error {
-	tx := &domain.Transaction{
+	tx := &transactionDomain.Transaction{
 		ID:         uuid.NewString(),
 		Type:       input.Type,
 		Amount:     (input.Amount),
@@ -29,22 +30,22 @@ func (s *TransactionService) CreateTransaction(input CreateTransactionInput) err
 	return s.repo.Create(tx)
 }
 
-func (s *TransactionService) GetTransactions(filter *domain.TransactionFilter) (domain.PageResult[domain.Transaction], error) {
+func (s *TransactionService) GetTransactions(filter *transactionDomain.TransactionFilter) (domain.PageResult[transactionDomain.Transaction], error) {
 	tx, total, err := s.repo.FindAll(filter)
-	pageResult := domain.PageResult[domain.Transaction]{
+	pageResult := domain.PageResult[transactionDomain.Transaction]{
 		Data:  tx,
 		Total: total,
 	}
 	return pageResult, err
 }
 
-func (s *TransactionService) GetTransactionSummary(fromDate *time.Time, toDate *time.Time) (domain.TransactionSummary, error) {
+func (s *TransactionService) GetTransactionSummary(fromDate *time.Time, toDate *time.Time) (transactionDomain.TransactionSummary, error) {
 	return s.repo.FindSummary(fromDate, toDate)
 }
 
 func (s *TransactionService) UpdateTransaction(id string, input CreateTransactionInput) error {
-	tx := &domain.Transaction{
-		ID:         uuid.NewString(),
+	tx := &transactionDomain.Transaction{
+		ID:         id,
 		Type:       input.Type,
 		Amount:     (input.Amount),
 		Category:   input.Category,
