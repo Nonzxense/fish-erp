@@ -1,8 +1,8 @@
 package transaction
 
 import (
-	transactionDomain "fish/internal/domain/transaction"
 	"fish/internal/domain"
+	transactionDomain "fish/internal/domain/transaction"
 	"fish/internal/repository"
 	"time"
 
@@ -26,7 +26,6 @@ func (s *TransactionService) CreateTransaction(input CreateTransactionInput) err
 		OccurredAt: input.OccurredAt,
 		Note:       input.Note,
 	}
-
 	return s.repo.Create(tx)
 }
 

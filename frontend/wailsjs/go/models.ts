@@ -111,6 +111,38 @@ export namespace domain {
 		    return a;
 		}
 	}
+	export class PageResult_fish_internal_domain_party_Party_ {
+	    data: party.Party[];
+	    total: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PageResult_fish_internal_domain_party_Party_(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.data = this.convertValues(source["data"], party.Party);
+	        this.total = source["total"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class PageResult_fish_internal_domain_transaction_Transaction_ {
 	    data: transaction.Transaction[];
 	    total: number;
@@ -142,6 +174,65 @@ export namespace domain {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace party {
+	
+	export class CreatePartyInput {
+	    name: string;
+	    phone?: string;
+	    note?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CreatePartyInput(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.phone = source["phone"];
+	        this.note = source["note"];
+	    }
+	}
+	export class Party {
+	    id: string;
+	    name: string;
+	    phone?: string;
+	    note?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Party(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.phone = source["phone"];
+	        this.note = source["note"];
+	    }
+	}
+	export class PartyFilter {
+	    name?: string;
+	    type?: string;
+	    phone?: string;
+	    page: number;
+	    pageSize: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PartyFilter(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.type = source["type"];
+	        this.phone = source["phone"];
+	        this.page = source["page"];
+	        this.pageSize = source["pageSize"];
+	    }
 	}
 
 }

@@ -6,6 +6,10 @@ export function CreateContainer(arg1) {
   return window['go']['main']['App']['CreateContainer'](arg1);
 }
 
+export function CreateParty(arg1) {
+  return window['go']['main']['App']['CreateParty'](arg1);
+}
+
 export function CreateTransaction(arg1) {
   return window['go']['main']['App']['CreateTransaction'](arg1);
 }
@@ -24,6 +28,10 @@ export function GetContainerSummary() {
 
 export function GetContainers(arg1) {
   return window['go']['main']['App']['GetContainers'](arg1);
+}
+
+export function GetParties(arg1) {
+  return window['go']['main']['App']['GetParties'](arg1);
 }
 
 export function GetTransactionSummary(arg1, arg2) {

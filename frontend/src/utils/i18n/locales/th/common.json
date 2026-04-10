@@ -8,6 +8,9 @@
   "foam-l": "โฟมใหญ่",
   "foam-m": "โฟมกลาง",
   "foam-s": "โฟมเล็ก",
+  "message": {
+    "delete-success": "ลบรายการสำเร็จ"
+  },
   "modal-common": {
     "ok": "ยืนยัน",
     "cancel": "ยกเลิก"

@@ -3,6 +3,7 @@ import AppLayout from './layout/AppLayout';
 import { App as AntApp, ConfigProvider } from 'antd';
 import IncomeAndExpense from "./pages/income-and-expense/IncomeAndExpense"
 import Container from './pages/container/Container';
+import Party from './pages/party/Party';
 
 const App = () => {
   return (
@@ -17,7 +18,7 @@ const App = () => {
             <Route path="/sales-invoices" element={<div>Page</div>} />
             <Route path="/truck-invoices" element={<div>Page</div>} />
             <Route path="/containers" element={<Container />} />
-            <Route path="/parties" element={<div>Page</div>} />
+            <Route path="/parties" element={<Party />} />
             <Route path="/settings" element={<div>Page</div>} />
           </Route>
         </Routes>
