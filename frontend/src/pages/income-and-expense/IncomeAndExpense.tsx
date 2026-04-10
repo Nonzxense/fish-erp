@@ -119,7 +119,7 @@ const IncomeAndExpense = () => {
                 <Button
                   hidden={!!record.billId}
                   icon={<PencilLine size={16} />}
-                  variant="link"
+                  variant="text"
                   color="blue"
                   onClick={() => handleEditTransaction(record)}
                 />

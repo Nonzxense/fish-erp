@@ -141,8 +141,8 @@ const Container = () => {
               <Tooltip title={localT('table.edit')}>
                 <Button
                   icon={<PencilLine size={16} />}
-                  variant="link"
-                  color="blue"
+                  variant="text"
+                  color="primary"
                   onClick={() => handleEditContainer(record)}
                 />
               </Tooltip>
