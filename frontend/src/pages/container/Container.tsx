@@ -138,7 +138,7 @@ const Container = () => {
         render: (_, record: container.Container) => {
           return (
             <Space>
-              <Tooltip title={localT('table.edit')}>
+              <Tooltip title={commonT('button-edit')}>
                 <Button
                   icon={<PencilLine size={16} />}
                   variant="text"

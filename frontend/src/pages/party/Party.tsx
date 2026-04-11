@@ -176,12 +176,12 @@ const Party = () => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12}>
               <Card variant="borderless">
-                <Statistic title={localT('type.overdue')} value={1} />
+                <Statistic title={localT('overdue')} value={1} />
               </Card>
             </Col>
             <Col xs={24} md={12}>
               <Card variant="borderless">
-                <Statistic title={localT('type.overdue-amount')} value={1} />
+                <Statistic title={localT('overdue-amount')} value={1} />
               </Card>
             </Col>
           </Row>

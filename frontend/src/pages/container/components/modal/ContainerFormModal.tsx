@@ -82,6 +82,7 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
 
   return (
     <Modal
+      title={isEdit ? commonT('modal-common.title-edit') : commonT('modal-common.title-create')}
       open={isOpen}
       onCancel={handleCloseModal}
       footer={null}

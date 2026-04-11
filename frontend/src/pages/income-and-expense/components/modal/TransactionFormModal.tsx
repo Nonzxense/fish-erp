@@ -54,6 +54,7 @@ const TransactionFormModal = ({ isOpen, onClose, onChange, transaction }: Transa
 
   return (
     <Modal
+      title={isEdit ? commonT('modal-common.title-edit') : commonT('modal-common.title-create')}
       open={isOpen}
       onCancel={handleCloseModal}
       footer={null}

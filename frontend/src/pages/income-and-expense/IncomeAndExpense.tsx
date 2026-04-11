@@ -115,7 +115,7 @@ const IncomeAndExpense = () => {
         render: (_, record: transaction.Transaction) => {
           return (
             <Space>
-              <Tooltip title={localT('table.edit')}>
+              <Tooltip title={commonT('button-edit')}>
                 <Button
                   hidden={!!record.billId}
                   icon={<PencilLine size={16} />}
@@ -128,7 +128,7 @@ const IncomeAndExpense = () => {
           )
         }
       }
-    ], [handleEditTransaction, localT])
+    ], [handleEditTransaction, localT, commonT])
 
   const rowSelection = {
     selectedRowKeys,

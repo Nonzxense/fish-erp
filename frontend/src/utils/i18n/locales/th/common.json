@@ -3,6 +3,7 @@
   "button-export": "ส่งออก",
   "button-filter": "กรอง",
   "button-delete": "ลบรายการ",
+  "button-edit": "แก้ไขรายการ",
   "plastic-l": "พลาสติกใหญ่",
   "plastic-s": "พลาสติกเล็ก",
   "foam-l": "โฟมใหญ่",
@@ -12,6 +13,8 @@
     "delete-success": "ลบรายการสำเร็จ"
   },
   "modal-common": {
+    "title-create": "เพิ่มรายการ",
+    "title-edit": "แก้ไขรายการ",
     "ok": "ยืนยัน",
     "cancel": "ยกเลิก"
   },

@@ -1,0 +1,28 @@
+{
+  "title": "ลูกค้า",
+  "subtitle": "จัดการลูกค้า",
+  "overdue": "ค้างชำระ",
+  "overdue-amount": "ยอดค้างชำระ",
+  "all": "ทั้งหมด",
+  "table": {
+    "name": "ชื่อ",
+    "phone": "เบอร์โทรศัพท์",
+    "note": "หมายเหตุ",
+    "overdue-amount": "ยอดค้างชำระ",
+    "manage": "การจัดการ"
+  },
+  "form": {
+    "name": {
+      "label": "ชื่อ",
+      "placeholder": "ชื่อ"
+    },
+    "phone": {
+      "label": "เบอร์โทรศัพท์",
+      "placeholder": "เบอร์โทรศัพท์"
+    },
+    "note": {
+      "label": "หมายเหตุ",
+      "placeholder": "หมายเหตุเพิ่มเติม..."
+    }
+  }
+}
