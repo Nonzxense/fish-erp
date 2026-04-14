@@ -34,3 +34,7 @@ func (s *PartyService) GetParties(filter *partyDomain.PartyFilter) (domain.PageR
 	}
 	return pageResult, error
 }
+
+func (s *PartyService) GetParty(id string) (partyDomain.Party, error) {
+	return s.repo.FindOne(id)
+}

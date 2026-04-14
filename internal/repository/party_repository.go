@@ -38,23 +38,16 @@ func (r *PartyRepository) FindAll(filter *domain.PartyFilter) ([]domain.Party, i
 	query := r.db.Model(&domain.Party{})
 
 	if filter != nil {
-		// Use LIKE for Name search to support partial matches
 		if filter.Name != nil {
 			query = query.Where("name LIKE ?", "%"+*filter.Name+"%")
 		}
-
-		// Use LIKE for Phone search
 		if filter.Phone != nil {
 			query = query.Where("phone LIKE ?", "%"+*filter.Phone+"%")
 		}
-
-		// Use exact match for Type (driver, mover, customer)
 		if filter.Type != nil {
 			query = query.Where("type = ?", filter.Type)
 		}
 	}
-
-	// Count total records before pagination
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -68,4 +61,10 @@ func (r *PartyRepository) FindAll(filter *domain.PartyFilter) ([]domain.Party, i
 	err := query.Find(&parties).Error
 
 	return parties, total, err
+}
+
+func (r *PartyRepository) FindOne(id string) (domain.Party, error) {
+	var party domain.Party
+	err := r.db.Where("id = ?", id).First(&party).Error
+	return party, err
 }

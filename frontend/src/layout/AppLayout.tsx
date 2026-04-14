@@ -40,19 +40,19 @@ const AppLayout = () => {
         label: localT('income-and-expense'),
       },
       {
-        key: 'purchase-invoices',
-        icon: <FileText size={20} />,
-        label: localT('purchase-invoice'),
-      },
-      {
         key: 'sales-invoices',
         icon: <Receipt size={20} />,
         label: localT('sales-invoice'),
       },
       {
+        key: 'purchase-invoices',
+        icon: <FileText size={20} />,
+        label: localT('purchase-invoice'),
+      },
+      {
         key: 'truck-invoices',
         icon: <Truck size={20} />,
-        label: localT('sales-invoice'),
+        label: localT('truck-invoice'),
       },
       {
         key: 'containers',

@@ -1,0 +1,37 @@
+{
+  "modal": {
+    "title": "ใบเสร็จรับเงิน",
+    "store-name": "ร้านขายปลา",
+    "invoice-no": "เลขที่บิล",
+    "add-new-customer": "+ เพิ่มลูกค้าใหม่",
+    "add-new-container": "+ เพิ่มลังใหม่",
+    "add-container": "เพิ่มลังสินค้า",
+    "add-fish": "เพิ่มปลาในลังนี้",
+    "container": "ลัง",
+    "container-order": "ลังที่",
+    "divider-title": "รายละเอียดสินค้า (แยกตามลัง)",
+    "new-customer-title": "รายละเอียดลูกค้าใหม่",
+    "new-container-title": "รายละเอียดลังใหม่",
+    "total-crates": "จำนวนลัง",
+    "total-amount": "ยอดรวมทั้งหมด",
+    "form": {
+      "customer": {
+        "label": "ลูกค้า",
+        "placeholder": "เลือกลูกค้า",
+        "new-name": "ชื่อลูกค้า"
+      },
+      "container": {
+        "label": "เลือกลัง",
+        "placeholder": "ค้นหาหมายเลขลัง หรือ เพิ่มลังใหม่",
+        "no": "หมายเลขลัง",
+        "type": "ประเภท",
+        "color": "สี"
+      },
+      "fish": {
+        "type": "ชนิดปลา",
+        "weight": "น้ำหนัก (กก.)",
+        "price": "ราคา/กก."
+      }
+    }
+  }
+}

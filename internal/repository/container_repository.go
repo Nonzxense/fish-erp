@@ -73,14 +73,14 @@ func (r *ContainerRepository) FindSummary() (domain.ContainerSummary, error) {
 	return summary, err
 }
 
-func (r *ContainerRepository) UpdateContainer(id int, container *domain.Container) error {
+func (r *ContainerRepository) UpdateContainer(id uint, container *domain.Container) error {
 	return r.db.
 		Model(&domain.Container{}).
 		Where("id = ?", id).
 		Updates(container).Error
 }
 
-func (r *ContainerRepository) DeleteContainers(ids []int) error {
+func (r *ContainerRepository) DeleteContainers(ids []uint) error {
 	return r.db.
 		Where("id IN ?", ids).
 		Delete(&domain.Container{}).Error

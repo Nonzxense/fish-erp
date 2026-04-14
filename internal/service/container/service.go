@@ -39,7 +39,7 @@ func (s *ContainerService) GetContainerSummary() (containerDomain.ContainerSumma
 	return s.repo.FindSummary()
 }
 
-func (s *ContainerService) UpdateContainer(id int, input CreateContainerInput) error {
+func (s *ContainerService) UpdateContainer(id uint, input CreateContainerInput) error {
 	container := &containerDomain.Container{
 		ID:     id,
 		Color:  input.Color,
@@ -49,6 +49,6 @@ func (s *ContainerService) UpdateContainer(id int, input CreateContainerInput) e
 	return s.repo.UpdateContainer(id, container)
 }
 
-func (s *ContainerService) DeleteContainers(ids []int) error {
+func (s *ContainerService) DeleteContainers(ids []uint) error {
 	return s.repo.DeleteContainers(ids)
 }
