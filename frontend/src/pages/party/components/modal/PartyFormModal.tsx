@@ -84,7 +84,6 @@ const PartyFormModal = ({ isOpen, onClose, onChange, party }: PartyFormModalProp
         <Form.Item
           name="phone"
           label={localT('form.phone.label')}
-          rules={[{ required: true, message: localT('form.phone.validate.required') }]}
         >
           <Input placeholder={localT('form.phone.placeholder')} />
         </Form.Item>

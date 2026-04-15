@@ -65,6 +65,13 @@ func (r *PartyRepository) FindAll(filter *domain.PartyFilter) ([]domain.Party, i
 
 func (r *PartyRepository) FindOne(id string) (domain.Party, error) {
 	var party domain.Party
-	err := r.db.Where("id = ?", id).First(&party).Error
-	return party, err
+	err := r.db.Model(&domain.Party{}).
+		Where("id = ?", id).
+		First(&party).Error
+
+	if err != nil {
+		return domain.Party{}, err
+	}
+
+	return party, nil
 }

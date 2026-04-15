@@ -117,7 +117,7 @@ const IncomeAndExpense = () => {
             <Space>
               <Tooltip title={commonT('button-edit')}>
                 <Button
-                  hidden={!!record.billId}
+                  hidden={!!record.invoiceId}
                   icon={<PencilLine size={16} />}
                   variant="text"
                   color="blue"

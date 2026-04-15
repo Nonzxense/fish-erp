@@ -60,3 +60,37 @@ func (r *InvoiceRepository) CreateFishTradeInvoice(invoice *domain.FishTradeInvo
 func (r *InvoiceRepository) CreateInvoice(invoice *domain.BaseInvoice) error {
 	return r.db.Create(invoice).Error
 }
+
+func (r *InvoiceRepository) FindAllFishTradeInvoices(filter *domain.InvoiceFilter) ([]domain.FishTradeInvoice, int64, error) {
+	var invoices []domain.FishTradeInvoice
+	var total int64
+
+	query := r.db.Model(&domain.FishTradeInvoice{}).
+		Joins("LEFT JOIN parties ON parties.id = fish_trade_invoices.customer_id")
+
+	if filter != nil {
+		if filter.Type != nil {
+			query = query.Where("fish_trade_invoices.type = ?", *filter.Type)
+		}
+
+		if filter.Name != nil {
+			query = query.Where("parties.name LIKE ?", "%"+*filter.Name+"%")
+		}
+
+		if filter.FromDate != nil {
+			query = query.Where("fish_trade_invoices.created_at >= ?", *filter.FromDate)
+		}
+
+		if filter.ToDate != nil {
+			query = query.Where("fish_trade_invoices.created_at <= ?", *filter.ToDate)
+		}
+	}
+
+	err := query.
+		Preload("Customer").
+		Order("fish_trade_invoices.created_at DESC").
+		Find(&invoices).
+		Error
+
+	return invoices, total, err
+}

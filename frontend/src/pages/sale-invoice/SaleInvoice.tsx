@@ -2,11 +2,15 @@ import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Stati
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
 import { ListFilter, PencilLine, Plus, Trash2, Eye, FileText } from 'lucide-react'
-import React, { useCallback, useMemo, useState } from 'react'
-import { DEFAULT_PAGE_SIZE } from '../../utils/constants'
-import dayjs from 'dayjs'
-import { formatTHB } from '../../utils/formatter'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
+import dayjs, { Dayjs } from 'dayjs'
+import { formatDate, formatTHB } from '../../utils/formatter'
 import SaleInvoiceFormModal from './components/modal/SaleInvoiceFormModal'
+import { invoice as invoiceModel } from '../../../wailsjs/go/models'
+import { InvoiceFilter } from './interface'
+import { Pagination } from '../../utils/types'
+import { GetFishTradeInvoices } from '../../../wailsjs/go/main/App'
 
 // Interface representing a Sale Invoice
 interface SaleInvoice {
@@ -20,21 +24,22 @@ interface SaleInvoice {
 
 const SaleInvoice = () => {
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
-  const [isLoading] = useState<boolean>(false)
+  const [filter, setFilter] = useState<InvoiceFilter>({})
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
+  const [invoices, setInvoices] = useState<invoiceModel.FishTradeInvoice[]>([])
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [segmentStatus, setSegmentStatus] = useState<string>('all')
-
+  const [pagination, setPagination] = useState<Pagination>({
+    page: DEFAULT_PAGE,
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: 0
+  })
   const { t: localT } = useTranslation('invoice')
   const { t: commonT } = useTranslation('common')
   const [form] = Form.useForm()
   const { modal, message } = App.useApp()
 
-  // --- Dummy Data ---
-  const dummyInvoices: SaleInvoice[] = useMemo(() => [
-    { id: 'INV-2023-001', date: '2023-10-25', customerName: 'John Doe', itemCount: 5, totalAmount: 1500.50, status: 'paid' },
-    { id: 'INV-2023-002', date: '2023-10-26', customerName: 'Jane Smith', itemCount: 2, totalAmount: 450.00, status: 'pending' },
-    { id: 'INV-2023-003', date: '2023-10-27', customerName: 'Somsak Move', itemCount: 10, totalAmount: 5200.00, status: 'overdue' },
-  ], [])
 
   const segmentOptions = useMemo(() => [
     { label: commonT('status.all'), value: 'all' },
@@ -43,7 +48,7 @@ const SaleInvoice = () => {
   ], [commonT])
 
   // --- Dummy Handlers ---
-  const handleEdit = useCallback((record: SaleInvoice) => {
+  const handleEdit = useCallback((record: invoiceModel.FishTradeInvoice) => {
     message.info(`Editing invoice: ${record.id}`)
   }, [message])
 
@@ -57,28 +62,29 @@ const SaleInvoice = () => {
     })
   }, [modal, commonT, message])
 
-  const handleViewDetail = useCallback((record: SaleInvoice) => {
+  const handleViewDetail = useCallback((record: invoiceModel.FishTradeInvoice) => {
     message.info(`Viewing details for: ${record.id}`)
   }, [message])
 
-  const columns: TableColumnsType<SaleInvoice> = useMemo(
+  const columns: TableColumnsType<invoiceModel.FishTradeInvoice> = useMemo(
     () => [
       {
-        title: 'Bill No',
+        title: 'Invoice No',
         key: 'id',
         dataIndex: 'id',
         render: (text) => <span className="font-mono font-medium">{text}</span>
       },
       {
         title: 'Date',
-        key: 'date',
-        dataIndex: 'date',
-        sorter: (a, b) => dayjs(a.date).unix() - dayjs(b.date).unix(),
+        key: 'createdAt',
+        dataIndex: 'createdAt',
+        render: (val) => formatDate(val)
       },
       {
         title: 'Customer',
-        key: 'customerName',
-        dataIndex: 'customerName',
+        key: 'customer',
+        dataIndex: 'customer',
+        render: (val) => val.name
       },
       {
         title: 'Items',
@@ -111,7 +117,7 @@ const SaleInvoice = () => {
         key: 'manage',
         align: 'center',
         width: 150,
-        render: (_, record: SaleInvoice) => (
+        render: (_, record: invoiceModel.FishTradeInvoice) => (
           <Space>
             <Tooltip title={commonT('button-view')}>
               <Button
@@ -144,9 +150,45 @@ const SaleInvoice = () => {
     [handleViewDetail, handleEdit, handleDelete, commonT]
   )
 
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: React.Key[]) => {
+      setSelectedRowKeys(keys)
+    },
+  }
+
+  const handleCloseInvoiceFormModal = useCallback(() => {
+    setIsOpenModalForm(false)
+  }, [])
+
+  const loadInvoices = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const goFilter = new invoiceModel.InvoiceFilter({
+        ...filter,
+        page: pagination.page,
+        pageSize: pagination.pageSize
+      })
+      const res = await GetFishTradeInvoices(goFilter)
+
+      setPagination((prev) => ({
+        ...prev,
+        total: res.total
+      }))
+      setInvoices(res.data)
+      console.log(res.data)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [filter, pagination.page, pagination.pageSize])
+
+  useEffect(() => {
+    loadInvoices()
+  }, [loadInvoices])
+
   return (
     <>
-      <SaleInvoiceFormModal isOpen={true} onChange={async () => {}} onClose={() => {}} />
+      <SaleInvoiceFormModal isOpen={isOpenModalForm} onChange={loadInvoices} onClose={handleCloseInvoiceFormModal} />
       <Space orientation="vertical" size="large" className="w-full">
         <Flex align="center" justify="space-between" className="w-full">
           <PageTitle
@@ -158,17 +200,17 @@ const SaleInvoice = () => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={8}>
               <Card variant="borderless">
-                <Statistic title="Total Invoices" value={dummyInvoices.length} prefix={<FileText size={18} />} />
+                <Statistic title="Total Invoices" value={invoices.length} prefix={<FileText size={18} />} />
               </Card>
             </Col>
             <Col xs={24} md={8}>
               <Card variant="borderless">
-                <Statistic title="Pending Payment" value={1} valueStyle={{ color: '#1890ff' }} />
+                <Statistic title="Pending Payment" value={1} styles={{ content: { color: '#1890ff' } }} />
               </Card>
             </Col>
             <Col xs={24} md={8}>
               <Card variant="borderless">
-                <Statistic title="Overdue" value={1} valueStyle={{ color: '#ff4d4f' }} />
+                <Statistic title="Overdue" value={1} styles={{ content: { color: '#ff4d4f' } }} />
               </Card>
             </Col>
           </Row>
@@ -196,10 +238,11 @@ const SaleInvoice = () => {
               {commonT('button-filter')}
             </Button>
             <Button
+              onClick={() => setIsOpenModalForm(true)}
               size="large"
               icon={<Plus size={16} />}
               className="min-w-[140px] gradient-btn">
-              Create Invoice
+              {commonT('button-create')}
             </Button>
           </Space>
         </Flex>
@@ -242,18 +285,17 @@ const SaleInvoice = () => {
       </div>
       <Table
         columns={columns}
-        dataSource={dummyInvoices}
+        dataSource={invoices}
         rowKey="id"
         loading={isLoading}
-        rowSelection={{
-          selectedRowKeys,
-          onChange: (keys) => setSelectedRowKeys(keys),
-        }}
+        scroll={{ x: 'max-content' }}
+        rowSelection={rowSelection}
         pagination={{
-          defaultPageSize: DEFAULT_PAGE_SIZE,
+          current: pagination.page,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
           showSizeChanger: true,
         }}
-        scroll={{ x: 'max-content' }}
       />
     </>
   )

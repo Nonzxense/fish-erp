@@ -5,11 +5,25 @@ export interface SaleInvoiceFormModalProps {
 }
 
 export type SaleInvoiceFormValues = {
+  type: string
+  status: string
+  note?: string
+  customerId: string
+  newCustomerName?: string
+  containers: FishContainerFormValues[]
+}
 
+export type FishContainerFormValues = {
+  containerId: number
+  isNewContainer: boolean
+  newContainerId?: number
+  newContainerType?: string
+  newContainerColor?: string
+  fishes: Fish[]
 }
 
 export interface Fish {
   name: string
-  weight: number
-  price: number
+  weightKg: number
+  pricePerKg: number
 }

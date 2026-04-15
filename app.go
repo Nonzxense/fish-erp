@@ -3,6 +3,10 @@ package main
 import (
 	"context"
 	"fish/internal/database"
+	containerDomain "fish/internal/domain/container"
+	invoiceDomain "fish/internal/domain/invoice"
+	partyDomain "fish/internal/domain/party"
+	transactionDomain "fish/internal/domain/transaction"
 	"fish/internal/repository"
 	"fish/internal/service/container"
 	"fish/internal/service/invoice"
@@ -25,46 +29,41 @@ type App struct {
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	return &App{}
+	db, _, err := database.NewDB()
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.AutoMigrate(
+		&transactionDomain.Transaction{},
+		&partyDomain.Party{},
+		&invoiceDomain.FishTradeInvoice{},
+		&containerDomain.FishContainer{},
+		&containerDomain.FishDetail{},
+		&containerDomain.Container{},
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	transactionRepo := repository.NewTransactionRepository(db)
+	containerRepo := repository.NewContainerRepository(db)
+	partyRepo := repository.NewPartyRepository(db)
+	invoiceRepo := repository.NewInvoiceRepository(db)
+
+	return &App{
+		db:                 db,
+		transactionService: transaction.NewTransactionService(transactionRepo),
+		containerService:   container.NewContainerService(containerRepo),
+		partyService:       party.NewPartyService(partyRepo),
+		invoiceService:     invoice.NewInvoiceService(invoiceRepo, partyRepo, containerRepo),
+	}
 }
 
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	db, _, err := database.NewDB()
-	if err != nil {
-		panic(err)
-	}
-
-	a.db = db
-
-	// Run schema if first run
-	var count int64
-	a.db.Raw(`
-		SELECT count(*) 
-		FROM sqlite_master 
-		WHERE type='table' AND name='transactions'
-	`).Scan(&count)
-
-	if count == 0 {
-		err = runSQLFile(a.db, "internal/database/schema.sql")
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	transactionRepo := repository.NewTransactionRepository(a.db)
-	a.transactionService = transaction.NewTransactionService(transactionRepo)
-
-	containerRepo := repository.NewContainerRepository(a.db)
-	a.containerService = container.NewContainerService(containerRepo)
-
-	partyRepo := repository.NewPartyRepository(a.db)
-	a.partyService = party.NewPartyService(partyRepo)
-
-	invoiceRepo := repository.NewInvoiceRepository(a.db)
-	a.invoiceService = invoice.NewInvoiceService(invoiceRepo, partyRepo, containerRepo)
 }
 
 func runSQLFile(db *gorm.DB, path string) error {

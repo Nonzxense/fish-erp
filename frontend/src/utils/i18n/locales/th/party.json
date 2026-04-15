@@ -14,7 +14,10 @@
   "form": {
     "name": {
       "label": "ชื่อ",
-      "placeholder": "ชื่อ"
+      "placeholder": "ชื่อ",
+      "validate": {
+        "required": "กรุณากรอกชื่อ"
+      }
     },
     "phone": {
       "label": "เบอร์โทรศัพท์",

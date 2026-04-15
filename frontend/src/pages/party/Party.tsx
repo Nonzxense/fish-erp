@@ -163,7 +163,7 @@ const Party = () => {
       <PartyFormModal
         isOpen={isOpenModalForm}
         onClose={() => setIsOpenModalForm(false)}
-        onChange={async () => { }}
+        onChange={loadParties}
       />
       <Space orientation="vertical" size="large" className="w-full">
         <Flex align="center" className="w-full">

@@ -18,10 +18,10 @@ func (a *App) GetContainerSummary() (containerDomain.ContainerSummary, error) {
 	return a.containerService.GetContainerSummary()
 }
 
-func (a *App) UpdateContainer(id int, input container.CreateContainerInput) error {
+func (a *App) UpdateContainer(id uint, input container.CreateContainerInput) error {
 	return a.containerService.UpdateContainer(id, input)
 }
 
-func (a *App) DeleteContainers(ids []int) error {
+func (a *App) DeleteContainers(ids []uint) error {
 	return a.containerService.DeleteContainers(ids)
 }
