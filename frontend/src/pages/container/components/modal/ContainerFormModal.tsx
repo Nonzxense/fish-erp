@@ -1,43 +1,18 @@
 import { Button, Form, InputNumber, Modal, Select } from "antd"
 import { ContainerFormValues, ContainerFormModalProp } from "./interface"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { CreateContainer, UpdateContainer } from "../../../../../wailsjs/go/main/App"
 import { container as containerModel } from "../../../../../wailsjs/go/models"
+import useContainerColorOptions from "../../../../hooks/useContainerColorOptions"
 
 const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerFormModalProp) => {
   const [isLoading, _setIsLoading] = useState<boolean>(false)
   const [form] = Form.useForm<ContainerFormValues>()
   const { t: localT } = useTranslation('container')
   const { t: commonT } = useTranslation('common')
+  const containerColorOptions = useContainerColorOptions()
   const isEdit = !!container
-
-  const containerColorOptions = useMemo(() => [
-    {
-      label: localT('color.blue'),
-      value: 'blue'
-    },
-    {
-      label: localT('color.light-green'),
-      value: 'light-green'
-    },
-    {
-      label: localT('color.green'),
-      value: 'green'
-    },
-    {
-      label: localT('color.orange'),
-      value: 'orange'
-    },
-    {
-      label: localT('color.yellow'),
-      value: 'yellow'
-    },
-    {
-      label: localT('color.red'),
-      value: 'red'
-    },
-  ], [localT])
 
   const handleSubmit = async (values: ContainerFormValues) => {
     const payload = new containerModel.CreateContainerInput({

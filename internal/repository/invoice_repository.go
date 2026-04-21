@@ -4,8 +4,7 @@ import (
 	containerDomain "fish/internal/domain/container"
 	domain "fish/internal/domain/invoice"
 	transaction "fish/internal/domain/transaction"
-	"fish/internal/ptr"
-	"time"
+	"fish/internal/utils/ptr"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -19,19 +18,26 @@ func NewInvoiceRepository(db *gorm.DB) *InvoiceRepository {
 	return &InvoiceRepository{db: db}
 }
 
+func (r *InvoiceRepository) GetDB() *gorm.DB {
+	return r.db
+}
+
 func (r *InvoiceRepository) CreateFishTradeInvoice(invoice *domain.FishTradeInvoice) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(invoice).Error; err != nil {
 			return err
 		}
 
+		transactionTypes := map[string]string{"sale": "income", "purchase": "expense"}
+
 		t := &transaction.Transaction{
 			ID:          uuid.NewString(),
 			Amount:      invoice.TotalAmount,
-			OccurredAt:  time.Now(),
+			OccurredAt:  invoice.CreatedAt,
 			InvoiceID:   &invoice.ID,
-			InvoiceType: ptr.String("sale"),
+			InvoiceType: ptr.String(invoice.Type),
 			Category:    ptr.String("trade"),
+			Type:        transactionTypes[invoice.Type],
 			Note:        ptr.String("Auto-generated from Fish Trade Invoice: " + invoice.ID),
 		}
 
@@ -88,6 +94,7 @@ func (r *InvoiceRepository) FindAllFishTradeInvoices(filter *domain.InvoiceFilte
 
 	err := query.
 		Preload("Customer").
+		Preload("Items").
 		Order("fish_trade_invoices.created_at DESC").
 		Find(&invoices).
 		Error

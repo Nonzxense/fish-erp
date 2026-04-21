@@ -1,10 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Fish, SaleInvoiceFormModalProps, SaleInvoiceFormValues } from './interface'
-import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, InputNumber, Modal, Row, Select, Space, Typography } from 'antd'
+import { Avatar, Button, Card, Col, DatePicker, Divider, Flex, Form, Input, InputNumber, Modal, Row, Select, Space, Typography } from 'antd'
 import { Fish as FishIcon, Plus, Trash2, Box } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { container as containerModel, invoice as invoiceModel, party as partyModel } from '../../../../../wailsjs/go/models'
 import { CreateFishTradeInvoice, GetContainers, GetParties } from '../../../../../wailsjs/go/main/App'
+import dayjs from 'dayjs'
+import { formatDate, formatTHB } from '../../../../utils/formatter'
+import useContainerTypeOptions from '../../../../hooks/useContainerTypeOptions'
+import useContainerColorOptions from '../../../../hooks/useContainerColorOptions'
 
 const { Text, Title } = Typography
 
@@ -15,6 +19,8 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
   const values = Form.useWatch([], form)
   const { t: localT } = useTranslation('sale-invoice')
   const { t: commonT } = useTranslation('common')
+  const containerTypeOptions = useContainerTypeOptions()
+  const containerColorOptions = useContainerColorOptions()
 
   const customerSelectOptions = [
     { label: localT('modal.add-new-customer'), value: 'NEW' },
@@ -26,7 +32,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
   const existingContainerSelectOptions = [
     { label: localT('modal.add-new-container'), value: 'NEW' },
     ...existingContainers.map(c => ({
-      label: `${c.id} (${c.type} - ${c.color})`,
+      label: `${c.id} (${commonT(c.type.replace('_', '-'))} - ${commonT(c.color)})`,
       value: c.id
     }))
   ]
@@ -44,6 +50,11 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
     return { money, containers }
   }, [values])
 
+  const handleCloseModal = useCallback(() => {
+    form.resetFields()
+    onClose()
+  }, [form, onClose])
+
   const handleSubmit = useCallback(async (values: SaleInvoiceFormValues) => {
     const items = values.containers.map((item) => {
       const fishes = item.fishes.map((fish) =>
@@ -58,7 +69,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
       return new containerModel.CreateFishContainerInput({
         containerId: isNewContainer ? 0 : Number(item.containerId),
         isNewContainer: isNewContainer,
-        newContainerId: item.newContainerId,
+        newContainerId: Number(item.newContainerId),
         newContainerType: item.newContainerType,
         newContainerColor: item.newContainerColor,
         fishes: fishes,
@@ -67,6 +78,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
 
     const isNewCustomer = !!values.newCustomerName
     const payload = new invoiceModel.CreateFishTradeInvoiceInput({
+      createdAt: values.createdAt.toISOString(),
       type: 'sale',
       status: 'pending', // dummy
       totalAmount: 0, // dummy
@@ -83,12 +95,13 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
       // handle by interceptor
     }
 
-    form.resetFields()
+    handleCloseModal()
     onChange()
-    onClose()
-  }, [form, onChange, onClose])
+
+  }, [handleCloseModal, onChange])
 
   useEffect(() => {
+    if (!isOpen) return
     const loadCustomers = async () => {
       try {
         const res = await GetParties(new partyModel.PartyFilter())
@@ -109,7 +122,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
 
     loadCustomers()
     loadContainers()
-  }, [])
+  }, [isOpen])
 
   return (
     <Modal
@@ -137,40 +150,58 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
         </>
       }
       open={isOpen}
-      onCancel={onClose}
+      onCancel={handleCloseModal}
       width={800}
       footer={null}
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         {/* 1. Customer Selection */}
-        <Form.Item
-          name="customerId"
-          label={localT('modal.form.customer.label')}
-          rules={[{ required: true }]}
-        >
-          <Select
-            placeholder={localT('modal.form.customer.placeholder')}
-            options={customerSelectOptions}
-          />
-        </Form.Item>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              name="customerId"
+              label={localT('modal.form.customer.label')}
+              rules={[{ required: true, message: localT('modal.form.customer.validate.required') }]}
+            >
+              <Select
+                placeholder={localT('modal.form.customer.placeholder')}
+                options={customerSelectOptions}
+              />
+            </Form.Item>
 
+          </Col>
+
+          <Col span={12}>
+            <Form.Item
+              name="createdAt"
+              label={commonT('date')}
+              rules={[{ required: true }]}
+              initialValue={dayjs()}
+            >
+              <DatePicker
+                className="!w-full"
+                allowClear={false}
+                format={formatDate}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
         {/* NEW CUSTOMER DETAILS (Conditional) */}
         {values?.customerId === 'NEW' && (
           <div className="bg-blue-50/50 p-4 rounded-lg mb-4 border border-blue-100">
             <Text strong className="block mb-2">{localT('modal.new-customer-title')}</Text>
             <Row gutter={8}>
               <Col span={12}>
-                <Form.Item name='newCustomerName' label={localT('modal.form.customer.new-name')} rules={[{ required: true }]}>
+                <Form.Item name='newCustomerName' label={localT('modal.form.customer.new-name')} rules={[{ required: true, message: localT('modal.form.customer.new-name.validate.required') }]}>
                   <Input placeholder={localT('modal.form.customer.new-name')} />
                 </Form.Item>
               </Col>
             </Row>
           </div>
         )}
-
         <Divider titlePlacement="left"><Text type="secondary">{localT('modal.divider-title')}</Text></Divider>
 
-        {/* 2. Nested Containers Selection */}
+        {/* 3. Nested Containers Selection */}
         <Form.List name="containers">
           {(containerFields, { add: addContainer, remove: removeContainer }) => (
             <div className="flex flex-col gap-6">
@@ -204,27 +235,24 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
                     </Col>
 
                     {/* NEW CONTAINER DETAILS (Conditional) */}
-                    {values?.containers?.[name]?.id === 'NEW' && (
+                    {values?.containers?.[name]?.containerId === 'NEW' && (
                       <Col span={24}>
                         <div className="bg-blue-50/50 p-4 rounded-lg mb-4 border border-blue-100">
                           <Text strong className="block mb-2">{localT('modal.new-container-title')}</Text>
                           <Row gutter={8}>
                             <Col span={8}>
-                              <Form.Item name={[name, 'new_no']} label={localT('modal.form.container.no')} rules={[{ required: true }]}>
-                                <Input placeholder="A-001" />
+                              <Form.Item name={[name, 'newContainerId']} label={localT('modal.form.container.no')} rules={[{ required: true }]}>
+                                <Input placeholder={localT('modal.form.container.no')} />
                               </Form.Item>
                             </Col>
                             <Col span={8}>
-                              <Form.Item name={[name, 'new_type']} label={localT('modal.form.container.type')}>
-                                <Select options={[
-                                  { label: 'Plastic L', value: 'plastic_l' },
-                                  { label: 'Foam M', value: 'foam_m' },
-                                ]} />
+                              <Form.Item name={[name, 'newContainerType']} label={localT('modal.form.container.type')}>
+                                <Select options={containerTypeOptions} placeholder={localT('modal.form.container.select-type')} />
                               </Form.Item>
                             </Col>
                             <Col span={8}>
-                              <Form.Item name={[name, 'new_color']} label={localT('modal.form.container.color')}>
-                                <Input placeholder="Blue" />
+                              <Form.Item name={[name, 'newContainerColor']} label={localT('modal.form.container.color')}>
+                                <Select options={containerColorOptions} placeholder={localT('modal.form.container.select-color')} />
                               </Form.Item>
                             </Col>
                           </Row>
@@ -266,17 +294,46 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
                   </Row>
                 </Card>
               ))}
-              <Button type="primary" ghost block icon={<Plus size={16} />} onClick={() => addContainer()} size="large">
+              <Button type="primary" ghost block icon={<Plus size={16} />} onClick={() => addContainer()} size="large" className='mb-4'>
                 {localT('modal.add-container')}
               </Button>
             </div>
           )}
         </Form.List>
-        <Flex key="footer" justify="space-between" align="center" className="px-4 py-2 bg-gray-50 rounded-lg">
-          <Space size="large">
-            <Statistic title={localT('modal.total-containers')} value={totals.containers} suffix={localT('modal.container')} valueStyle={{ fontSize: 18 }} />
-            <Statistic title={localT('modal.total-amount')} value={totals.money} precision={2} suffix="฿" valueStyle={{ fontSize: 18, color: '#f5222d' }} />
-          </Space>
+        <Form.Item
+          name="note"
+          label={localT('modal.form.note.label')}
+        >
+          <Input.TextArea
+            rows={3}
+            placeholder={localT('modal.form.note.placeholder')}
+          />
+        </Form.Item>
+        <Flex justify="end" className="w-full">
+          <Flex
+            vertical
+            gap={8}
+            className="mb-4 px-4 py-4 bg-gray-50 rounded-lg gradient-btn min-w-[220px]"
+          >
+            <Flex justify="space-between" align="center" gap={16}>
+              <Text className="!text-white">
+                {localT('modal.total-containers')}
+              </Text>
+              <Text strong className="!text-white">
+                {totals.containers} {localT('modal.container')}
+              </Text>
+            </Flex>
+
+            <Flex justify="space-between" align="center" gap={16}>
+              <Text className="!text-white">
+                {localT('modal.total-amount')}
+              </Text>
+
+              <Text strong className="text-lg !text-white">
+                {formatTHB(totals.money)}
+              </Text>
+            </Flex>
+          </Flex>
         </Flex>
         <Form.Item noStyle>
           <Button type="primary" htmlType="submit" block>
@@ -287,14 +344,5 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
     </Modal>
   )
 }
-
-const Statistic = ({ title, value, precision = 0, suffix, valueStyle }: any) => (
-  <div>
-    <Text type="secondary" className="text-[12px]">{title}</Text>
-    <div style={valueStyle}>
-      {typeof value === 'number' ? value.toLocaleString(undefined, { minimumFractionDigits: precision }) : value} {suffix}
-    </div>
-  </div>
-)
 
 export default SaleInvoiceFormModal

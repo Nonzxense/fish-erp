@@ -1,3 +1,5 @@
+import { Dayjs } from "dayjs"
+
 export interface SaleInvoiceFormModalProps {
   isOpen: boolean
   onClose: () => void
@@ -5,6 +7,7 @@ export interface SaleInvoiceFormModalProps {
 }
 
 export type SaleInvoiceFormValues = {
+  createdAt: Dayjs
   type: string
   status: string
   note?: string

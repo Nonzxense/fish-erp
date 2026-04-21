@@ -5,9 +5,10 @@ import (
 	containerDomain "fish/internal/domain/container"
 	invoiceDomain "fish/internal/domain/invoice"
 	partyDomain "fish/internal/domain/party"
-	"fish/internal/ptr"
 	"fish/internal/repository"
 	container "fish/internal/service/container"
+	"fish/internal/utils/count"
+	"fish/internal/utils/ptr"
 	"fmt"
 	"time"
 
@@ -34,7 +35,10 @@ func (s *InvoiceService) CreateFishTradeInvoice(input CreateFishTradeInvoiceInpu
 		return err
 	}
 
-	invoice := s.initializeInvoice(input, customer)
+	invoice, err := s.initializeInvoice(input, customer)
+	if err != nil {
+		return err
+	}
 
 	for _, containerInput := range input.Items {
 		containerID, err := s.resolveContainerID(containerInput)
@@ -110,11 +114,27 @@ func (s *InvoiceService) resolveContainerID(input container.CreateFishContainerI
 	return newContainer.ID, s.containerRepo.CreateContainer(&newContainer)
 }
 
-func (s *InvoiceService) initializeInvoice(input CreateFishTradeInvoiceInput, customer partyDomain.Party) *invoiceDomain.FishTradeInvoice {
+func (s *InvoiceService) initializeInvoice(input CreateFishTradeInvoiceInput, customer partyDomain.Party) (*invoiceDomain.FishTradeInvoice, error) {
+	c, err := count.GetCountForMonth[invoiceDomain.FishTradeInvoice](s.repo.GetDB(), input.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		return nil, err
+	}
+
+	sequenceID := fmt.Sprintf("FT-%d%02d-%04d",
+		input.CreatedAt.In(loc).Year(),
+		input.CreatedAt.In(loc).Month(),
+		c+1,
+	)
+
 	return &invoiceDomain.FishTradeInvoice{
 		BaseInvoice: invoiceDomain.BaseInvoice{
-			ID:        uuid.NewString(),
-			CreatedAt: time.Now(),
+			ID:        sequenceID,
+			CreatedAt: input.CreatedAt,
 			Type:      input.Type,
 			Status:    input.Status,
 			Note:      input.Note,
@@ -122,7 +142,7 @@ func (s *InvoiceService) initializeInvoice(input CreateFishTradeInvoiceInput, cu
 		CustomerID: customer.ID,
 		Customer:   customer,
 		Items:      []containerDomain.FishContainer{},
-	}
+	}, nil
 }
 
 func (s *InvoiceService) mapFishToContainer(invoiceID string, containerID uint, fishes []container.CreateFishDetailInput) containerDomain.FishContainer {

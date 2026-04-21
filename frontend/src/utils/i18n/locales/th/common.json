@@ -9,6 +9,12 @@
   "foam-l": "โฟมใหญ่",
   "foam-m": "โฟมกลาง",
   "foam-s": "โฟมเล็ก",
+  "blue": "สีน้ำเงิน",
+  "light-green": "สีเขียวอ่อน",
+  "green": "สีเขียวเข้ม",
+  "orange": "สีส้ม",
+  "yellow": "สีเหลือง",
+  "red": "สีแดง",
   "message": {
     "delete-success": "ลบรายการสำเร็จ"
   },
@@ -32,6 +38,8 @@
     "button-search": "ค้นหา",
     "button-clear": "ล้างการกรอง"
   },
+  "date": "วันที่",
+  "date-picker": "เลือกวันที่",
   "range-picker": {
     "start": "วันที่เริ่ม",
     "end": "วันที่สิ้นสุด"

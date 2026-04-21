@@ -1,11 +1,15 @@
 package invoice
 
-import "fish/internal/service/container"
+import (
+	"fish/internal/service/container"
+	"time"
+)
 
 type CreateInvoiceInput struct {
-	Type   string  `json:"type" validate:"required,oneof=sale purchase truck"`
-	Status string  `json:"status" validate:"oneof=pending paid"`
-	Note   *string `json:"note"`
+	Type      string    `json:"type" validate:"required,oneof=sale purchase truck"`
+	Status    string    `json:"status" validate:"oneof=pending paid"`
+	Note      *string   `json:"note"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type CreateFishTradeInvoiceInput struct {

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { ListFilter, PencilLine, Plus, Trash2, Eye, FileText } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
-import dayjs, { Dayjs } from 'dayjs'
 import { formatDate, formatTHB } from '../../utils/formatter'
 import SaleInvoiceFormModal from './components/modal/SaleInvoiceFormModal'
 import { invoice as invoiceModel } from '../../../wailsjs/go/models'
@@ -89,8 +88,8 @@ const SaleInvoice = () => {
       {
         title: 'Items',
         key: 'itemCount',
-        dataIndex: 'itemCount',
         align: 'center',
+        render: (_, record) => record.items?.length || 0
       },
       {
         title: 'Total',
@@ -176,7 +175,6 @@ const SaleInvoice = () => {
         total: res.total
       }))
       setInvoices(res.data)
-      console.log(res.data)
     } finally {
       setIsLoading(false)
     }

@@ -5,11 +5,14 @@ import IncomeAndExpense from "./pages/income-and-expense/IncomeAndExpense"
 import Container from './pages/container/Container';
 import Party from './pages/party/Party';
 import SaleInvoice from './pages/sale-invoice/SaleInvoice';
+import dayjs from 'dayjs';
+import thTh from 'antd/locale/th_TH'
 
+dayjs.locale('th')
 const App = () => {
   return (
     <AntApp>
-      <ConfigProvider>
+      <ConfigProvider locale={thTh}>
         <Routes>
           <Route element={<AppLayout />}>
             <Route path="/" element={<div>Page</div>} />

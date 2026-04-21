@@ -329,6 +329,7 @@ export namespace invoice {
 	    type: string;
 	    status: string;
 	    note?: string;
+	    createdAt: time.Time;
 	    customerId: string;
 	    isNewCustomer: boolean;
 	    newCustomerName?: string;
@@ -344,6 +345,7 @@ export namespace invoice {
 	        this.type = source["type"];
 	        this.status = source["status"];
 	        this.note = source["note"];
+	        this.createdAt = this.convertValues(source["createdAt"], time.Time);
 	        this.customerId = source["customerId"];
 	        this.isNewCustomer = source["isNewCustomer"];
 	        this.newCustomerName = source["newCustomerName"];

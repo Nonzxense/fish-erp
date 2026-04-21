@@ -12,25 +12,34 @@
     "divider-title": "รายละเอียดสินค้า (แยกตามลัง)",
     "new-customer-title": "รายละเอียดลูกค้าใหม่",
     "new-container-title": "รายละเอียดลังใหม่",
-    "total-crates": "จำนวนลัง",
+    "total-containers": "จำนวนลัง",
     "total-amount": "ยอดรวมทั้งหมด",
     "form": {
       "customer": {
         "label": "ลูกค้า",
         "placeholder": "เลือกลูกค้า",
-        "new-name": "ชื่อลูกค้า"
+        "new-name": "ชื่อลูกค้า",
+        "validate": {
+          "required": "กรุณากรอกชื่อลูกค้า"
+        }
       },
       "container": {
         "label": "เลือกลัง",
         "placeholder": "ค้นหาหมายเลขลัง หรือ เพิ่มลังใหม่",
         "no": "หมายเลขลัง",
         "type": "ประเภท",
-        "color": "สี"
+        "select-type": "เลือกประเภท",
+        "color": "สี",
+        "select-color": "เลือกสี"
       },
       "fish": {
         "name": "ชนิดปลา",
         "weight": "น้ำหนัก (กก.)",
         "price": "ราคา/กก."
+      },
+      "note": {
+        "label": "หมายเหตุ",
+        "placeholder": "หมายเหตุเพิ่มเติม..."
       }
     }
   }
