@@ -171,6 +171,7 @@ const IncomeAndExpense = () => {
         pageSize: pagination.pageSize
       })
       const res = await GetTransactions(goFilter)
+      console.log(res.data)
       const { totalIncome, totalExpense, profit } =
         await GetTransactionSummary(goFilter.fromDate ?? segmentRange.fromDate, filter.toDate ?? segmentRange.toDate)
       setTotalIncome(totalIncome)

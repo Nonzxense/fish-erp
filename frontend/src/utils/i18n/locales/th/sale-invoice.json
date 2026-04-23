@@ -1,4 +1,6 @@
 {
+  "title": "บิลขาย",
+  "subtitle": "จัดการบิลขายปลา",
   "modal": {
     "title": "ใบเสร็จรับเงิน",
     "store-name": "ร้านขายปลา",
@@ -14,6 +16,10 @@
     "new-container-title": "รายละเอียดลังใหม่",
     "total-containers": "จำนวนลัง",
     "total-amount": "ยอดรวมทั้งหมด",
+    "validate": {
+      "add-container": "กรุณาเพิ่มลังปลา",
+      "add-fish": "กรุณาเพิ่มปลา"
+    },
     "form": {
       "customer": {
         "label": "ลูกค้า",
@@ -30,17 +36,35 @@
         "type": "ประเภท",
         "select-type": "เลือกประเภท",
         "color": "สี",
-        "select-color": "เลือกสี"
+        "select-color": "เลือกสี",
+        "validate-required": "กรุณาเลือกหมายเลขลัง หรือ เพิ่มลังใหม่"
       },
       "fish": {
         "name": "ชนิดปลา",
         "weight": "น้ำหนัก (กก.)",
-        "price": "ราคา/กก."
+        "price": "ราคา/กก.",
+        "name-validate": "กรุณากรอกชนิดปลา",
+        "weight-validate": "กรุณากรอกน้ำหนัก",
+        "price-validate": "กรุณากรอกราคา"
       },
       "note": {
         "label": "หมายเหตุ",
         "placeholder": "หมายเหตุเพิ่มเติม..."
       }
     }
+  },
+  "status": {
+    "all": "ทั้งหมด",
+    "pending": "ค้างอยู่",
+    "paid": "จ่ายแล้ว"
+  },
+  "table": {
+    "invoice-no": "เลขที่บิล",
+    "date": "วันที่",
+    "customer": "ลูกค้า",
+    "items": "จำนวนลัง",
+    "total": "จำนวนเงิน",
+    "status": "สถานะ",
+    "manage": "การจัดการ"
   }
 }

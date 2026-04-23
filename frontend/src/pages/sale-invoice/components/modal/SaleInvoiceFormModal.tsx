@@ -122,7 +122,14 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
 
     loadCustomers()
     loadContainers()
-  }, [isOpen])
+    form.setFieldsValue({
+      containers: [
+        {
+          fishes: [{}]
+        }
+      ]
+    })
+  }, [form, isOpen])
 
   return (
     <Modal
@@ -153,10 +160,16 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
       onCancel={handleCloseModal}
       width={800}
       footer={null}
+      styles={{
+        body: {
+          maxHeight: '70vh',
+          overflowY: 'auto',
+        },
+      }}
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         {/* 1. Customer Selection */}
-        <Row gutter={16}>
+        <Row gutter={[16, 16]} className="!mx-0">
           <Col span={12}>
             <Form.Item
               name="customerId"
@@ -202,16 +215,27 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
         <Divider titlePlacement="left"><Text type="secondary">{localT('modal.divider-title')}</Text></Divider>
 
         {/* 3. Nested Containers Selection */}
-        <Form.List name="containers">
-          {(containerFields, { add: addContainer, remove: removeContainer }) => (
-            <div className="flex flex-col gap-6">
+        <Form.List
+          name="containers"
+          rules={[
+            {
+              validator: async (_, containers) => {
+                if (!containers || containers.length < 1) {
+                  return Promise.reject(new Error(localT('modal.validate.add-container')))
+                }
+              }
+            }
+          ]}
+        >
+          {(containerFields, { add: addContainer, remove: removeContainer }, { errors }) => (
+            <div className="flex flex-col mb-4 gap-6">
               {containerFields.map(({ key, name, ...restField }) => (
                 <Card
                   key={key}
                   size="small"
                   className="border-2 border-blue-50"
                   title={<Space><Box size={16} className="text-blue-500" /> {localT('modal.container-order')} {name + 1}</Space>}
-                  extra={<Button type="text" danger icon={<Trash2 size={16} />} onClick={() => removeContainer(name)} />}
+                  extra={<Button type="text" danger icon={<Trash2 size={16} />} onClick={() => removeContainer(name)} disabled={containerFields.length === 1} />}
                 >
                   <Row gutter={16}>
                     <Col span={24}>
@@ -219,7 +243,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
                         {...restField}
                         label={localT('modal.form.container.label')}
                         name={[name, 'containerId']}
-                        rules={[{ required: true, message: localT('modal.form.container.placeholder') }]}
+                        rules={[{ required: true, message: localT('modal.form.container.validate-required') }]}
                       >
                         <Select
                           placeholder={localT('modal.form.container.placeholder')}
@@ -261,32 +285,44 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
                     )}
 
                     <Col span={24}>
-                      <Form.List name={[name, 'fishes']}>
-                        {(fishFields, { add: addFish, remove: removeFish }) => (
-                          <div className="bg-white p-2 rounded">
+                      <Form.List
+                        name={[name, 'fishes']}
+                        rules={[
+                          {
+                            validator: async (_, fishes) => {
+                              if (!fishes || fishes.length < 1) {
+                                return Promise.reject(new Error(localT('modal.validate.add-fish')))
+                              }
+                            }
+                          }
+                        ]}
+                      >
+                        {(fishFields, { add: addFish, remove: removeFish }, { errors }) => (
+                          <div className="bg-white py-2 pl-2 rounded">
                             {fishFields.map((fishField) => (
                               <Row key={fishField.key} gutter={8} align="bottom" className="mb-2">
-                                <Col span={8}>
-                                  <Form.Item {...fishField} label={fishField.name === 0 ? localT('modal.form.fish.name') : ""} name={[fishField.name, 'name']}>
+                                <Col flex="auto">
+                                  <Form.Item {...fishField} label={fishField.name === 0 ? localT('modal.form.fish.name') : ""} name={[fishField.name, 'name']} rules={[{ required: true, message: localT('modal.form.fish.name-validate') }]}>
                                     <Input />
                                   </Form.Item>
                                 </Col>
-                                <Col span={6}>
-                                  <Form.Item {...fishField} label={fishField.name === 0 ? localT('modal.form.fish.weight') : ""} name={[fishField.name, 'weightKg']}>
+                                <Col flex="160px">
+                                  <Form.Item {...fishField} label={fishField.name === 0 ? localT('modal.form.fish.weight') : ""} name={[fishField.name, 'weightKg']} rules={[{ required: true, message: localT('modal.form.fish.weight-validate') }]}>
                                     <InputNumber className="w-full" min={0} />
                                   </Form.Item>
                                 </Col>
-                                <Col span={6}>
-                                  <Form.Item {...fishField} label={fishField.name === 0 ? localT('modal.form.fish.price') : ""} name={[fishField.name, 'pricePerKg']}>
+                                <Col flex="160px">
+                                  <Form.Item {...fishField} label={fishField.name === 0 ? localT('modal.form.fish.price') : ""} name={[fishField.name, 'pricePerKg']} rules={[{ required: true, message: localT('modal.form.fish.price-validate') }]}>
                                     <InputNumber className="w-full" min={0} />
                                   </Form.Item>
                                 </Col>
-                                <Col span={2}>
-                                  <Button type="text" danger icon={<Trash2 size={14} />} onClick={() => removeFish(fishField.name)} className="mb-[24px]" />
+                                <Col flex="16px">
+                                  <Button type="text" danger icon={<Trash2 size={14} />} onClick={() => removeFish(fishField.name)} className="mb-[24px]" disabled={fishFields.length === 1} />
                                 </Col>
                               </Row>
                             ))}
                             <Button type="dashed" block icon={<Plus size={14} />} onClick={() => addFish()}>{localT('modal.add-fish')}</Button>
+                            <Form.ErrorList errors={errors} />
                           </div>
                         )}
                       </Form.List>
@@ -294,9 +330,10 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
                   </Row>
                 </Card>
               ))}
-              <Button type="primary" ghost block icon={<Plus size={16} />} onClick={() => addContainer()} size="large" className='mb-4'>
+              <Button type="primary" ghost block icon={<Plus size={16} />} onClick={() => addContainer()} size="large">
                 {localT('modal.add-container')}
               </Button>
+              <Form.ErrorList errors={errors} />
             </div>
           )}
         </Form.List>

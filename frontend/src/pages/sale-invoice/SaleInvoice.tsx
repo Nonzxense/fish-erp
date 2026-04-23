@@ -1,4 +1,4 @@
-import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker } from 'antd'
+import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker, TableProps } from 'antd'
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
 import { ListFilter, PencilLine, Plus, Trash2, Eye, FileText } from 'lucide-react'
@@ -10,6 +10,7 @@ import { invoice as invoiceModel } from '../../../wailsjs/go/models'
 import { InvoiceFilter } from './interface'
 import { Pagination } from '../../utils/types'
 import { GetFishTradeInvoices } from '../../../wailsjs/go/main/App'
+import { getPaidStatusColor } from '../../utils/getTagColor'
 
 // Interface representing a Sale Invoice
 interface SaleInvoice {
@@ -34,17 +35,16 @@ const SaleInvoice = () => {
     pageSize: DEFAULT_PAGE_SIZE,
     total: 0
   })
-  const { t: localT } = useTranslation('invoice')
+  const { t: localT } = useTranslation('sale-invoice')
   const { t: commonT } = useTranslation('common')
   const [form] = Form.useForm()
   const { modal, message } = App.useApp()
 
-
   const segmentOptions = useMemo(() => [
-    { label: commonT('status.all'), value: 'all' },
-    { label: commonT('status.pending'), value: 'pending' },
-    { label: commonT('status.paid'), value: 'paid' },
-  ], [commonT])
+    { label: localT('status.all'), value: 'all' },
+    { label: localT('status.pending'), value: 'pending' },
+    { label: localT('status.paid'), value: 'paid' },
+  ], [localT])
 
   // --- Dummy Handlers ---
   const handleEdit = useCallback((record: invoiceModel.FishTradeInvoice) => {
@@ -68,51 +68,47 @@ const SaleInvoice = () => {
   const columns: TableColumnsType<invoiceModel.FishTradeInvoice> = useMemo(
     () => [
       {
-        title: 'Invoice No',
+        title: localT('table.invoice-no'),
         key: 'id',
         dataIndex: 'id',
         render: (text) => <span className="font-mono font-medium">{text}</span>
       },
       {
-        title: 'Date',
+        title: localT('table.date'),
         key: 'createdAt',
         dataIndex: 'createdAt',
         render: (val) => formatDate(val)
       },
       {
-        title: 'Customer',
+        title: localT('table.customer'),
         key: 'customer',
         dataIndex: 'customer',
         render: (val) => val.name
       },
       {
-        title: 'Items',
+        title: localT('table.items'),
         key: 'itemCount',
         align: 'center',
         render: (_, record) => record.items?.length || 0
       },
       {
-        title: 'Total',
+        title: localT('table.total'),
         key: 'totalAmount',
         dataIndex: 'totalAmount',
         align: 'right',
         render: (val) => formatTHB(val)
       },
       {
-        title: 'Status',
+        title: localT('table.status'),
         key: 'status',
         dataIndex: 'status',
         align: 'center',
         render: (status: SaleInvoice['status']) => {
-          let color = 'default'
-          if (status === 'paid') color = 'success'
-          if (status === 'pending') color = 'processing'
-          if (status === 'overdue') color = 'error'
-          return <Tag color={color} className="capitalize">{status}</Tag>
+          return <Tag color={getPaidStatusColor(status)} variant="outlined" >{localT(`status.${status}`)}</Tag>
         }
       },
       {
-        title: commonT('table.manage'),
+        title: localT('table.manage'),
         key: 'manage',
         align: 'center',
         width: 150,
@@ -146,7 +142,7 @@ const SaleInvoice = () => {
         )
       }
     ],
-    [handleViewDetail, handleEdit, handleDelete, commonT]
+    [localT, commonT, handleViewDetail, handleEdit, handleDelete]
   )
 
   const rowSelection = {
@@ -159,6 +155,19 @@ const SaleInvoice = () => {
   const handleCloseInvoiceFormModal = useCallback(() => {
     setIsOpenModalForm(false)
   }, [])
+
+  const handleTableChange: TableProps<invoiceModel.FishTradeInvoice>['onChange'] = (
+    pagination
+  ) => {
+    const page = pagination.current || DEFAULT_PAGE
+    const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE
+
+    setPagination((prev) => ({
+      ...prev,
+      page,
+      pageSize,
+    }))
+  }
 
   const loadInvoices = useCallback(async () => {
     try {
@@ -190,8 +199,8 @@ const SaleInvoice = () => {
       <Space orientation="vertical" size="large" className="w-full">
         <Flex align="center" justify="space-between" className="w-full">
           <PageTitle
-            title="Sale Invoices"
-            subtitle="Manage and track your customer billing"
+            title={localT('title')}
+            subtitle={localT('subtitle')}
           />
         </Flex>
         <div className="w-full">
@@ -294,6 +303,7 @@ const SaleInvoice = () => {
           total: pagination.total,
           showSizeChanger: true,
         }}
+        onChange={handleTableChange}
       />
     </>
   )

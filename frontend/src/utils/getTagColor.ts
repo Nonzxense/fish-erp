@@ -7,9 +7,24 @@ export const getTransactionTypeColor = (
 
   switch (type.toLowerCase()) {
     case 'income':
-      return 'green'
+      return 'success'
     case 'expense':
-      return 'red'
+      return 'error'
+    default:
+      return 'default'
+  }
+}
+
+export const getPaidStatusColor = (
+  status?: string
+): TagProps['color'] => {
+  if (!status) return 'default'
+
+  switch (status.toLowerCase()) {
+    case 'paid':
+      return 'success'
+    case 'pending':
+      return 'warning'
     default:
       return 'default'
   }
