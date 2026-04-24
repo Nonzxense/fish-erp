@@ -6,8 +6,8 @@ export function CreateContainer(arg1) {
   return window['go']['main']['App']['CreateContainer'](arg1);
 }
 
-export function CreateFishTradeInvoice(arg1) {
-  return window['go']['main']['App']['CreateFishTradeInvoice'](arg1);
+export function CreateFishSaleInvoice(arg1) {
+  return window['go']['main']['App']['CreateFishSaleInvoice'](arg1);
 }
 
 export function CreateParty(arg1) {
@@ -22,6 +22,10 @@ export function DeleteContainers(arg1) {
   return window['go']['main']['App']['DeleteContainers'](arg1);
 }
 
+export function DeleteFishSaleInvoices(arg1) {
+  return window['go']['main']['App']['DeleteFishSaleInvoices'](arg1);
+}
+
 export function DeleteTransactions(arg1) {
   return window['go']['main']['App']['DeleteTransactions'](arg1);
 }
@@ -34,8 +38,8 @@ export function GetContainers(arg1) {
   return window['go']['main']['App']['GetContainers'](arg1);
 }
 
-export function GetFishTradeInvoices(arg1) {
-  return window['go']['main']['App']['GetFishTradeInvoices'](arg1);
+export function GetFishSaleInvoices(arg1) {
+  return window['go']['main']['App']['GetFishSaleInvoices'](arg1);
 }
 
 export function GetParties(arg1) {
@@ -52,6 +56,10 @@ export function GetTransactions(arg1) {
 
 export function UpdateContainer(arg1, arg2) {
   return window['go']['main']['App']['UpdateContainer'](arg1, arg2);
+}
+
+export function UpdateFishSaleInvoice(arg1, arg2) {
+  return window['go']['main']['App']['UpdateFishSaleInvoice'](arg1, arg2);
 }
 
 export function UpdateTransaction(arg1, arg2) {

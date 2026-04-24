@@ -4,7 +4,7 @@ import { Avatar, Button, Card, Col, DatePicker, Divider, Flex, Form, Input, Inpu
 import { Fish as FishIcon, Plus, Trash2, Box } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { container as containerModel, invoice as invoiceModel, party as partyModel } from '../../../../../wailsjs/go/models'
-import { CreateFishTradeInvoice, GetContainers, GetParties } from '../../../../../wailsjs/go/main/App'
+import { CreateFishSaleInvoice, GetContainers, GetParties, UpdateFishSaleInvoice } from '../../../../../wailsjs/go/main/App'
 import dayjs from 'dayjs'
 import { formatDate, formatTHB } from '../../../../utils/formatter'
 import useContainerTypeOptions from '../../../../hooks/useContainerTypeOptions'
@@ -12,7 +12,7 @@ import useContainerColorOptions from '../../../../hooks/useContainerColorOptions
 
 const { Text, Title } = Typography
 
-const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModalProps) => {
+const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleInvoiceFormModalProps) => {
   const [customers, setCustomers] = useState<partyModel.Party[]>([])
   const [existingContainers, setExistingContainers] = useState<containerModel.Container[]>([])
   const [form] = Form.useForm()
@@ -21,6 +21,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
   const { t: commonT } = useTranslation('common')
   const containerTypeOptions = useContainerTypeOptions()
   const containerColorOptions = useContainerColorOptions()
+  const isEdit = !!saleInvoice
 
   const customerSelectOptions = [
     { label: localT('modal.add-new-customer'), value: 'NEW' },
@@ -77,7 +78,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
     })
 
     const isNewCustomer = !!values.newCustomerName
-    const payload = new invoiceModel.CreateFishTradeInvoiceInput({
+    const payload = new invoiceModel.CreateFishSaleInvoiceInput({
       createdAt: values.createdAt.toISOString(),
       type: 'sale',
       status: 'pending', // dummy
@@ -88,9 +89,13 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
       newCustomerName: values.newCustomerName,
       items: items,
     })
-
+    console.log(payload)
     try {
-      await CreateFishTradeInvoice(payload)
+      if (isEdit && saleInvoice) {
+        await UpdateFishSaleInvoice(saleInvoice.id, payload)
+      } else {
+        await CreateFishSaleInvoice(payload)
+      }
     } catch {
       // handle by interceptor
     }
@@ -98,7 +103,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
     handleCloseModal()
     onChange()
 
-  }, [handleCloseModal, onChange])
+  }, [handleCloseModal, isEdit, onChange, saleInvoice])
 
   useEffect(() => {
     if (!isOpen) return
@@ -122,14 +127,23 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange }: SaleInvoiceFormModa
 
     loadCustomers()
     loadContainers()
-    form.setFieldsValue({
-      containers: [
-        {
-          fishes: [{}]
-        }
-      ]
-    })
-  }, [form, isOpen])
+    if (isOpen && saleInvoice) {
+      form.setFieldsValue({
+        id: saleInvoice.id,
+        customerId: saleInvoice.customerId,
+        containers: saleInvoice.items,
+        note: saleInvoice.note
+      })
+    } else {
+      form.setFieldsValue({
+        containers: [
+          {
+            fishes: [{}]
+          }
+        ]
+      })
+    }
+  }, [form, isOpen, saleInvoice])
 
   return (
     <Modal

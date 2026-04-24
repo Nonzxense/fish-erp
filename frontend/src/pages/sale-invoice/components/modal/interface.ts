@@ -1,9 +1,11 @@
 import { Dayjs } from "dayjs"
+import { invoice } from "../../../../../wailsjs/go/models"
 
 export interface SaleInvoiceFormModalProps {
   isOpen: boolean
   onClose: () => void
   onChange: () => Promise<void>
+  saleInvoice?: invoice.FishSaleInvoice
 }
 
 export type SaleInvoiceFormValues = {

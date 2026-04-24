@@ -37,7 +37,7 @@ func NewApp() *App {
 	err = db.AutoMigrate(
 		&transactionDomain.Transaction{},
 		&partyDomain.Party{},
-		&invoiceDomain.FishTradeInvoice{},
+		&invoiceDomain.FishSaleInvoice{},
 		&containerDomain.FishContainer{},
 		&containerDomain.FishDetail{},
 		&containerDomain.Container{},

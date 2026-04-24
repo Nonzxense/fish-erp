@@ -9,7 +9,7 @@ import {time} from '../models';
 
 export function CreateContainer(arg1:container.CreateContainerInput):Promise<void>;
 
-export function CreateFishTradeInvoice(arg1:invoice.CreateFishTradeInvoiceInput):Promise<void>;
+export function CreateFishSaleInvoice(arg1:invoice.CreateFishSaleInvoiceInput):Promise<void>;
 
 export function CreateParty(arg1:party.CreatePartyInput):Promise<void>;
 
@@ -17,13 +17,15 @@ export function CreateTransaction(arg1:transaction.CreateTransactionInput):Promi
 
 export function DeleteContainers(arg1:Array<number>):Promise<void>;
 
+export function DeleteFishSaleInvoices(arg1:Array<string>):Promise<void>;
+
 export function DeleteTransactions(arg1:Array<string>):Promise<void>;
 
 export function GetContainerSummary():Promise<container.ContainerSummary>;
 
 export function GetContainers(arg1:container.ContainerFilter):Promise<domain.PageResult_fish_internal_domain_container_Container_>;
 
-export function GetFishTradeInvoices(arg1:invoice.InvoiceFilter):Promise<domain.PageResult_fish_internal_domain_invoice_FishTradeInvoice_>;
+export function GetFishSaleInvoices(arg1:invoice.InvoiceFilter):Promise<domain.PageResult_fish_internal_domain_invoice_FishSaleInvoice_>;
 
 export function GetParties(arg1:party.PartyFilter):Promise<domain.PageResult_fish_internal_domain_party_Party_>;
 
@@ -32,5 +34,7 @@ export function GetTransactionSummary(arg1:time.Time,arg2:time.Time):Promise<tra
 export function GetTransactions(arg1:transaction.TransactionFilter):Promise<domain.PageResult_fish_internal_domain_transaction_Transaction_>;
 
 export function UpdateContainer(arg1:number,arg2:container.CreateContainerInput):Promise<void>;
+
+export function UpdateFishSaleInvoice(arg1:string,arg2:invoice.CreateFishSaleInvoiceInput):Promise<void>;
 
 export function UpdateTransaction(arg1:string,arg2:transaction.CreateTransactionInput):Promise<void>;

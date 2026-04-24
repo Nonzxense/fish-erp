@@ -8,7 +8,6 @@ type Transaction struct {
 	Type        string    `json:"type" gorm:"type:text;check:type IN ('income', 'expense')"`
 	OccurredAt  time.Time `json:"occurredAt"`
 	InvoiceID   *string   `json:"invoiceId" gorm:"default:null"`
-	InvoiceType *string   `json:"invoiceType" gorm:"default:null"`
 	Category    *string   `json:"category,omitempty"`
 	Note        *string   `json:"note,omitempty"`
 }

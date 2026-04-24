@@ -22,19 +22,18 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
       status: values.status ?? undefined
     })
 
-    if (isEdit && container) {
-      await UpdateContainer(container.id, payload)
-    } else {
-      try {
+    try {
+      if (isEdit && container) {
+        await UpdateContainer(container.id, payload)
+      } else {
         await CreateContainer(payload)
-      } catch {
-        // handle by interceptor
       }
+    } catch {
+      // handle by interceptor
     }
 
     onChange()
-    form.resetFields()
-    onClose()
+    handleCloseModal()
   }
 
   const handleCloseModal = useCallback(() => {

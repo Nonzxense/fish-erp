@@ -1,7 +1,7 @@
 import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker, TableProps } from 'antd'
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
-import { ListFilter, PencilLine, Plus, Trash2, Eye, FileText } from 'lucide-react'
+import { ListFilter, PencilLine, Plus, Trash2, Eye, FileText, Check } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
 import { formatDate, formatTHB } from '../../utils/formatter'
@@ -9,25 +9,16 @@ import SaleInvoiceFormModal from './components/modal/SaleInvoiceFormModal'
 import { invoice as invoiceModel } from '../../../wailsjs/go/models'
 import { InvoiceFilter } from './interface'
 import { Pagination } from '../../utils/types'
-import { GetFishTradeInvoices } from '../../../wailsjs/go/main/App'
+import { DeleteFishSaleInvoices, GetFishSaleInvoices } from '../../../wailsjs/go/main/App'
 import { getPaidStatusColor } from '../../utils/getTagColor'
-
-// Interface representing a Sale Invoice
-interface SaleInvoice {
-  id: string;          // Bill No
-  date: string;
-  customerName: string;
-  itemCount: number;
-  totalAmount: number;
-  status: 'pending' | 'paid' | 'overdue' | 'cancelled';
-}
 
 const SaleInvoice = () => {
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
   const [filter, setFilter] = useState<InvoiceFilter>({})
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
-  const [invoices, setInvoices] = useState<invoiceModel.FishTradeInvoice[]>([])
+  const [invoices, setInvoices] = useState<invoiceModel.FishSaleInvoice[]>([])
+  const [selectedInvoiceEdit, setSelectedInvoiceEdit] = useState<invoiceModel.FishSaleInvoice>()
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [segmentStatus, setSegmentStatus] = useState<string>('all')
   const [pagination, setPagination] = useState<Pagination>({
@@ -46,10 +37,93 @@ const SaleInvoice = () => {
     { label: localT('status.paid'), value: 'paid' },
   ], [localT])
 
-  // --- Dummy Handlers ---
-  const handleEdit = useCallback((record: invoiceModel.FishTradeInvoice) => {
-    message.info(`Editing invoice: ${record.id}`)
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: React.Key[]) => {
+      setSelectedRowKeys(keys)
+    },
+  }
+
+  const resetPagination = useCallback(() => {
+    setPagination((prev) => ({
+      ...prev,
+      page: DEFAULT_PAGE,
+      pageSize: DEFAULT_PAGE_SIZE,
+    }))
+  }, [])
+
+  const handleEdit = useCallback((record: invoiceModel.FishSaleInvoice) => {
+    setSelectedInvoiceEdit(record)
+    setIsOpenModalForm(true)
+  }, [])
+
+  const handleViewDetail = useCallback((record: invoiceModel.FishSaleInvoice) => {
+    message.info(`Viewing details for: ${record.id}`)
   }, [message])
+
+  const handleMarkPaid = useCallback((id: string) => {
+    modal.confirm({
+      title: localT('modal-paid.title'),
+      content: localT('modal-paid.desc', { amount: 1 }),
+      okText: commonT('modal-common.ok'),
+      onOk: () => message.success('Invoice deleted successfully')
+    })
+  }, [commonT, localT, message, modal])
+
+  const loadInvoices = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const goFilter = new invoiceModel.InvoiceFilter({
+        ...filter,
+        page: pagination.page,
+        pageSize: pagination.pageSize
+      })
+      const res = await GetFishSaleInvoices(goFilter)
+      setPagination((prev) => ({
+        ...prev,
+        total: res.total
+      }))
+      setInvoices(res.data)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [filter, pagination.page, pagination.pageSize])
+
+  const handleCloseInvoiceFormModal = useCallback(() => {
+    setIsOpenModalForm(false)
+    setSelectedInvoiceEdit(undefined)
+  }, [])
+
+  const handleTableChange: TableProps<invoiceModel.FishSaleInvoice>['onChange'] = (
+    pagination
+  ) => {
+    const page = pagination.current || DEFAULT_PAGE
+    const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE
+
+    setPagination((prev) => ({
+      ...prev,
+      page,
+      pageSize,
+    }))
+  }
+
+  const handleBulkDelete = useCallback(async () => {
+    modal.confirm({
+      title: commonT('modal-delete.title'),
+      content: commonT('modal-delete.desc', { amount: selectedRowKeys.length }),
+      okText: commonT('modal-common.ok'),
+      cancelText: commonT('modal-common.cancel'),
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        await DeleteFishSaleInvoices((selectedRowKeys).map((id) => String(id)))
+        setSelectedRowKeys([])
+        resetPagination()
+        message.success(commonT('modal-delete.success', { amount: selectedRowKeys.length }))
+        await loadInvoices()
+      },
+    })
+  }, [modal, commonT, selectedRowKeys, message, resetPagination, loadInvoices])
+
 
   const handleDelete = useCallback((id: string) => {
     modal.confirm({
@@ -57,15 +131,16 @@ const SaleInvoice = () => {
       content: commonT('modal-delete.desc', { amount: 1 }),
       okText: commonT('modal-common.ok'),
       okButtonProps: { danger: true },
-      onOk: () => message.success('Invoice deleted successfully')
+      onOk: async () => {
+        await DeleteFishSaleInvoices([id])
+        resetPagination()
+        message.success(commonT('modal-delete.success', { amount: 1 }))
+        await loadInvoices()
+      }
     })
-  }, [modal, commonT, message])
+  }, [modal, commonT, resetPagination, message, loadInvoices])
 
-  const handleViewDetail = useCallback((record: invoiceModel.FishTradeInvoice) => {
-    message.info(`Viewing details for: ${record.id}`)
-  }, [message])
-
-  const columns: TableColumnsType<invoiceModel.FishTradeInvoice> = useMemo(
+  const columns: TableColumnsType<invoiceModel.FishSaleInvoice> = useMemo(
     () => [
       {
         title: localT('table.invoice-no'),
@@ -103,7 +178,7 @@ const SaleInvoice = () => {
         key: 'status',
         dataIndex: 'status',
         align: 'center',
-        render: (status: SaleInvoice['status']) => {
+        render: (status) => {
           return <Tag color={getPaidStatusColor(status)} variant="outlined" >{localT(`status.${status}`)}</Tag>
         }
       },
@@ -112,7 +187,7 @@ const SaleInvoice = () => {
         key: 'manage',
         align: 'center',
         width: 150,
-        render: (_, record: invoiceModel.FishTradeInvoice) => (
+        render: (_, record: invoiceModel.FishSaleInvoice) => (
           <Space>
             <Tooltip title={commonT('button-view')}>
               <Button
@@ -120,6 +195,17 @@ const SaleInvoice = () => {
                 type="text"
                 onClick={() => handleViewDetail(record)}
               />
+            </Tooltip>
+            <Tooltip title={localT('button-mark-paid')}>
+              {record.status === 'pending' && (
+                <Button
+                  icon={<Check size={16} />}
+                  type="text"
+                  color="green"
+                  variant="filled"
+                  onClick={() => handleMarkPaid(record.id)}
+                />
+              )}
             </Tooltip>
             <Tooltip title={commonT('button-edit')}>
               <Button
@@ -142,52 +228,8 @@ const SaleInvoice = () => {
         )
       }
     ],
-    [localT, commonT, handleViewDetail, handleEdit, handleDelete]
+    [localT, commonT, handleViewDetail, handleMarkPaid, handleEdit, handleDelete]
   )
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (keys: React.Key[]) => {
-      setSelectedRowKeys(keys)
-    },
-  }
-
-  const handleCloseInvoiceFormModal = useCallback(() => {
-    setIsOpenModalForm(false)
-  }, [])
-
-  const handleTableChange: TableProps<invoiceModel.FishTradeInvoice>['onChange'] = (
-    pagination
-  ) => {
-    const page = pagination.current || DEFAULT_PAGE
-    const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE
-
-    setPagination((prev) => ({
-      ...prev,
-      page,
-      pageSize,
-    }))
-  }
-
-  const loadInvoices = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const goFilter = new invoiceModel.InvoiceFilter({
-        ...filter,
-        page: pagination.page,
-        pageSize: pagination.pageSize
-      })
-      const res = await GetFishTradeInvoices(goFilter)
-
-      setPagination((prev) => ({
-        ...prev,
-        total: res.total
-      }))
-      setInvoices(res.data)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [filter, pagination.page, pagination.pageSize])
 
   useEffect(() => {
     loadInvoices()
@@ -195,7 +237,12 @@ const SaleInvoice = () => {
 
   return (
     <>
-      <SaleInvoiceFormModal isOpen={isOpenModalForm} onChange={loadInvoices} onClose={handleCloseInvoiceFormModal} />
+      <SaleInvoiceFormModal
+        isOpen={isOpenModalForm}
+        onChange={loadInvoices}
+        onClose={handleCloseInvoiceFormModal}
+        saleInvoice={selectedInvoiceEdit}
+      />
       <Space orientation="vertical" size="large" className="w-full">
         <Flex align="center" justify="space-between" className="w-full">
           <PageTitle
@@ -231,7 +278,12 @@ const SaleInvoice = () => {
           />
           <Space size="middle">
             {selectedRowKeys.length > 0 && (
-              <Button size="large" icon={<Trash2 size={16} />} danger className="min-w-[140px]">
+              <Button
+                onClick={handleBulkDelete}
+                size="large"
+                icon={<Trash2 size={16} />}
+                danger
+                className="min-w-[140px]">
                 {commonT('button-delete')} ({selectedRowKeys.length})
               </Button>
             )}

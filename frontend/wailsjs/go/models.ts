@@ -134,7 +134,7 @@ export namespace container {
 	export class FishDetail {
 	    ID: number;
 	    FishContainerID: number;
-	    fishName: string;
+	    name: string;
 	    weightKg: number;
 	    pricePerKg: number;
 	
@@ -146,7 +146,7 @@ export namespace container {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
 	        this.FishContainerID = source["FishContainerID"];
-	        this.fishName = source["fishName"];
+	        this.name = source["name"];
 	        this.weightKg = source["weightKg"];
 	        this.pricePerKg = source["pricePerKg"];
 	    }
@@ -224,17 +224,17 @@ export namespace domain {
 		    return a;
 		}
 	}
-	export class PageResult_fish_internal_domain_invoice_FishTradeInvoice_ {
-	    data: invoice.FishTradeInvoice[];
+	export class PageResult_fish_internal_domain_invoice_FishSaleInvoice_ {
+	    data: invoice.FishSaleInvoice[];
 	    total: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new PageResult_fish_internal_domain_invoice_FishTradeInvoice_(source);
+	        return new PageResult_fish_internal_domain_invoice_FishSaleInvoice_(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.data = this.convertValues(source["data"], invoice.FishTradeInvoice);
+	        this.data = this.convertValues(source["data"], invoice.FishSaleInvoice);
 	        this.total = source["total"];
 	    }
 	
@@ -325,7 +325,7 @@ export namespace domain {
 
 export namespace invoice {
 	
-	export class CreateFishTradeInvoiceInput {
+	export class CreateFishSaleInvoiceInput {
 	    type: string;
 	    status: string;
 	    note?: string;
@@ -337,7 +337,7 @@ export namespace invoice {
 	    totalAmount: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new CreateFishTradeInvoiceInput(source);
+	        return new CreateFishSaleInvoiceInput(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -371,7 +371,7 @@ export namespace invoice {
 		    return a;
 		}
 	}
-	export class FishTradeInvoice {
+	export class FishSaleInvoice {
 	    id: string;
 	    createdAt: time.Time;
 	    type: string;
@@ -383,7 +383,7 @@ export namespace invoice {
 	    totalAmount: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new FishTradeInvoice(source);
+	        return new FishSaleInvoice(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -584,7 +584,6 @@ export namespace transaction {
 	    type: string;
 	    occurredAt: time.Time;
 	    invoiceId?: string;
-	    invoiceType?: string;
 	    category?: string;
 	    note?: string;
 	
@@ -599,7 +598,6 @@ export namespace transaction {
 	        this.type = source["type"];
 	        this.occurredAt = this.convertValues(source["occurredAt"], time.Time);
 	        this.invoiceId = source["invoiceId"];
-	        this.invoiceType = source["invoiceType"];
 	        this.category = source["category"];
 	        this.note = source["note"];
 	    }

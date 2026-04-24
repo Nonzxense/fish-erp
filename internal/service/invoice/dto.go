@@ -12,7 +12,7 @@ type CreateInvoiceInput struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-type CreateFishTradeInvoiceInput struct {
+type CreateFishSaleInvoiceInput struct {
 	CreateInvoiceInput
 	CustomerID      string                               `json:"customerId" validate:"required_if=IsNewCustomer false"`
 	IsNewCustomer   bool                                 `json:"isNewCustomer"`
