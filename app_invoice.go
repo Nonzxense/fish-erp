@@ -18,6 +18,10 @@ func (a *App) UpdateFishSaleInvoice(id string, input invoice.CreateFishSaleInvoi
 	return a.invoiceService.UpdateFishSaleInvoice(id, input)
 }
 
+func (a *App) ChangeInvoiceStatus(id string, status string) error {
+	return a.invoiceService.ChangeInvoiceStatus(id, status)
+}
+
 func (a *App) DeleteFishSaleInvoices(ids []string) error {
 	return a.invoiceService.DeleteFishSaleInvoices(ids)
 }

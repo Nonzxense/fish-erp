@@ -16,9 +16,11 @@
   "orange": "สีส้ม",
   "yellow": "สีเหลือง",
   "red": "สีแดง",
+  "kg": "กก.",
   "message": {
     "delete-success": "ลบรายการสำเร็จ"
   },
+  "container": "ลัง",
   "modal-common": {
     "title-create": "เพิ่มรายการ",
     "title-edit": "แก้ไขรายการ",

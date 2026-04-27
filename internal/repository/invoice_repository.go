@@ -32,11 +32,6 @@ func (r *InvoiceRepository) CreateFishSaleInvoice(
 			return err
 		}
 
-		// 2 transaction
-		if err := r.syncInvoiceTransaction(tx, invoice); err != nil {
-			return err
-		}
-
 		// 3 containers
 		for i := range invoice.Items {
 			item := &invoice.Items[i]
@@ -118,10 +113,6 @@ func (r *InvoiceRepository) UpdateFishSaleInvoice(
 			return err
 		}
 
-		if err := r.syncInvoiceTransaction(tx, invoice); err != nil {
-			return err
-		}
-
 		// update invoice
 		if err := tx.Model(&domain.FishSaleInvoice{}).
 			Where("id = ?", id).
@@ -179,7 +170,54 @@ func (r *InvoiceRepository) DeleteFishSaleInvoices(ids []string) error {
 		Delete(&domain.FishSaleInvoice{}).Error
 }
 
+func (r *InvoiceRepository) ChangeInvoiceStatus(id string, status string) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var invoice domain.FishSaleInvoice
+
+		if err := tx.First(&invoice, "id = ?", id).Error; err != nil {
+			return err
+		}
+
+		oldStatus := invoice.Status
+
+		if err := tx.Model(&invoice).
+			Update("status", status).Error; err != nil {
+			return err
+		}
+
+		// became paid
+		if oldStatus != "paid" && status == "paid" {
+			return r.createInvoiceTransaction(tx, &invoice)
+		}
+
+		// left paid
+		if oldStatus == "paid" && status != "paid" {
+			return tx.Where("invoice_id = ?", id).
+				Delete(&transaction.Transaction{}).Error
+		}
+
+		return nil
+	})
+}
+
 // --- Helpers ---
+
+func (r *InvoiceRepository) createInvoiceTransaction(
+	tx *gorm.DB,
+	invoice *domain.FishSaleInvoice,
+) error {
+	t := transaction.Transaction{
+		ID:         uuid.NewString(),
+		InvoiceID:  &invoice.ID,
+		Amount:     invoice.TotalAmount,
+		OccurredAt: invoice.CreatedAt,
+		Type:       "income",
+		Category:   ptr.String("ขายปลา"),
+		Note:       ptr.String("ใบเสร็จ " + invoice.ID),
+	}
+
+	return tx.Create(&t).Error
+}
 
 func (r *InvoiceRepository) syncInvoiceTransaction(
 	tx *gorm.DB,

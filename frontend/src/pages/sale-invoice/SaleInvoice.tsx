@@ -1,7 +1,7 @@
-import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker, TableProps } from 'antd'
+import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker, TableProps, Select } from 'antd'
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
-import { ListFilter, PencilLine, Plus, Trash2, Eye, FileText, Check } from 'lucide-react'
+import { ListFilter, PencilLine, Plus, Trash2, Eye, FileText } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
 import { formatDate, formatTHB } from '../../utils/formatter'
@@ -9,16 +9,18 @@ import SaleInvoiceFormModal from './components/modal/SaleInvoiceFormModal'
 import { invoice as invoiceModel } from '../../../wailsjs/go/models'
 import { InvoiceFilter } from './interface'
 import { Pagination } from '../../utils/types'
-import { DeleteFishSaleInvoices, GetFishSaleInvoices } from '../../../wailsjs/go/main/App'
+import { ChangeInvoiceStatus, DeleteFishSaleInvoices, GetFishSaleInvoices } from '../../../wailsjs/go/main/App'
 import { getPaidStatusColor } from '../../utils/getTagColor'
+import SaleInvoiceDetailModal from './components/modal/SaleInvoiceDetailModal'
 
 const SaleInvoice = () => {
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
   const [filter, setFilter] = useState<InvoiceFilter>({})
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
+  const [isOpenModalDetail, setIsOpenModalDetail] = useState<boolean>(false)
   const [invoices, setInvoices] = useState<invoiceModel.FishSaleInvoice[]>([])
-  const [selectedInvoiceEdit, setSelectedInvoiceEdit] = useState<invoiceModel.FishSaleInvoice>()
+  const [selectedInvoice, setSelectedInvoice] = useState<invoiceModel.FishSaleInvoice>()
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [segmentStatus, setSegmentStatus] = useState<string>('all')
   const [pagination, setPagination] = useState<Pagination>({
@@ -53,22 +55,14 @@ const SaleInvoice = () => {
   }, [])
 
   const handleEdit = useCallback((record: invoiceModel.FishSaleInvoice) => {
-    setSelectedInvoiceEdit(record)
+    setSelectedInvoice(record)
     setIsOpenModalForm(true)
   }, [])
 
   const handleViewDetail = useCallback((record: invoiceModel.FishSaleInvoice) => {
-    message.info(`Viewing details for: ${record.id}`)
-  }, [message])
-
-  const handleMarkPaid = useCallback((id: string) => {
-    modal.confirm({
-      title: localT('modal-paid.title'),
-      content: localT('modal-paid.desc', { amount: 1 }),
-      okText: commonT('modal-common.ok'),
-      onOk: () => message.success('Invoice deleted successfully')
-    })
-  }, [commonT, localT, message, modal])
+    setSelectedInvoice(record)
+    setIsOpenModalDetail(true)
+  }, [])
 
   const loadInvoices = useCallback(async () => {
     try {
@@ -91,7 +85,12 @@ const SaleInvoice = () => {
 
   const handleCloseInvoiceFormModal = useCallback(() => {
     setIsOpenModalForm(false)
-    setSelectedInvoiceEdit(undefined)
+    setSelectedInvoice(undefined)
+  }, [])
+
+  const handleCloseInvoiceViewModal = useCallback(() => {
+    setIsOpenModalDetail(false)
+    setSelectedInvoice(undefined)
   }, [])
 
   const handleTableChange: TableProps<invoiceModel.FishSaleInvoice>['onChange'] = (
@@ -124,21 +123,28 @@ const SaleInvoice = () => {
     })
   }, [modal, commonT, selectedRowKeys, message, resetPagination, loadInvoices])
 
+  const handleChangeStatus = useCallback(
+    (record: invoiceModel.FishSaleInvoice, newStatus: string) => {
+      if (record.status === newStatus) return
 
-  const handleDelete = useCallback((id: string) => {
-    modal.confirm({
-      title: commonT('modal-delete.title'),
-      content: commonT('modal-delete.desc', { amount: 1 }),
-      okText: commonT('modal-common.ok'),
-      okButtonProps: { danger: true },
-      onOk: async () => {
-        await DeleteFishSaleInvoices([id])
-        resetPagination()
-        message.success(commonT('modal-delete.success', { amount: 1 }))
-        await loadInvoices()
-      }
-    })
-  }, [modal, commonT, resetPagination, message, loadInvoices])
+      modal.confirm({
+        title: localT('modal-status.title'),
+        content: localT('modal-status.desc', {
+          from: localT(`status.${record.status}`),
+          to: localT(`status.${newStatus}`)
+        }),
+        okText: commonT('modal-common.ok'),
+        cancelText: commonT('modal-common.cancel'),
+        onOk: async () => {
+          await ChangeInvoiceStatus(record.id, newStatus)
+          message.success(localT('modal-status.success'))
+
+          await loadInvoices()
+        }
+      })
+    },
+    [modal, localT, commonT, message, loadInvoices]
+  )
 
   const columns: TableColumnsType<invoiceModel.FishSaleInvoice> = useMemo(
     () => [
@@ -178,9 +184,41 @@ const SaleInvoice = () => {
         key: 'status',
         dataIndex: 'status',
         align: 'center',
-        render: (status) => {
-          return <Tag color={getPaidStatusColor(status)} variant="outlined" >{localT(`status.${status}`)}</Tag>
-        }
+        width: 180,
+        render: (status, record) => (
+          <Select
+            size="small"
+            value={status}
+            style={{ width: 140 }}
+            onChange={(value) => handleChangeStatus(record, value)}
+            options={[
+              {
+                label: (
+                  <Tag color={getPaidStatusColor('pending')} bordered={false}>
+                    {localT('status.pending')}
+                  </Tag>
+                ),
+                value: 'pending'
+              },
+              {
+                label: (
+                  <Tag color={getPaidStatusColor('paid')} bordered={false}>
+                    {localT('status.paid')}
+                  </Tag>
+                ),
+                value: 'paid'
+              },
+              {
+                label: (
+                  <Tag color="red" bordered={false}>
+                    {localT('status.cancelled')}
+                  </Tag>
+                ),
+                value: 'cancelled'
+              }
+            ]}
+          />
+        )
       },
       {
         title: localT('table.manage'),
@@ -196,17 +234,6 @@ const SaleInvoice = () => {
                 onClick={() => handleViewDetail(record)}
               />
             </Tooltip>
-            <Tooltip title={localT('button-mark-paid')}>
-              {record.status === 'pending' && (
-                <Button
-                  icon={<Check size={16} />}
-                  type="text"
-                  color="green"
-                  variant="filled"
-                  onClick={() => handleMarkPaid(record.id)}
-                />
-              )}
-            </Tooltip>
             <Tooltip title={commonT('button-edit')}>
               <Button
                 icon={<PencilLine size={16} />}
@@ -214,21 +241,14 @@ const SaleInvoice = () => {
                 color="primary"
                 variant="filled"
                 onClick={() => handleEdit(record)}
-              />
-            </Tooltip>
-            <Tooltip title={commonT('button-delete')}>
-              <Button
-                icon={<Trash2 size={16} />}
-                type="text"
-                danger
-                onClick={() => handleDelete(record.id)}
+                hidden={record.status !== 'pending'}
               />
             </Tooltip>
           </Space>
         )
       }
     ],
-    [localT, commonT, handleViewDetail, handleMarkPaid, handleEdit, handleDelete]
+    [localT, handleChangeStatus, commonT, handleViewDetail, handleEdit]
   )
 
   useEffect(() => {
@@ -241,7 +261,12 @@ const SaleInvoice = () => {
         isOpen={isOpenModalForm}
         onChange={loadInvoices}
         onClose={handleCloseInvoiceFormModal}
-        saleInvoice={selectedInvoiceEdit}
+        saleInvoice={selectedInvoice}
+      />
+      <SaleInvoiceDetailModal
+        isOpen={isOpenModalDetail}
+        onClose={handleCloseInvoiceViewModal}
+        saleInvoice={selectedInvoice}
       />
       <Space orientation="vertical" size="large" className="w-full">
         <Flex align="center" justify="space-between" className="w-full">

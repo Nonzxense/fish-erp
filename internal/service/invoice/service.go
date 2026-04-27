@@ -59,6 +59,10 @@ func (s *InvoiceService) UpdateFishSaleInvoice(id string, input CreateFishSaleIn
 	return s.repo.UpdateFishSaleInvoice(id, invoice)
 }
 
+func (s *InvoiceService) ChangeInvoiceStatus(id string, status string) error {
+	return s.repo.ChangeInvoiceStatus(id, status)
+}
+
 func (s *InvoiceService) DeleteFishSaleInvoices(ids []string) error {
 	return s.repo.DeleteFishSaleInvoices(ids)
 }

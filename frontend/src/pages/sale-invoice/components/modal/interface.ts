@@ -8,6 +8,29 @@ export interface SaleInvoiceFormModalProps {
   saleInvoice?: invoice.FishSaleInvoice
 }
 
+export interface SaleInvoiceViewProps {
+  isOpen: boolean
+  onClose: () => void
+  saleInvoice?: invoice.FishSaleInvoice
+}
+
+export type FishRow = {
+  key: string
+  type: 'fish'
+  name: string
+  weightKg: number
+  pricePerKg: number
+  amount: number
+}
+
+export type HeaderRow = {
+  key: string
+  type: 'header'
+  containerId: number
+}
+
+export type RowData = HeaderRow | FishRow
+
 export type SaleInvoiceFormValues = {
   createdAt: Dayjs
   type: string

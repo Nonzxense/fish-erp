@@ -1,5 +1,5 @@
 {
-  "title": "บิลขาย",
+  "title": "บิลขายปลา",
   "subtitle": "จัดการบิลขายปลา",
   "button-mark-paid": "จ่ายแล้ว",
   "modal": {
@@ -17,6 +17,8 @@
     "new-container-title": "รายละเอียดลังใหม่",
     "total-containers": "จำนวนลัง",
     "total-amount": "ยอดรวมทั้งหมด",
+    "summary": "สรุปรายการ",
+    "total-weight": "น้ำหนักรวม (กก.)",
     "validate": {
       "add-container": "กรุณาเพิ่มลังปลา",
       "add-fish": "กรุณาเพิ่มปลา"
@@ -57,7 +59,8 @@
   "status": {
     "all": "ทั้งหมด",
     "pending": "ค้างชำระ",
-    "paid": "จ่ายแล้ว"
+    "paid": "จ่ายแล้ว",
+    "cancelled": "ยกเลิก"
   },
   "table": {
     "invoice-no": "เลขที่บิล",

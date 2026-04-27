@@ -7,6 +7,8 @@ import {transaction} from '../models';
 import {domain} from '../models';
 import {time} from '../models';
 
+export function ChangeInvoiceStatus(arg1:string,arg2:string):Promise<void>;
+
 export function CreateContainer(arg1:container.CreateContainerInput):Promise<void>;
 
 export function CreateFishSaleInvoice(arg1:invoice.CreateFishSaleInvoiceInput):Promise<void>;

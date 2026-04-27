@@ -159,12 +159,12 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
               />
               <div className="flex flex-col justify-center">
                 <Title level={4} className="!mb-0">{localT('modal.title')}</Title>
-                <Text type='secondary'>{localT('modal.store-name')}</Text>
+                <Text type='secondary'>{localT('modal.title')}</Text>
               </div>
             </Flex>
-            <div className="text-right">
+            <div className="text-right" hidden={!isEdit}>
               <Text type="secondary" className="text-[12px] block uppercase">{localT('modal.invoice-no')}</Text>
-              <Text strong className="text-blue-500 font-mono">#12345678</Text>
+              <Text strong className="text-blue-500 font-mono">#{saleInvoice?.id}</Text>
             </div>
           </Flex>
           <Divider className="mb-4" />
