@@ -1,7 +1,7 @@
 import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker, TableProps, Select, Dropdown } from 'antd'
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
-import { ListFilter, PencilLine, Plus, Trash2, Eye } from 'lucide-react'
+import { ListFilter, PencilLine, Plus, Eye } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
 import { formatDate, formatTHB } from '../../utils/formatter'
@@ -9,7 +9,7 @@ import SaleInvoiceFormModal from './components/modal/SaleInvoiceFormModal'
 import { invoice as invoiceModel } from '../../../wailsjs/go/models'
 import { InvoiceFilter, InvoiceFilterFormValues } from './interface'
 import { Pagination } from '../../utils/types'
-import { ChangeInvoiceStatus, DeleteFishSaleInvoices, GetFishSaleInvoices, GetFishTradeInvoiceSummary } from '../../../wailsjs/go/main/App'
+import { ChangeInvoiceStatus, GetFishSaleInvoices, GetFishTradeInvoiceSummary } from '../../../wailsjs/go/main/App'
 import { getPaidStatusColor } from '../../utils/getTagColor'
 import SaleInvoiceDetailModal from './components/modal/SaleInvoiceDetailModal'
 import dayjs from 'dayjs'
@@ -23,7 +23,6 @@ const SaleInvoice = () => {
   const [invoices, setInvoices] = useState<invoiceModel.FishSaleInvoice[]>([])
   const [invoiceSummary, setInvoiceSummary] = useState<invoiceModel.FishTradeInvoiceSummary>()
   const [selectedInvoice, setSelectedInvoice] = useState<invoiceModel.FishSaleInvoice>()
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [segmentStatus, setSegmentStatus] = useState<string>('all')
   const [pagination, setPagination] = useState<Pagination>({
     page: DEFAULT_PAGE,
@@ -41,13 +40,6 @@ const SaleInvoice = () => {
     { label: localT('status.paid'), value: 'paid' },
     { label: localT('status.cancelled'), value: 'cancelled' },
   ], [localT])
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (keys: React.Key[]) => {
-      setSelectedRowKeys(keys)
-    },
-  }
 
   const resetPagination = useCallback(() => {
     setPagination((prev) => ({
@@ -119,22 +111,6 @@ const SaleInvoice = () => {
     }))
   }
 
-  const handleBulkDelete = useCallback(async () => {
-    modal.confirm({
-      title: commonT('modal-delete.title'),
-      content: commonT('modal-delete.desc', { amount: selectedRowKeys.length }),
-      okText: commonT('modal-common.ok'),
-      cancelText: commonT('modal-common.cancel'),
-      okButtonProps: { danger: true },
-      onOk: async () => {
-        await DeleteFishSaleInvoices((selectedRowKeys).map((id) => String(id)))
-        setSelectedRowKeys([])
-        resetPagination()
-        message.success(commonT('modal-delete.success', { amount: selectedRowKeys.length }))
-        await loadInvoices()
-      },
-    })
-  }, [modal, commonT, selectedRowKeys, message, resetPagination, loadInvoices])
 
   const handleChangeStatus = useCallback(
     (record: invoiceModel.FishSaleInvoice, newStatus: string) => {
@@ -347,16 +323,6 @@ const SaleInvoice = () => {
             className="select-none"
           />
           <Space size="middle">
-            {selectedRowKeys.length > 0 && (
-              <Button
-                onClick={handleBulkDelete}
-                size="large"
-                icon={<Trash2 size={16} />}
-                danger
-                className="min-w-[140px]">
-                {commonT('button-delete')} ({selectedRowKeys.length})
-              </Button>
-            )}
             <Button
               onClick={() => setIsShowFilters((isShow) => !isShow)}
               size="large"
@@ -434,7 +400,6 @@ const SaleInvoice = () => {
         rowKey="id"
         loading={isLoading}
         scroll={{ x: 'max-content' }}
-        rowSelection={rowSelection}
         pagination={{
           current: pagination.page,
           pageSize: pagination.pageSize,
