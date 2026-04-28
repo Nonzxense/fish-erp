@@ -10,6 +10,10 @@ export function CreateContainer(arg1) {
   return window['go']['main']['App']['CreateContainer'](arg1);
 }
 
+export function CreateFishPurchaseInvoice(arg1) {
+  return window['go']['main']['App']['CreateFishPurchaseInvoice'](arg1);
+}
+
 export function CreateFishSaleInvoice(arg1) {
   return window['go']['main']['App']['CreateFishSaleInvoice'](arg1);
 }
@@ -40,6 +44,10 @@ export function GetContainerSummary() {
 
 export function GetContainers(arg1) {
   return window['go']['main']['App']['GetContainers'](arg1);
+}
+
+export function GetFishPurchaseInvoices(arg1) {
+  return window['go']['main']['App']['GetFishPurchaseInvoices'](arg1);
 }
 
 export function GetFishSaleInvoices(arg1) {

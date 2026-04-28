@@ -38,10 +38,30 @@ func (s *InvoiceService) CreateFishSaleInvoice(input CreateFishSaleInvoiceInput)
 	return s.repo.CreateFishSaleInvoice(invoice)
 }
 
+func (s *InvoiceService) CreateFishPurchaseInvoice(input CreateFishPurchaseInvoiceInput) error {
+	invoice, err := s.buildFishPurchaseInvoice(input)
+	if err != nil {
+		return err
+	}
+
+	return s.repo.CreateFishPurchaseInvoice(invoice)
+}
+
 func (s *InvoiceService) GetFishSaleInvoices(filter *invoiceDomain.InvoiceFilter) (domain.PageResult[invoiceDomain.FishSaleInvoice], error) {
 	invoices, total, err := s.repo.FindAllFishSaleInvoices(filter)
 
 	pageResult := domain.PageResult[invoiceDomain.FishSaleInvoice]{
+		Data:  invoices,
+		Total: total,
+	}
+
+	return pageResult, err
+}
+
+func (s *InvoiceService) GetFishPurchaseInvoices(filter *invoiceDomain.InvoiceFilter) (domain.PageResult[invoiceDomain.FishPurchaseInvoice], error) {
+	invoices, total, err := s.repo.FindAllFishPurchaseInvoices(filter)
+
+	pageResult := domain.PageResult[invoiceDomain.FishPurchaseInvoice]{
 		Data:  invoices,
 		Total: total,
 	}
@@ -74,12 +94,16 @@ func (s *InvoiceService) DeleteFishSaleInvoices(ids []string) error {
 // --- Helpers ---
 
 func (s *InvoiceService) buildFishSaleInvoice(input CreateFishSaleInvoiceInput) (*invoiceDomain.FishSaleInvoice, error) {
-	customer, err := s.resolveCustomer(input)
+	customer, err := s.resolveParty(PartyInput{
+		IsNewParty:   input.IsNewCustomer,
+		PartyID:      input.CustomerID,
+		NewPartyName: input.NewCustomerName,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	invoice, err := s.initializeInvoice(input, customer)
+	invoice, err := s.initializeSaleInvoice(input, customer)
 	if err != nil {
 		return nil, err
 	}
@@ -103,26 +127,44 @@ func (s *InvoiceService) buildFishSaleInvoice(input CreateFishSaleInvoiceInput) 
 	return invoice, nil
 }
 
-func (s *InvoiceService) resolveCustomer(input CreateFishSaleInvoiceInput) (partyDomain.Party, error) {
-	if !input.IsNewCustomer {
-		customer, err := s.partyRepo.FindOne(input.CustomerID)
+func (s *InvoiceService) buildFishPurchaseInvoice(input CreateFishPurchaseInvoiceInput) (*invoiceDomain.FishPurchaseInvoice, error) {
+	supplier, err := s.resolveParty(PartyInput{
+		IsNewParty:   input.IsNewSupplier,
+		PartyID:      input.SupplierID,
+		NewPartyName: input.NewSupplierName,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	invoice, err := s.initializePurchaseInvoice(input, supplier)
+	if err != nil {
+		return nil, err
+	}
+
+	return invoice, nil
+}
+
+func (s *InvoiceService) resolveParty(input PartyInput) (partyDomain.Party, error) {
+	if !input.IsNewParty {
+		party, err := s.partyRepo.FindOne(input.PartyID)
 		if err != nil {
 			return partyDomain.Party{}, err
 		}
-		return customer, nil
+		return party, nil
 	}
 
-	if input.NewCustomerName == nil {
-		return partyDomain.Party{}, fmt.Errorf("customer name is required for new customers")
+	if input.NewPartyName == nil {
+		return partyDomain.Party{}, fmt.Errorf("party name is required")
 	}
 
-	customer := partyDomain.Party{
+	party := partyDomain.Party{
 		ID:   uuid.NewString(),
-		Name: *input.NewCustomerName,
+		Name: *input.NewPartyName,
 	}
 
-	err := s.partyRepo.CreateParty(&customer)
-	return customer, err
+	err := s.partyRepo.CreateParty(&party)
+	return party, err
 }
 
 func (s *InvoiceService) resolveContainerID(input container.CreateFishContainerInput) (uint, error) {
@@ -163,7 +205,7 @@ func (s *InvoiceService) resolveContainerID(input container.CreateFishContainerI
 	return newContainer.ID, nil
 }
 
-func (s *InvoiceService) initializeInvoice(input CreateFishSaleInvoiceInput, customer partyDomain.Party) (*invoiceDomain.FishSaleInvoice, error) {
+func (s *InvoiceService) initializeSaleInvoice(input CreateFishSaleInvoiceInput, customer partyDomain.Party) (*invoiceDomain.FishSaleInvoice, error) {
 	c, err := count.GetCountForMonth[invoiceDomain.FishSaleInvoice](s.repo.GetDB(), input.CreatedAt)
 	if err != nil {
 		return nil, err
@@ -194,13 +236,44 @@ func (s *InvoiceService) initializeInvoice(input CreateFishSaleInvoiceInput, cus
 	}, nil
 }
 
+func (s *InvoiceService) initializePurchaseInvoice(input CreateFishPurchaseInvoiceInput, supplier partyDomain.Party) (*invoiceDomain.FishPurchaseInvoice, error) {
+	c, err := count.GetCountForMonth[invoiceDomain.FishPurchaseInvoice](s.repo.GetDB(), input.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		return nil, err
+	}
+
+	sequenceID := fmt.Sprintf("FP-%d%02d-%04d",
+		input.CreatedAt.In(loc).Year(),
+		input.CreatedAt.In(loc).Month(),
+		c+1,
+	)
+
+	return &invoiceDomain.FishPurchaseInvoice{
+		BaseInvoice: invoiceDomain.BaseInvoice{
+			ID:        sequenceID,
+			CreatedAt: input.CreatedAt,
+			Type:      input.Type,
+			Status:    input.Status,
+			Note:      input.Note,
+		},
+		SupplierID: supplier.ID,
+		Supplier:   supplier,
+		Fishes:     []containerDomain.FishPurchaseDetail{},
+	}, nil
+}
+
 func (s *InvoiceService) mapFishToContainer(invoiceID string, containerID uint, fishes []container.CreateFishDetailInput) containerDomain.FishContainer {
 	fc := containerDomain.FishContainer{
 		InvoiceId:   invoiceID,
 		ContainerID: containerID,
 	}
 	for _, f := range fishes {
-		fc.Fishes = append(fc.Fishes, containerDomain.FishDetail{
+		fc.Fishes = append(fc.Fishes, containerDomain.FishSaleDetail{
 			FishContainerID: containerID,
 			Name:            f.Name,
 			WeightKg:        f.WeightKg,

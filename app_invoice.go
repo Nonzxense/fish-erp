@@ -10,8 +10,16 @@ func (a *App) CreateFishSaleInvoice(input invoice.CreateFishSaleInvoiceInput) er
 	return a.invoiceService.CreateFishSaleInvoice(input)
 }
 
+func (a *App) CreateFishPurchaseInvoice(input invoice.CreateFishPurchaseInvoiceInput) error {
+	return a.invoiceService.CreateFishPurchaseInvoice(input)
+}
+
 func (a *App) GetFishSaleInvoices(filter *invoiceDomain.InvoiceFilter) (domain.PageResult[invoiceDomain.FishSaleInvoice], error) {
 	return a.invoiceService.GetFishSaleInvoices(filter)
+}
+
+func (a *App) GetFishPurchaseInvoices(filter *invoiceDomain.InvoiceFilter) (domain.PageResult[invoiceDomain.FishPurchaseInvoice], error) {
+	return a.invoiceService.GetFishPurchaseInvoices(filter)
 }
 
 func (a *App) GetFishTradeInvoiceSummary(invoiceType string) (invoiceDomain.FishTradeInvoiceSummary, error) {

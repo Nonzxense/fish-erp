@@ -63,6 +63,13 @@ const Party = () => {
     })
   }, [modal, localT])
 
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: React.Key[]) => {
+      setSelectedRowKeys(keys)
+    },
+  }
+
   const columns: TableColumnsType<party.Party> = useMemo(
     () => [
       {
@@ -247,18 +254,17 @@ const Party = () => {
       </div>
       <Table
         columns={columns}
+        rowSelection={rowSelection}
         dataSource={parties}
-        rowKey="id"
+        scroll={{ x: 'max-content' }}
+        rowKey={(record) => record.id}
         loading={isLoading}
-        rowSelection={{
-          selectedRowKeys,
-          onChange: (keys) => setSelectedRowKeys(keys),
-        }}
         pagination={{
-          defaultPageSize: DEFAULT_PAGE_SIZE,
+          current: pagination.page,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
           showSizeChanger: true,
         }}
-        scroll={{ x: 'max-content' }}
       />
     </>
   )

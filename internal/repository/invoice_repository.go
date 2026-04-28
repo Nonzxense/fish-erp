@@ -58,11 +58,31 @@ func (r *InvoiceRepository) CreateFishSaleInvoice(
 	})
 }
 
+func (r *InvoiceRepository) CreateFishPurchaseInvoice(
+	invoice *domain.FishPurchaseInvoice,
+) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+
+		if err := tx.Omit("Fishes").Create(invoice).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Create(&invoice.Fishes).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
 func (r *InvoiceRepository) CreateInvoice(invoice *domain.BaseInvoice) error {
 	return r.db.Create(invoice).Error
 }
 
-func (r *InvoiceRepository) FindAllFishSaleInvoices(filter *domain.InvoiceFilter) ([]domain.FishSaleInvoice, int64, error) {
+func (r *InvoiceRepository) FindAllFishSaleInvoices(
+	filter *domain.InvoiceFilter,
+) ([]domain.FishSaleInvoice, int64, error) {
+
 	var invoices []domain.FishSaleInvoice
 	var total int64
 
@@ -70,14 +90,15 @@ func (r *InvoiceRepository) FindAllFishSaleInvoices(filter *domain.InvoiceFilter
 		Joins("LEFT JOIN parties ON parties.id = fish_sale_invoices.customer_id")
 
 	if filter != nil {
+
 		if filter.ID != nil {
 			query = query.Where("fish_sale_invoices.id LIKE ?", "%"+*filter.ID+"%")
 		}
-		
+
 		if filter.CustomerName != nil {
 			query = query.Where("parties.name LIKE ?", "%"+*filter.CustomerName+"%")
 		}
-		
+
 		if filter.Status != nil {
 			query = query.Where("fish_sale_invoices.status = ?", *filter.Status)
 		}
@@ -91,6 +112,10 @@ func (r *InvoiceRepository) FindAllFishSaleInvoices(filter *domain.InvoiceFilter
 		}
 	}
 
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
 	err := query.
 		Preload("Customer").
 		Preload("Items").
@@ -100,6 +125,78 @@ func (r *InvoiceRepository) FindAllFishSaleInvoices(filter *domain.InvoiceFilter
 		Error
 
 	return invoices, total, err
+}
+
+func (r *InvoiceRepository) FindAllFishPurchaseInvoices(
+	filter *domain.InvoiceFilter,
+) ([]domain.FishPurchaseInvoice, int64, error) {
+
+	var invoices []domain.FishPurchaseInvoice
+	var total int64
+
+	query := r.db.Model(&domain.FishPurchaseInvoice{}).
+		Joins("LEFT JOIN parties ON parties.id = fish_purchase_invoices.customer_id")
+
+	if filter != nil {
+
+		if filter.ID != nil {
+			query = query.Where("fish_purchase_invoices.id LIKE ?", "%"+*filter.ID+"%")
+		}
+
+		if filter.CustomerName != nil {
+			query = query.Where("parties.name LIKE ?", "%"+*filter.CustomerName+"%")
+		}
+
+		if filter.Status != nil {
+			query = query.Where("fish_purchase_invoices.status = ?", *filter.Status)
+		}
+
+		if filter.FromDate != nil {
+			query = query.Where("fish_purchase_invoices.created_at >= ?", *filter.FromDate)
+		}
+
+		if filter.ToDate != nil {
+			query = query.Where("fish_purchase_invoices.created_at <= ?", *filter.ToDate)
+		}
+	}
+
+	err := query.
+		Preload("Customer").
+		Preload("Fishes").
+		Order("fish_purchase_invoices.id DESC").
+		Find(&invoices).
+		Error
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	countQuery := r.db.Model(&domain.FishPurchaseInvoice{})
+	if filter != nil {
+		if filter.ID != nil {
+			countQuery = countQuery.Where("id LIKE ?", "%"+*filter.ID+"%")
+		}
+		if filter.CustomerName != nil {
+			countQuery = countQuery.Joins("LEFT JOIN parties ON parties.id = fish_purchase_invoices.customer_id").
+				Where("parties.name LIKE ?", "%"+*filter.CustomerName+"%")
+		}
+		if filter.Status != nil {
+			countQuery = countQuery.Where("status = ?", *filter.Status)
+		}
+		if filter.FromDate != nil {
+			countQuery = countQuery.Where("created_at >= ?", *filter.FromDate)
+		}
+		if filter.ToDate != nil {
+			countQuery = countQuery.Where("created_at <= ?", *filter.ToDate)
+		}
+	}
+
+	err = countQuery.Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return invoices, total, nil
 }
 
 func (r *InvoiceRepository) UpdateFishSaleInvoice(

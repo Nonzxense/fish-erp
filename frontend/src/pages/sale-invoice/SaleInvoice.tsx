@@ -397,16 +397,16 @@ const SaleInvoice = () => {
       <Table
         columns={columns}
         dataSource={invoices}
-        rowKey="id"
-        loading={isLoading}
         scroll={{ x: 'max-content' }}
+        rowKey={(record) => record.id}
+        onChange={handleTableChange}
+        loading={isLoading}
         pagination={{
           current: pagination.page,
           pageSize: pagination.pageSize,
           total: pagination.total,
           showSizeChanger: true,
         }}
-        onChange={handleTableChange}
       />
     </>
   )

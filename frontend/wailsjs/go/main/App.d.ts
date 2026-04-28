@@ -11,6 +11,8 @@ export function ChangeInvoiceStatus(arg1:string,arg2:string):Promise<void>;
 
 export function CreateContainer(arg1:container.CreateContainerInput):Promise<void>;
 
+export function CreateFishPurchaseInvoice(arg1:invoice.CreateFishPurchaseInvoiceInput):Promise<void>;
+
 export function CreateFishSaleInvoice(arg1:invoice.CreateFishSaleInvoiceInput):Promise<void>;
 
 export function CreateParty(arg1:party.CreatePartyInput):Promise<void>;
@@ -26,6 +28,8 @@ export function DeleteTransactions(arg1:Array<string>):Promise<void>;
 export function GetContainerSummary():Promise<container.ContainerSummary>;
 
 export function GetContainers(arg1:container.ContainerFilter):Promise<domain.PageResult_fish_internal_domain_container_Container_>;
+
+export function GetFishPurchaseInvoices(arg1:invoice.InvoiceFilter):Promise<domain.PageResult_fish_internal_domain_invoice_FishPurchaseInvoice_>;
 
 export function GetFishSaleInvoices(arg1:invoice.InvoiceFilter):Promise<domain.PageResult_fish_internal_domain_invoice_FishSaleInvoice_>;
 

@@ -39,7 +39,7 @@ func NewApp() *App {
 		&partyDomain.Party{},
 		&invoiceDomain.FishSaleInvoice{},
 		&containerDomain.FishContainer{},
-		&containerDomain.FishDetail{},
+		&containerDomain.FishSaleDetail{},
 		&containerDomain.Container{},
 	)
 	if err != nil {

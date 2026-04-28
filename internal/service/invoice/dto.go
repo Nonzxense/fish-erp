@@ -20,3 +20,18 @@ type CreateFishSaleInvoiceInput struct {
 	Items           []container.CreateFishContainerInput `json:"items" validate:"required,dive"`
 	TotalAmount     float64                              `json:"totalAmount" validate:"required,min=0"`
 }
+
+type CreateFishPurchaseInvoiceInput struct {
+	CreateInvoiceInput
+	SupplierID      string                            `json:"supplierId" validate:"required_if=IsNewSupplier false"`
+	IsNewSupplier   bool                              `json:"isNewSupplier"`
+	NewSupplierName *string                           `json:"newSupplierName" validate:"omitempty,required_if=IsNewSupplier true"`
+	Fishes          []container.CreateFishDetailInput `json:"fishes" validate:"required,dive"`
+	TotalAmount     float64                           `json:"totalAmount" validate:"required,min=0"`
+}
+
+type PartyInput struct {
+	IsNewParty   bool
+	PartyID      string
+	NewPartyName *string
+}
