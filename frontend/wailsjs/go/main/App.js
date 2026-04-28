@@ -46,6 +46,10 @@ export function GetFishSaleInvoices(arg1) {
   return window['go']['main']['App']['GetFishSaleInvoices'](arg1);
 }
 
+export function GetFishTradeInvoiceSummary(arg1) {
+  return window['go']['main']['App']['GetFishTradeInvoiceSummary'](arg1);
+}
+
 export function GetParties(arg1) {
   return window['go']['main']['App']['GetParties'](arg1);
 }

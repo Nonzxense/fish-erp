@@ -5,6 +5,7 @@ import (
 	domain "fish/internal/domain/invoice"
 	transaction "fish/internal/domain/transaction"
 	"fish/internal/utils/ptr"
+	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -32,7 +33,7 @@ func (r *InvoiceRepository) CreateFishSaleInvoice(
 			return err
 		}
 
-		// 3 containers
+		// 2 containers
 		for i := range invoice.Items {
 			item := &invoice.Items[i]
 			item.InvoiceId = invoice.ID
@@ -41,7 +42,7 @@ func (r *InvoiceRepository) CreateFishSaleInvoice(
 				return err
 			}
 
-			// 4 fishes after container ID exists
+			// 3 fishes after container ID exists
 			for j := range item.Fishes {
 				item.Fishes[j].FishContainerID = item.ID
 			}
@@ -69,12 +70,16 @@ func (r *InvoiceRepository) FindAllFishSaleInvoices(filter *domain.InvoiceFilter
 		Joins("LEFT JOIN parties ON parties.id = fish_sale_invoices.customer_id")
 
 	if filter != nil {
-		if filter.Type != nil {
-			query = query.Where("fish_sale_invoices.type = ?", *filter.Type)
+		if filter.ID != nil {
+			query = query.Where("fish_sale_invoices.id LIKE ?", "%"+*filter.ID+"%")
 		}
-
-		if filter.Name != nil {
-			query = query.Where("parties.name LIKE ?", "%"+*filter.Name+"%")
+		
+		if filter.CustomerName != nil {
+			query = query.Where("parties.name LIKE ?", "%"+*filter.CustomerName+"%")
+		}
+		
+		if filter.Status != nil {
+			query = query.Where("fish_sale_invoices.status = ?", *filter.Status)
 		}
 
 		if filter.FromDate != nil {
@@ -200,6 +205,30 @@ func (r *InvoiceRepository) ChangeInvoiceStatus(id string, status string) error 
 	})
 }
 
+func (r *InvoiceRepository) GetFishTradeInvoiceSummary(invoiceType string) (domain.FishTradeInvoiceSummary, error) {
+	var summary domain.FishTradeInvoiceSummary
+	var query *gorm.DB
+
+	switch invoiceType {
+	case "sale":
+		query = r.db.Model(&domain.FishSaleInvoice{})
+	case "purchase":
+		query = r.db.Model(&domain.FishPurchaseInvoice{})
+	default:
+		return summary, fmt.Errorf("invalid invoice type")
+	}
+
+	err := query.
+		Select(`
+			COUNT(*) AS total_invoices,
+			SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END) AS paid,
+			SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending
+		`).
+		Scan(&summary).Error
+
+	return summary, err
+}
+
 // --- Helpers ---
 
 func (r *InvoiceRepository) createInvoiceTransaction(
@@ -293,11 +322,11 @@ func (r *InvoiceRepository) syncInvoiceContainers(
 		}
 	}
 
-	// removed -> available
+	// removed -> at_store
 	if len(removed) > 0 {
 		if err := tx.Model(&containerDomain.Container{}).
 			Where("id IN ?", removed).
-			Update("status", ptr.String("available")).Error; err != nil {
+			Update("status", ptr.String("at_store")).Error; err != nil {
 			return err
 		}
 	}

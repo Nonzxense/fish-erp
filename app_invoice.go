@@ -14,6 +14,10 @@ func (a *App) GetFishSaleInvoices(filter *invoiceDomain.InvoiceFilter) (domain.P
 	return a.invoiceService.GetFishSaleInvoices(filter)
 }
 
+func (a *App) GetFishTradeInvoiceSummary(invoiceType string) (invoiceDomain.FishTradeInvoiceSummary, error) {
+	return a.invoiceService.GetFishTradeInvoiceSummary(invoiceType)
+}
+
 func (a *App) UpdateFishSaleInvoice(id string, input invoice.CreateFishSaleInvoiceInput) error {
 	return a.invoiceService.UpdateFishSaleInvoice(id, input)
 }

@@ -25,6 +25,8 @@ export const getPaidStatusColor = (
       return 'success'
     case 'pending':
       return 'warning'
+    case 'cancelled':
+      return 'error'
     default:
       return 'default'
   }

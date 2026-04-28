@@ -417,10 +417,26 @@ export namespace invoice {
 		    return a;
 		}
 	}
+	export class FishTradeInvoiceSummary {
+	    totalInvoice: number;
+	    pending: number;
+	    paid: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new FishTradeInvoiceSummary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.totalInvoice = source["totalInvoice"];
+	        this.pending = source["pending"];
+	        this.paid = source["paid"];
+	    }
+	}
 	export class InvoiceFilter {
 	    id?: string;
-	    type?: string;
-	    name?: string;
+	    customerName?: string;
+	    status?: string;
 	    fromDate?: time.Time;
 	    toDate?: time.Time;
 	    page: number;
@@ -433,8 +449,8 @@ export namespace invoice {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
-	        this.type = source["type"];
-	        this.name = source["name"];
+	        this.customerName = source["customerName"];
+	        this.status = source["status"];
 	        this.fromDate = this.convertValues(source["fromDate"], time.Time);
 	        this.toDate = this.convertValues(source["toDate"], time.Time);
 	        this.page = source["page"];

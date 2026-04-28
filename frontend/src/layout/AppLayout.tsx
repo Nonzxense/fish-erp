@@ -1,7 +1,7 @@
 import { Avatar, Divider, Flex, Layout, Menu, MenuProps, Typography } from 'antd'
 import Sider from 'antd/es/layout/Sider'
 import React, { useMemo } from 'react'
-import { FileText, Fish, House, Package, Receipt, Settings, Truck, Users, Wallet } from 'lucide-react'
+import { Boxes, Fish, HandCoins, House, ReceiptText, Settings, ShoppingCart, Truck, Users, } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Content } from 'antd/es/layout/layout'
@@ -36,17 +36,17 @@ const AppLayout = () => {
       },
       {
         key: 'income-and-expenses',
-        icon: <Wallet size={20} />,
+        icon: <HandCoins size={20} />,
         label: localT('income-and-expense'),
       },
       {
         key: 'sales-invoices',
-        icon: <Receipt size={20} />,
+        icon: <ReceiptText size={20} />,
         label: localT('sales-invoice'),
       },
       {
         key: 'purchase-invoices',
-        icon: <FileText size={20} />,
+        icon: <ShoppingCart size={20} />,
         label: localT('purchase-invoice'),
       },
       {
@@ -56,7 +56,7 @@ const AppLayout = () => {
       },
       {
         key: 'containers',
-        icon: <Package size={20} />,
+        icon: <Boxes size={20} />,
         label: localT('container'),
       },
       {

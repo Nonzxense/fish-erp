@@ -49,6 +49,10 @@ func (s *InvoiceService) GetFishSaleInvoices(filter *invoiceDomain.InvoiceFilter
 	return pageResult, err
 }
 
+func (s *InvoiceService) GetFishTradeInvoiceSummary(invoiceType string) (invoiceDomain.FishTradeInvoiceSummary, error) {
+	return s.repo.GetFishTradeInvoiceSummary(invoiceType)
+}
+
 func (s *InvoiceService) UpdateFishSaleInvoice(id string, input CreateFishSaleInvoiceInput) error {
 	invoice, err := s.buildFishSaleInvoice(input)
 	if err != nil {
@@ -123,6 +127,14 @@ func (s *InvoiceService) resolveCustomer(input CreateFishSaleInvoiceInput) (part
 
 func (s *InvoiceService) resolveContainerID(input container.CreateFishContainerInput) (uint, error) {
 	if !input.IsNewContainer {
+		err := s.containerRepo.UpdateContainerStatus(
+			input.ContainerID,
+			"with_customer",
+		)
+		if err != nil {
+			return 0, err
+		}
+
 		return input.ContainerID, nil
 	}
 
@@ -138,11 +150,17 @@ func (s *InvoiceService) resolveContainerID(input container.CreateFishContainerI
 	if input.NewContainerColor != nil {
 		newContainer.Color = *input.NewContainerColor
 	}
+
 	if input.NewContainerType != nil {
 		newContainer.Type = *input.NewContainerType
 	}
 
-	return newContainer.ID, s.containerRepo.CreateContainer(&newContainer)
+	err := s.containerRepo.CreateContainer(&newContainer)
+	if err != nil {
+		return 0, err
+	}
+
+	return newContainer.ID, nil
 }
 
 func (s *InvoiceService) initializeInvoice(input CreateFishSaleInvoiceInput, customer partyDomain.Party) (*invoiceDomain.FishSaleInvoice, error) {

@@ -3,9 +3,9 @@
   "subtitle": "Fish shop management",
   "home": "หน้าหลัก",
   "income-and-expense": "รายรับ-รายจ่าย",
-  "purchase-invoice": "บิลซื้อ",
-  "sales-invoice": "บิลขาย",
-  "truck-invoice": "บิลรถบรรทุก",
+  "purchase-invoice": "รับซื้อปลาเข้า",
+  "sales-invoice": "ขายปลาออก",
+  "truck-invoice": "ค่าขนส่ง",
   "container": "จัดการลังปลา",
   "party": "ลูกค้า",
   "settings": "การตั้งค่า"

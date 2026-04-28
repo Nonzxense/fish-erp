@@ -89,7 +89,6 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
       newCustomerName: values.newCustomerName,
       items: items,
     })
-    console.log(payload)
     try {
       if (isEdit && saleInvoice) {
         await UpdateFishSaleInvoice(saleInvoice.id, payload)
@@ -159,7 +158,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
               />
               <div className="flex flex-col justify-center">
                 <Title level={4} className="!mb-0">{localT('modal.title')}</Title>
-                <Text type='secondary'>{localT('modal.title')}</Text>
+                <Text type='secondary'>{localT('title')}</Text>
               </div>
             </Flex>
             <div className="text-right" hidden={!isEdit}>

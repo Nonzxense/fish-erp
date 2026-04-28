@@ -1,17 +1,18 @@
-import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker, TableProps, Select } from 'antd'
+import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker, TableProps, Select, Dropdown } from 'antd'
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
-import { ListFilter, PencilLine, Plus, Trash2, Eye, FileText } from 'lucide-react'
+import { ListFilter, PencilLine, Plus, Trash2, Eye } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
 import { formatDate, formatTHB } from '../../utils/formatter'
 import SaleInvoiceFormModal from './components/modal/SaleInvoiceFormModal'
 import { invoice as invoiceModel } from '../../../wailsjs/go/models'
-import { InvoiceFilter } from './interface'
+import { InvoiceFilter, InvoiceFilterFormValues } from './interface'
 import { Pagination } from '../../utils/types'
-import { ChangeInvoiceStatus, DeleteFishSaleInvoices, GetFishSaleInvoices } from '../../../wailsjs/go/main/App'
+import { ChangeInvoiceStatus, DeleteFishSaleInvoices, GetFishSaleInvoices, GetFishTradeInvoiceSummary } from '../../../wailsjs/go/main/App'
 import { getPaidStatusColor } from '../../utils/getTagColor'
 import SaleInvoiceDetailModal from './components/modal/SaleInvoiceDetailModal'
+import dayjs from 'dayjs'
 
 const SaleInvoice = () => {
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
@@ -20,6 +21,7 @@ const SaleInvoice = () => {
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
   const [isOpenModalDetail, setIsOpenModalDetail] = useState<boolean>(false)
   const [invoices, setInvoices] = useState<invoiceModel.FishSaleInvoice[]>([])
+  const [invoiceSummary, setInvoiceSummary] = useState<invoiceModel.FishTradeInvoiceSummary>()
   const [selectedInvoice, setSelectedInvoice] = useState<invoiceModel.FishSaleInvoice>()
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [segmentStatus, setSegmentStatus] = useState<string>('all')
@@ -37,6 +39,7 @@ const SaleInvoice = () => {
     { label: localT('status.all'), value: 'all' },
     { label: localT('status.pending'), value: 'pending' },
     { label: localT('status.paid'), value: 'paid' },
+    { label: localT('status.cancelled'), value: 'cancelled' },
   ], [localT])
 
   const rowSelection = {
@@ -69,6 +72,7 @@ const SaleInvoice = () => {
       setIsLoading(true)
       const goFilter = new invoiceModel.InvoiceFilter({
         ...filter,
+        status: segmentStatus === 'all' ? undefined : segmentStatus,
         page: pagination.page,
         pageSize: pagination.pageSize
       })
@@ -81,7 +85,16 @@ const SaleInvoice = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [filter, pagination.page, pagination.pageSize])
+  }, [filter, pagination.page, pagination.pageSize, segmentStatus])
+
+  const loadInvoiceSummary = useCallback(async () => {
+    const res = await GetFishTradeInvoiceSummary('sale')
+    setInvoiceSummary({
+      totalInvoice: res.totalInvoice,
+      pending: res.pending,
+      paid: res.paid
+    })
+  }, [])
 
   const handleCloseInvoiceFormModal = useCallback(() => {
     setIsOpenModalForm(false)
@@ -140,11 +153,35 @@ const SaleInvoice = () => {
           message.success(localT('modal-status.success'))
 
           await loadInvoices()
+          await loadInvoiceSummary()
         }
       })
     },
-    [modal, localT, commonT, message, loadInvoices]
+    [modal, localT, commonT, message, loadInvoices, loadInvoiceSummary]
   )
+
+  const handleSearchFilter = useCallback((filters: InvoiceFilterFormValues) => {
+    const newFilters: InvoiceFilter = {
+      id: filters.id ? filters.id : undefined,
+      customerName: filters.customerName ? filters.customerName : undefined,
+      fromDate: filters?.dateRange?.[0]
+        ? dayjs(filters.dateRange[0]).toISOString()
+        : null,
+      toDate: filters?.dateRange?.[1] ? dayjs(filters.dateRange[1]).toISOString()
+        : null,
+    }
+    setFilter(newFilters)
+    resetPagination()
+  }, [resetPagination])
+
+  const handleResetFilters = useCallback(() => {
+    setFilter({})
+  }, [])
+
+  const handleSegmentStatusFilterChange = useCallback((status: string) => {
+    setSegmentStatus(status)
+    resetPagination()
+  }, [resetPagination])
 
   const columns: TableColumnsType<invoiceModel.FishSaleInvoice> = useMemo(
     () => [
@@ -186,38 +223,33 @@ const SaleInvoice = () => {
         align: 'center',
         width: 180,
         render: (status, record) => (
-          <Select
-            size="small"
-            value={status}
-            style={{ width: 140 }}
-            onChange={(value) => handleChangeStatus(record, value)}
-            options={[
-              {
-                label: (
-                  <Tag color={getPaidStatusColor('pending')} bordered={false}>
-                    {localT('status.pending')}
-                  </Tag>
-                ),
-                value: 'pending'
-              },
-              {
-                label: (
-                  <Tag color={getPaidStatusColor('paid')} bordered={false}>
-                    {localT('status.paid')}
-                  </Tag>
-                ),
-                value: 'paid'
-              },
-              {
-                label: (
-                  <Tag color="red" bordered={false}>
-                    {localT('status.cancelled')}
-                  </Tag>
-                ),
-                value: 'cancelled'
-              }
-            ]}
-          />
+          <Dropdown
+            trigger={['click']}
+            menu={{
+              onClick: ({ key }) => handleChangeStatus(record, key),
+              items: [
+                {
+                  key: 'pending',
+                  label: localT('status.pending'),
+                },
+                {
+                  key: 'paid',
+                  label: localT('status.paid'),
+                },
+                {
+                  key: 'cancelled',
+                  label: localT('status.cancelled'),
+                }
+              ]
+            }}
+          >
+            <Tag
+              color={getPaidStatusColor(status)}
+              className="cursor-pointer px-3 py-1 text-sm"
+            >
+              {localT(`status.${status}`)}
+            </Tag>
+          </Dropdown>
         )
       },
       {
@@ -253,7 +285,8 @@ const SaleInvoice = () => {
 
   useEffect(() => {
     loadInvoices()
-  }, [loadInvoices])
+    loadInvoiceSummary()
+  }, [loadInvoiceSummary, loadInvoices])
 
   return (
     <>
@@ -279,17 +312,29 @@ const SaleInvoice = () => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={8}>
               <Card variant="borderless">
-                <Statistic title="Total Invoices" value={invoices.length} prefix={<FileText size={18} />} />
+                <Statistic
+                  title={localT('stat.total-invoices')}
+                  value={invoiceSummary?.totalInvoice}
+                  styles={{ content: { color: '#1677ff' } }}
+                />
               </Card>
             </Col>
             <Col xs={24} md={8}>
               <Card variant="borderless">
-                <Statistic title="Pending Payment" value={1} styles={{ content: { color: '#1890ff' } }} />
+                <Statistic
+                  title={localT('stat.pending')}
+                  value={invoiceSummary?.pending}
+                  styles={{ content: { color: '#faad14' } }}
+                />
               </Card>
             </Col>
             <Col xs={24} md={8}>
               <Card variant="borderless">
-                <Statistic title="Overdue" value={1} styles={{ content: { color: '#ff4d4f' } }} />
+                <Statistic
+                  title={localT('stat.paid')}
+                  value={invoiceSummary?.paid}
+                  styles={{ content: { color: '#00c951' } }}
+                />
               </Card>
             </Col>
           </Row>
@@ -298,7 +343,7 @@ const SaleInvoice = () => {
           <Segmented
             options={segmentOptions}
             value={segmentStatus}
-            onChange={(val) => setSegmentStatus(val as string)}
+            onChange={handleSegmentStatusFilterChange}
             className="select-none"
           />
           <Space size="middle">
@@ -338,30 +383,46 @@ const SaleInvoice = () => {
           }`}
       >
         <Card>
-          <Form form={form} layout="vertical">
+          <Form
+            form={form}
+            layout="vertical"
+            onReset={handleResetFilters}
+            onFinish={handleSearchFilter}
+          >
             <Row gutter={16}>
               <Col span={6}>
-                <Form.Item label="Bill No" name="id">
-                  <Input placeholder="Search invoice number" allowClear />
+                <Form.Item label={localT('form.invoice-no.label')} name="id">
+                  <Input placeholder={localT('form.invoice-no.placeholder')} allowClear />
                 </Form.Item>
               </Col>
               <Col span={6}>
-                <Form.Item label="Customer" name="customer">
-                  <Input placeholder="Search customer" allowClear />
+                <Form.Item label={localT('form.customer.label')} name="customerName">
+                  <Input placeholder={localT('form.customer.placeholder')} allowClear />
                 </Form.Item>
               </Col>
               <Col span={6}>
-                <Form.Item label="Date Range" name="dateRange">
+                <Form.Item label={localT('form.date-range.label')} name="dateRange">
                   <DatePicker.RangePicker className="w-full" />
                 </Form.Item>
               </Col>
-              <Col span={6}>
-                <Form.Item label=" " className="mb-0">
-                  <Flex gap={8} justify="end">
-                    <Button type="primary">Search</Button>
-                    <Button variant="outlined" onClick={() => form.resetFields()}>Clear</Button>
-                  </Flex>
-                </Form.Item>
+              <Col span={6} offset={18}>
+                <Flex gap={16}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    className="w-full"
+                  >
+                    {commonT('filter.button-search')}
+                  </Button>
+                  <Button
+                    htmlType="reset"
+                    color="primary"
+                    variant="outlined"
+                    className="w-full"
+                  >
+                    {commonT('filter.button-clear')}
+                  </Button>
+                </Flex>
               </Col>
             </Row>
           </Form>

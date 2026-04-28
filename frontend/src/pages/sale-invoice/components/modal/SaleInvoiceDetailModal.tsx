@@ -148,7 +148,7 @@ const SaleInvoiceDetailModal = ({
             }
             columns={[
               {
-                title: 'Description',
+                title: localT('table.description'),
                 render: (_, record) => {
                   if (record.type === 'header') {
                     return (
@@ -166,15 +166,15 @@ const SaleInvoiceDetailModal = ({
                 }
               },
               {
-                title: 'Weight',
+                title: localT('table.weight'),
                 align: 'right',
                 render: (_, record) =>
                   record.type === 'fish'
-                    ? `${record.weightKg.toFixed(2)} kg`
+                    ? record.weightKg.toFixed(2)
                     : null
               },
               {
-                title: 'Rate',
+                title: localT('table.rate'),
                 align: 'right',
                 render: (_, record) =>
                   record.type === 'fish'
@@ -182,7 +182,7 @@ const SaleInvoiceDetailModal = ({
                     : null
               },
               {
-                title: 'Amount',
+                title: localT('table.total'),
                 align: 'right',
                 render: (_, record) =>
                   record.type === 'fish'

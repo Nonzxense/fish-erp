@@ -80,6 +80,13 @@ func (r *ContainerRepository) UpdateContainer(id uint, container *domain.Contain
 		Updates(container).Error
 }
 
+func (r *ContainerRepository) UpdateContainerStatus(id uint, status string) error {
+	return r.db.
+		Model(&domain.Container{}).
+		Where("id = ?", id).
+		Update("status", status).Error
+}
+
 func (r *ContainerRepository) DeleteContainers(ids []uint) error {
 	return r.db.
 		Where("id IN ?", ids).

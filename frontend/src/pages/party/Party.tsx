@@ -10,14 +10,6 @@ import { PartyFilter } from './interface'
 import { GetParties } from '../../../wailsjs/go/main/App'
 import { Pagination } from '../../utils/types'
 
-interface Party {
-  id: number;
-  name: string;
-  phone: string;
-  type: 'driver' | 'mover' | 'customer';
-  note: string;
-}
-
 const Party = () => {
   const [parties, setParties] = useState<party.Party[]>([])
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)

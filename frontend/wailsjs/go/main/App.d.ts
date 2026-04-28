@@ -29,6 +29,8 @@ export function GetContainers(arg1:container.ContainerFilter):Promise<domain.Pag
 
 export function GetFishSaleInvoices(arg1:invoice.InvoiceFilter):Promise<domain.PageResult_fish_internal_domain_invoice_FishSaleInvoice_>;
 
+export function GetFishTradeInvoiceSummary(arg1:string):Promise<invoice.FishTradeInvoiceSummary>;
+
 export function GetParties(arg1:party.PartyFilter):Promise<domain.PageResult_fish_internal_domain_party_Party_>;
 
 export function GetTransactionSummary(arg1:time.Time,arg2:time.Time):Promise<transaction.TransactionSummary>;
