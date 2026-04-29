@@ -4,10 +4,8 @@ import (
 	containerDomain "fish/internal/domain/container"
 	domain "fish/internal/domain/invoice"
 	transaction "fish/internal/domain/transaction"
-	"fish/internal/utils/ptr"
 	"fmt"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -67,10 +65,15 @@ func (r *InvoiceRepository) CreateFishPurchaseInvoice(
 			return err
 		}
 
-		if err := tx.Create(&invoice.Fishes).Error; err != nil {
-			return err
+		for i := range invoice.Fishes {
+			invoice.Fishes[i].InvoiceId = invoice.ID
 		}
 
+		if len(invoice.Fishes) > 0 {
+			if err := tx.Create(&invoice.Fishes).Error; err != nil {
+				return err
+			}
+		}
 		return nil
 	})
 }
@@ -86,33 +89,12 @@ func (r *InvoiceRepository) FindAllFishSaleInvoices(
 	var invoices []domain.FishSaleInvoice
 	var total int64
 
-	query := r.db.Model(&domain.FishSaleInvoice{}).
+	base := r.db.Model(&domain.FishSaleInvoice{}).
 		Joins("LEFT JOIN parties ON parties.id = fish_sale_invoices.customer_id")
 
-	if filter != nil {
+	query := applyInvoiceFilter(base, filter, "fish_sale_invoices")
 
-		if filter.ID != nil {
-			query = query.Where("fish_sale_invoices.id LIKE ?", "%"+*filter.ID+"%")
-		}
-
-		if filter.CustomerName != nil {
-			query = query.Where("parties.name LIKE ?", "%"+*filter.CustomerName+"%")
-		}
-
-		if filter.Status != nil {
-			query = query.Where("fish_sale_invoices.status = ?", *filter.Status)
-		}
-
-		if filter.FromDate != nil {
-			query = query.Where("fish_sale_invoices.created_at >= ?", *filter.FromDate)
-		}
-
-		if filter.ToDate != nil {
-			query = query.Where("fish_sale_invoices.created_at <= ?", *filter.ToDate)
-		}
-	}
-
-	if err := query.Count(&total).Error; err != nil {
+	if err := countQuery(query, &total); err != nil {
 		return nil, 0, err
 	}
 
@@ -121,8 +103,7 @@ func (r *InvoiceRepository) FindAllFishSaleInvoices(
 		Preload("Items").
 		Preload("Items.Fishes").
 		Order("fish_sale_invoices.id DESC").
-		Find(&invoices).
-		Error
+		Find(&invoices).Error
 
 	return invoices, total, err
 }
@@ -134,69 +115,23 @@ func (r *InvoiceRepository) FindAllFishPurchaseInvoices(
 	var invoices []domain.FishPurchaseInvoice
 	var total int64
 
-	query := r.db.Model(&domain.FishPurchaseInvoice{}).
-		Joins("LEFT JOIN parties ON parties.id = fish_purchase_invoices.customer_id")
+	base := r.db.Model(&domain.FishPurchaseInvoice{}).
+		Joins("LEFT JOIN parties ON parties.id = fish_purchase_invoices.supplier_id")
 
-	if filter != nil {
+	query := applyInvoiceFilter(base, filter, "fish_purchase_invoices")
 
-		if filter.ID != nil {
-			query = query.Where("fish_purchase_invoices.id LIKE ?", "%"+*filter.ID+"%")
-		}
-
-		if filter.CustomerName != nil {
-			query = query.Where("parties.name LIKE ?", "%"+*filter.CustomerName+"%")
-		}
-
-		if filter.Status != nil {
-			query = query.Where("fish_purchase_invoices.status = ?", *filter.Status)
-		}
-
-		if filter.FromDate != nil {
-			query = query.Where("fish_purchase_invoices.created_at >= ?", *filter.FromDate)
-		}
-
-		if filter.ToDate != nil {
-			query = query.Where("fish_purchase_invoices.created_at <= ?", *filter.ToDate)
-		}
+	if err := countQuery(query, &total); err != nil {
+		return nil, 0, err
 	}
 
 	err := query.
-		Preload("Customer").
+		Preload("Supplier").
 		Preload("Fishes").
 		Order("fish_purchase_invoices.id DESC").
 		Find(&invoices).
 		Error
 
-	if err != nil {
-		return nil, 0, err
-	}
-
-	countQuery := r.db.Model(&domain.FishPurchaseInvoice{})
-	if filter != nil {
-		if filter.ID != nil {
-			countQuery = countQuery.Where("id LIKE ?", "%"+*filter.ID+"%")
-		}
-		if filter.CustomerName != nil {
-			countQuery = countQuery.Joins("LEFT JOIN parties ON parties.id = fish_purchase_invoices.customer_id").
-				Where("parties.name LIKE ?", "%"+*filter.CustomerName+"%")
-		}
-		if filter.Status != nil {
-			countQuery = countQuery.Where("status = ?", *filter.Status)
-		}
-		if filter.FromDate != nil {
-			countQuery = countQuery.Where("created_at >= ?", *filter.FromDate)
-		}
-		if filter.ToDate != nil {
-			countQuery = countQuery.Where("created_at <= ?", *filter.ToDate)
-		}
-	}
-
-	err = countQuery.Count(&total).Error
-	if err != nil {
-		return nil, 0, err
-	}
-
-	return invoices, total, nil
+	return invoices, total, err
 }
 
 func (r *InvoiceRepository) UpdateFishSaleInvoice(
@@ -266,39 +201,82 @@ func (r *InvoiceRepository) UpdateFishSaleInvoice(
 	})
 }
 
+func (r *InvoiceRepository) UpdateFishPurchaseInvoice(
+	id string,
+	invoice *domain.FishPurchaseInvoice,
+) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var oldInvoice *domain.FishPurchaseInvoice
+
+		if err := tx.Preload("Fishes").
+			First(&oldInvoice, "id = ?", id).Error; err != nil {
+			return err
+		}
+
+		if err := r.syncInvoiceFishDetails(tx, oldInvoice, invoice); err != nil {
+			return err
+		}
+
+		if err := tx.Model(&domain.FishPurchaseInvoice{}).
+			Where("id = ?", id).
+			Omit("id").
+			Updates(invoice).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
 func (r *InvoiceRepository) DeleteFishSaleInvoices(ids []string) error {
 	return r.db.Unscoped().
 		Where("id IN ?", ids).
 		Delete(&domain.FishSaleInvoice{}).Error
 }
 
-func (r *InvoiceRepository) ChangeInvoiceStatus(id string, status string) error {
+func (r *InvoiceRepository) ChangeInvoiceStatus(model interface{}, id string, newStatus string) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		var invoice domain.FishSaleInvoice
+		var oldStatus string
+		var transactionType string
+		var category string
 
-		if err := tx.First(&invoice, "id = ?", id).Error; err != nil {
+		switch model.(type) {
+		case *domain.FishSaleInvoice:
+			transactionType = "income"
+			category = "ขายปลา"
+
+		case *domain.FishPurchaseInvoice:
+			transactionType = "expense"
+			category = "ซื้อปลา"
+
+		default:
+			return fmt.Errorf("unsupported type")
+		}
+
+		if err := tx.Model(model).
+			Select("status").
+			Where("id = ?", id).
+			Scan(&oldStatus).Error; err != nil {
 			return err
 		}
 
-		oldStatus := invoice.Status
-
-		if err := tx.Model(&invoice).
-			Update("status", status).Error; err != nil {
+		if err := tx.Model(model).
+			Where("id = ?", id).
+			Update("status", newStatus).Error; err != nil {
 			return err
 		}
 
-		// became paid
-		if oldStatus != "paid" && status == "paid" {
-			return r.createInvoiceTransaction(tx, &invoice)
-		}
-
-		// left paid
-		if oldStatus == "paid" && status != "paid" {
-			return tx.Where("invoice_id = ?", id).
-				Delete(&transaction.Transaction{}).Error
-		}
-
-		return nil
+		return r.applyStatusTransition(
+			oldStatus,
+			newStatus,
+			func() error {
+				return r.createInvoiceTransactionByID(tx, model, id, transactionType, category)
+			},
+			func() error {
+				return tx.Where("invoice_id = ?", id).
+					Delete(&transaction.Transaction{}).Error
+			},
+		)
 	})
 }
 
@@ -324,118 +302,4 @@ func (r *InvoiceRepository) GetFishTradeInvoiceSummary(invoiceType string) (doma
 		Scan(&summary).Error
 
 	return summary, err
-}
-
-// --- Helpers ---
-
-func (r *InvoiceRepository) createInvoiceTransaction(
-	tx *gorm.DB,
-	invoice *domain.FishSaleInvoice,
-) error {
-	t := transaction.Transaction{
-		ID:         uuid.NewString(),
-		InvoiceID:  &invoice.ID,
-		Amount:     invoice.TotalAmount,
-		OccurredAt: invoice.CreatedAt,
-		Type:       "income",
-		Category:   ptr.String("ขายปลา"),
-		Note:       ptr.String("ใบเสร็จ " + invoice.ID),
-	}
-
-	return tx.Create(&t).Error
-}
-
-func (r *InvoiceRepository) syncInvoiceTransaction(
-	tx *gorm.DB,
-	invoice *domain.FishSaleInvoice,
-) error {
-	transactionTypes := map[string]string{
-		"sale":     "income",
-		"purchase": "expense",
-	}
-
-	t := transaction.Transaction{
-		Amount:     invoice.TotalAmount,
-		OccurredAt: invoice.CreatedAt,
-		Category:   ptr.String("trade"),
-		Type:       transactionTypes[invoice.Type],
-		Note:       ptr.String("Auto-generated from Fish Trade Invoice: " + invoice.ID),
-	}
-
-	result := tx.Model(&transaction.Transaction{}).
-		Where("invoice_id = ?", invoice.ID).
-		Omit("Note").
-		Updates(t)
-
-	if result.Error != nil {
-		return result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		t.ID = uuid.NewString()
-		t.InvoiceID = &invoice.ID
-
-		if err := tx.Create(&t).Error; err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (r *InvoiceRepository) syncInvoiceContainers(
-	tx *gorm.DB,
-	oldInvoice *domain.FishSaleInvoice,
-	newInvoice *domain.FishSaleInvoice,
-) error {
-	oldMap := map[uint]bool{}
-	newMap := map[uint]bool{}
-
-	// nil safe
-	if oldInvoice != nil {
-		for _, item := range oldInvoice.Items {
-			oldMap[item.ContainerID] = true
-		}
-	}
-
-	if newInvoice != nil {
-		for _, item := range newInvoice.Items {
-			newMap[item.ContainerID] = true
-		}
-	}
-
-	var removed []uint
-	var added []uint
-
-	for id := range oldMap {
-		if !newMap[id] {
-			removed = append(removed, id)
-		}
-	}
-
-	for id := range newMap {
-		if !oldMap[id] {
-			added = append(added, id)
-		}
-	}
-
-	// removed -> at_store
-	if len(removed) > 0 {
-		if err := tx.Model(&containerDomain.Container{}).
-			Where("id IN ?", removed).
-			Update("status", ptr.String("at_store")).Error; err != nil {
-			return err
-		}
-	}
-
-	// added -> with_customer
-	if len(added) > 0 {
-		if err := tx.Model(&containerDomain.Container{}).
-			Where("id IN ?", added).
-			Update("status", ptr.String("with_customer")).Error; err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

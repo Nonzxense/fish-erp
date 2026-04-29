@@ -1,35 +1,34 @@
-import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker, TableProps, Dropdown } from 'antd'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import PurchaseInvoiceFormModal from './components/modal/PurchaseInvoiceFormModal'
+import { App, Button, Card, Col, DatePicker, Dropdown, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, TableProps, Tag, Tooltip } from 'antd'
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
-import { ListFilter, PencilLine, Plus, Eye } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
-import { formatDate, formatTHB } from '../../utils/formatter'
-import SaleInvoiceFormModal from './components/modal/SaleInvoiceFormModal'
-import { invoice as invoiceModel } from '../../../wailsjs/go/models'
-import { InvoiceFilter, InvoiceFilterFormValues } from './interface'
+import { Eye, ListFilter, PencilLine, Plus } from 'lucide-react'
 import { Pagination } from '../../utils/types'
-import { ChangeInvoiceStatus, GetFishSaleInvoices, GetFishTradeInvoiceSummary } from '../../../wailsjs/go/main/App'
-import { getPaidStatusColor } from '../../utils/getTagColor'
-import SaleInvoiceDetailModal from './components/modal/SaleInvoiceDetailModal'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
+import { InvoiceFilter, InvoiceFilterFormValues } from '../sale-invoice/interface'
 import dayjs from 'dayjs'
+import { invoice as invoiceModel } from '../../../wailsjs/go/models'
+import { formatDate, formatTHB } from '../../utils/formatter'
+import { getPaidStatusColor } from '../../utils/getTagColor'
+import { ChangeInvoiceStatus, GetFishPurchaseInvoices, GetFishTradeInvoiceSummary } from '../../../wailsjs/go/main/App'
 
-const SaleInvoice = () => {
-  const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
-  const [filter, setFilter] = useState<InvoiceFilter>({})
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+const PurchaseInvoice = () => {
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
-  const [isOpenModalDetail, setIsOpenModalDetail] = useState<boolean>(false)
-  const [invoices, setInvoices] = useState<invoiceModel.FishSaleInvoice[]>([])
-  const [invoiceSummary, setInvoiceSummary] = useState<invoiceModel.FishTradeInvoiceSummary>()
-  const [selectedInvoice, setSelectedInvoice] = useState<invoiceModel.FishSaleInvoice>()
+  const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
   const [segmentStatus, setSegmentStatus] = useState<string>('all')
+  const [isOpenModalDetail, setIsOpenModalDetail] = useState<boolean>(false)
+  const [invoiceSummary, setInvoiceSummary] = useState<invoiceModel.FishTradeInvoiceSummary>()
+  const [invoices, setInvoices] = useState<invoiceModel.FishPurchaseInvoice[]>([])
+  const [selectedInvoice, setSelectedInvoice] = useState<invoiceModel.FishPurchaseInvoice>()
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [filter, setFilter] = useState<InvoiceFilter>({})
   const [pagination, setPagination] = useState<Pagination>({
     page: DEFAULT_PAGE,
     pageSize: DEFAULT_PAGE_SIZE,
     total: 0
   })
-  const { t: localT } = useTranslation('sale-invoice')
+  const { t: localT } = useTranslation('purchase-invoice')
   const { t: commonT } = useTranslation('common')
   const [form] = Form.useForm()
   const { modal, message } = App.useApp()
@@ -41,6 +40,7 @@ const SaleInvoice = () => {
     { label: localT('status.cancelled'), value: 'cancelled' },
   ], [localT])
 
+
   const resetPagination = useCallback(() => {
     setPagination((prev) => ({
       ...prev,
@@ -49,97 +49,14 @@ const SaleInvoice = () => {
     }))
   }, [])
 
-  const handleEdit = useCallback((record: invoiceModel.FishSaleInvoice) => {
-    setSelectedInvoice(record)
-    setIsOpenModalForm(true)
+  const handleSegmentStatusFilterChange = useCallback((status: string) => {
+    setSegmentStatus(status)
+    resetPagination()
+  }, [resetPagination])
+
+  const handleResetFilters = useCallback(() => {
+    setFilter({})
   }, [])
-
-  const handleViewDetail = useCallback((record: invoiceModel.FishSaleInvoice) => {
-    setSelectedInvoice(record)
-    setIsOpenModalDetail(true)
-  }, [])
-
-  const loadInvoices = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const goFilter = new invoiceModel.InvoiceFilter({
-        ...filter,
-        status: segmentStatus === 'all' ? undefined : segmentStatus,
-        page: pagination.page,
-        pageSize: pagination.pageSize
-      })
-      const res = await GetFishSaleInvoices(goFilter)
-      setPagination((prev) => ({
-        ...prev,
-        total: res.total
-      }))
-      setInvoices(res.data)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [filter, pagination.page, pagination.pageSize, segmentStatus])
-
-  const loadInvoiceSummary = useCallback(async () => {
-    const res = await GetFishTradeInvoiceSummary('sale')
-    setInvoiceSummary({
-      totalInvoice: res.totalInvoice,
-      pending: res.pending,
-      paid: res.paid
-    })
-  }, [])
-
-  const handleCloseInvoiceFormModal = useCallback(() => {
-    setIsOpenModalForm(false)
-    setSelectedInvoice(undefined)
-  }, [])
-
-  const handleFormModalChange = useCallback(async () => {
-    await loadInvoices()
-    await loadInvoiceSummary()
-  }, [loadInvoiceSummary, loadInvoices])
-
-  const handleCloseInvoiceViewModal = useCallback(() => {
-    setIsOpenModalDetail(false)
-    setSelectedInvoice(undefined)
-  }, [])
-
-  const handleTableChange: TableProps<invoiceModel.FishSaleInvoice>['onChange'] = (
-    pagination
-  ) => {
-    const page = pagination.current || DEFAULT_PAGE
-    const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE
-
-    setPagination((prev) => ({
-      ...prev,
-      page,
-      pageSize,
-    }))
-  }
-
-
-  const handleChangeStatus = useCallback(
-    (record: invoiceModel.FishSaleInvoice, newStatus: string) => {
-      if (record.status === newStatus) return
-
-      modal.confirm({
-        title: localT('modal-status.title'),
-        content: localT('modal-status.desc', {
-          from: localT(`status.${record.status}`),
-          to: localT(`status.${newStatus}`)
-        }),
-        okText: commonT('modal-common.ok'),
-        cancelText: commonT('modal-common.cancel'),
-        onOk: async () => {
-          await ChangeInvoiceStatus("sale", record.id, newStatus)
-          message.success(localT('modal-status.success'))
-
-          await loadInvoices()
-          await loadInvoiceSummary()
-        }
-      })
-    },
-    [modal, localT, commonT, message, loadInvoices, loadInvoiceSummary]
-  )
 
   const handleSearchFilter = useCallback((filters: InvoiceFilterFormValues) => {
     const newFilters: InvoiceFilter = {
@@ -155,16 +72,94 @@ const SaleInvoice = () => {
     resetPagination()
   }, [resetPagination])
 
-  const handleResetFilters = useCallback(() => {
-    setFilter({})
+  const handleTableChange: TableProps<invoiceModel.FishPurchaseInvoice>['onChange'] = (
+    pagination
+  ) => {
+    const page = pagination.current || DEFAULT_PAGE
+    const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE
+
+    setPagination((prev) => ({
+      ...prev,
+      page,
+      pageSize,
+    }))
+  }
+
+  const handleEdit = useCallback((record: invoiceModel.FishPurchaseInvoice) => {
+    setSelectedInvoice(record)
+    setIsOpenModalForm(true)
   }, [])
 
-  const handleSegmentStatusFilterChange = useCallback((status: string) => {
-    setSegmentStatus(status)
-    resetPagination()
-  }, [resetPagination])
+  const handleViewDetail = useCallback((record: invoiceModel.FishPurchaseInvoice) => {
+    setSelectedInvoice(record)
+    setIsOpenModalDetail(true)
+  }, [])
 
-  const columns: TableColumnsType<invoiceModel.FishSaleInvoice> = useMemo(
+  const loadInvoices = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const goFilter = new invoiceModel.InvoiceFilter({
+        ...filter,
+        status: segmentStatus === 'all' ? undefined : segmentStatus,
+        page: pagination.page,
+        pageSize: pagination.pageSize
+      })
+      const res = await GetFishPurchaseInvoices(goFilter)
+      setPagination((prev) => ({
+        ...prev,
+        total: res.total
+      }))
+      setInvoices(res.data)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [filter, pagination.page, pagination.pageSize, segmentStatus])
+
+  const loadInvoiceSummary = useCallback(async () => {
+    const res = await GetFishTradeInvoiceSummary('purchase')
+    setInvoiceSummary({
+      totalInvoice: res.totalInvoice,
+      pending: res.pending,
+      paid: res.paid
+    })
+  }, [])
+
+  const handleChangeStatus = useCallback(
+    (record: invoiceModel.FishPurchaseInvoice, newStatus: string) => {
+      if (record.status === newStatus) return
+
+      modal.confirm({
+        title: localT('modal-status.title'),
+        content: localT('modal-status.desc', {
+          from: localT(`status.${record.status}`),
+          to: localT(`status.${newStatus}`)
+        }),
+        okText: commonT('modal-common.ok'),
+        cancelText: commonT('modal-common.cancel'),
+        onOk: async () => {
+          await ChangeInvoiceStatus("purchase", record.id, newStatus)
+          message.success(localT('modal-status.success'))
+
+          await loadInvoices()
+          await loadInvoiceSummary()
+        }
+      })
+    },
+    [modal, localT, commonT, message, loadInvoices, loadInvoiceSummary]
+  )
+
+  const handleCloseInvoiceFormModal = useCallback(() => {
+    setIsOpenModalForm(false)
+    setSelectedInvoice(undefined)
+  }, [])
+
+  const handleFormModalChange = useCallback(async () => {
+    await loadInvoices()
+    await loadInvoiceSummary()
+  }, [loadInvoiceSummary, loadInvoices])
+
+
+  const columns: TableColumnsType<invoiceModel.FishPurchaseInvoice> = useMemo(
     () => [
       {
         title: localT('table.invoice-no'),
@@ -179,16 +174,10 @@ const SaleInvoice = () => {
         render: (val) => formatDate(val)
       },
       {
-        title: localT('table.customer'),
-        key: 'customer',
-        dataIndex: 'customer',
+        title: localT('table.supplier'),
+        key: 'supplier',
+        dataIndex: 'supplier',
         render: (val) => val.name
-      },
-      {
-        title: localT('table.items'),
-        key: 'itemCount',
-        align: 'center',
-        render: (_, record) => record.items?.length || 0
       },
       {
         title: localT('table.total'),
@@ -238,7 +227,7 @@ const SaleInvoice = () => {
         key: 'manage',
         align: 'center',
         width: 150,
-        render: (_, record: invoiceModel.FishSaleInvoice) => (
+        render: (_, record: invoiceModel.FishPurchaseInvoice) => (
           <Space>
             <Tooltip title={commonT('button-view')}>
               <Button
@@ -271,16 +260,10 @@ const SaleInvoice = () => {
 
   return (
     <>
-      <SaleInvoiceFormModal
+      <PurchaseInvoiceFormModal
         isOpen={isOpenModalForm}
         onChange={handleFormModalChange}
         onClose={handleCloseInvoiceFormModal}
-        saleInvoice={selectedInvoice}
-      />
-      <SaleInvoiceDetailModal
-        isOpen={isOpenModalDetail}
-        onClose={handleCloseInvoiceViewModal}
-        saleInvoice={selectedInvoice}
       />
       <Space orientation="vertical" size="large" className="w-full">
         <Flex align="center" justify="space-between" className="w-full">
@@ -295,7 +278,6 @@ const SaleInvoice = () => {
               <Card variant="borderless">
                 <Statistic
                   title={localT('stat.total-invoices')}
-                  value={invoiceSummary?.totalInvoice}
                   styles={{ content: { color: '#1677ff' } }}
                 />
               </Card>
@@ -304,7 +286,6 @@ const SaleInvoice = () => {
               <Card variant="borderless">
                 <Statistic
                   title={localT('stat.pending')}
-                  value={invoiceSummary?.pending}
                   styles={{ content: { color: '#faad14' } }}
                 />
               </Card>
@@ -313,7 +294,6 @@ const SaleInvoice = () => {
               <Card variant="borderless">
                 <Statistic
                   title={localT('stat.paid')}
-                  value={invoiceSummary?.paid}
                   styles={{ content: { color: '#00c951' } }}
                 />
               </Card>
@@ -417,4 +397,4 @@ const SaleInvoice = () => {
   )
 }
 
-export default SaleInvoice
+export default PurchaseInvoice

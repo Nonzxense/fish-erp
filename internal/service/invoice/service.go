@@ -83,8 +83,33 @@ func (s *InvoiceService) UpdateFishSaleInvoice(id string, input CreateFishSaleIn
 	return s.repo.UpdateFishSaleInvoice(id, invoice)
 }
 
-func (s *InvoiceService) ChangeInvoiceStatus(id string, status string) error {
-	return s.repo.ChangeInvoiceStatus(id, status)
+func (s *InvoiceService) UpdateFishPurchaseInvoice(id string, input CreateFishPurchaseInvoiceInput) error {
+	invoice, err := s.buildFishPurchaseInvoice(input)
+	if err != nil {
+		return err
+	}
+	invoice.ID = id
+
+	return s.repo.UpdateFishPurchaseInvoice(id, invoice)
+}
+
+func (s *InvoiceService) ChangeInvoiceStatus(invoiceType string, id string, status string) error {
+	switch invoiceType {
+	case "sale":
+		return s.repo.ChangeInvoiceStatus(
+			&invoiceDomain.FishSaleInvoice{},
+			id,
+			status,
+		)
+	case "purchase":
+		return s.repo.ChangeInvoiceStatus(
+			&invoiceDomain.FishPurchaseInvoice{},
+			id,
+			status,
+		)
+	default:
+		return fmt.Errorf("invalid invoice type")
+	}
 }
 
 func (s *InvoiceService) DeleteFishSaleInvoices(ids []string) error {
@@ -140,6 +165,18 @@ func (s *InvoiceService) buildFishPurchaseInvoice(input CreateFishPurchaseInvoic
 	invoice, err := s.initializePurchaseInvoice(input, supplier)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, f := range input.Fishes {
+		invoice.Fishes = append(invoice.Fishes, containerDomain.FishPurchaseDetail{
+			Name:       f.Name,
+			WeightKg:   f.WeightKg,
+			PricePerKg: f.PricePerKg,
+		})
+	}
+
+	for _, f := range invoice.Fishes {
+		invoice.TotalAmount += f.WeightKg * f.PricePerKg
 	}
 
 	return invoice, nil

@@ -81,8 +81,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
     const payload = new invoiceModel.CreateFishSaleInvoiceInput({
       createdAt: values.createdAt.toISOString(),
       type: 'sale',
-      status: 'pending', // dummy
-      totalAmount: 0, // dummy
+      status: 'pending',
       note: values.note || "",
       customerId: isNewCustomer ? "" : values.customerId,
       isNewCustomer: isNewCustomer,
@@ -194,9 +193,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
                 options={customerSelectOptions}
               />
             </Form.Item>
-
           </Col>
-
           <Col span={12}>
             <Form.Item
               name="createdAt"

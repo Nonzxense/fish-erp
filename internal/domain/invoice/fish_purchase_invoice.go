@@ -7,8 +7,8 @@ import (
 
 type FishPurchaseInvoice struct {
 	BaseInvoice
-	SupplierID  string      `json:"supplierId" gorm:"column:supplier_id"`
-	Supplier    party.Party `json:"supplier" gorm:"foreignKey:SupplierId"`
-	Fishes      []container.FishPurchaseDetail
-	TotalAmount float64 `json:"totalAmount"`
+	SupplierID  string                         `json:"supplierId" gorm:"column:supplier_id"`
+	Supplier    party.Party                    `json:"supplier" gorm:"foreignKey:SupplierId"`
+	Fishes      []container.FishPurchaseDetail `json:"items" gorm:"foreignKey:InvoiceId;constraint:OnDelete:CASCADE"`
+	TotalAmount float64                        `json:"totalAmount"`
 }

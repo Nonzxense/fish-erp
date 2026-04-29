@@ -7,7 +7,7 @@ import {transaction} from '../models';
 import {domain} from '../models';
 import {time} from '../models';
 
-export function ChangeInvoiceStatus(arg1:string,arg2:string):Promise<void>;
+export function ChangeInvoiceStatus(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function CreateContainer(arg1:container.CreateContainerInput):Promise<void>;
 
@@ -42,6 +42,8 @@ export function GetTransactionSummary(arg1:time.Time,arg2:time.Time):Promise<tra
 export function GetTransactions(arg1:transaction.TransactionFilter):Promise<domain.PageResult_fish_internal_domain_transaction_Transaction_>;
 
 export function UpdateContainer(arg1:number,arg2:container.CreateContainerInput):Promise<void>;
+
+export function UpdateFishPurchaseInvoice(arg1:string,arg2:invoice.CreateFishPurchaseInvoiceInput):Promise<void>;
 
 export function UpdateFishSaleInvoice(arg1:string,arg2:invoice.CreateFishSaleInvoiceInput):Promise<void>;
 

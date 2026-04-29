@@ -18,7 +18,6 @@ type CreateFishSaleInvoiceInput struct {
 	IsNewCustomer   bool                                 `json:"isNewCustomer"`
 	NewCustomerName *string                              `json:"newCustomerName" validate:"omitempty,required_if=IsNewCustomer true"`
 	Items           []container.CreateFishContainerInput `json:"items" validate:"required,dive"`
-	TotalAmount     float64                              `json:"totalAmount" validate:"required,min=0"`
 }
 
 type CreateFishPurchaseInvoiceInput struct {
@@ -27,7 +26,6 @@ type CreateFishPurchaseInvoiceInput struct {
 	IsNewSupplier   bool                              `json:"isNewSupplier"`
 	NewSupplierName *string                           `json:"newSupplierName" validate:"omitempty,required_if=IsNewSupplier true"`
 	Fishes          []container.CreateFishDetailInput `json:"fishes" validate:"required,dive"`
-	TotalAmount     float64                           `json:"totalAmount" validate:"required,min=0"`
 }
 
 type PartyInput struct {

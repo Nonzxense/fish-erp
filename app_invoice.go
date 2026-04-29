@@ -30,8 +30,12 @@ func (a *App) UpdateFishSaleInvoice(id string, input invoice.CreateFishSaleInvoi
 	return a.invoiceService.UpdateFishSaleInvoice(id, input)
 }
 
-func (a *App) ChangeInvoiceStatus(id string, status string) error {
-	return a.invoiceService.ChangeInvoiceStatus(id, status)
+func (a *App) UpdateFishPurchaseInvoice(id string, input invoice.CreateFishPurchaseInvoiceInput) error {
+	return a.invoiceService.UpdateFishPurchaseInvoice(id, input)
+}
+
+func (a *App) ChangeInvoiceStatus(invoiceType string, id string, status string) error {
+	return a.invoiceService.ChangeInvoiceStatus(invoiceType, id, status)
 }
 
 func (a *App) DeleteFishSaleInvoices(ids []string) error {

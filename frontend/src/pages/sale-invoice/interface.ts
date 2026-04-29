@@ -2,7 +2,7 @@ import { Dayjs } from "dayjs"
 
 export interface InvoiceFilter {
   id?: string
-  customerName?: string
+  partyName?: string
   status?: string
   fromDate?: string | null
   toDate?: string | null
@@ -10,6 +10,6 @@ export interface InvoiceFilter {
 
 export type InvoiceFilterFormValues = {
   id?: string
-  customerName?: string
+  partyName?: string
   dateRange?: [Dayjs, Dayjs]
 }

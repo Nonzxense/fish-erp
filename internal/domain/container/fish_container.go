@@ -16,6 +16,7 @@ type FishSaleDetail struct {
 }
 
 type FishPurchaseDetail struct {
+	InvoiceId  string  `gorm:"index"`
 	ID         uint    `gorm:"primaryKey"`
 	Name       string  `json:"name" gorm:"column:fish_name;not null"`
 	WeightKg   float64 `json:"weightKg" gorm:"column:weight_kg;not null"`

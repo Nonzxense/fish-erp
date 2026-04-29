@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Avatar,
   Button,
-  Card,
   Col,
   DatePicker,
   Divider,
@@ -12,19 +11,20 @@ import {
   InputNumber,
   Modal,
   Row,
+  Select,
   Typography
 } from 'antd'
 import { Fish as FishIcon, Plus, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { party as partyModel, invoice as invoiceModel } from '../../../../../wailsjs/go/models'
+import { party as partyModel, invoice as invoiceModel, container as containerModel } from '../../../../../wailsjs/go/models'
 import {
-  // CreateFishPurchaseInvoice,
+  CreateFishPurchaseInvoice,
   GetParties,
-  // UpdateFishPurchaseInvoice
+  UpdateFishPurchaseInvoice
 } from '../../../../../wailsjs/go/main/App'
 import dayjs from 'dayjs'
 import { formatDate, formatTHB } from '../../../../utils/formatter'
-import { PurchaseInvoiceFormModalProps } from './interface'
+import { PurchaseInvoiceFormModalProps, PurchaseInvoiceFormValues } from './interface'
 
 const { Text, Title } = Typography
 
@@ -34,7 +34,7 @@ const PurchaseInvoiceFormModal = ({
   onChange,
   purchaseInvoice
 }: PurchaseInvoiceFormModalProps) => {
-  const [customers, setCustomers] = useState<partyModel.Party[]>([])
+  const [suppliers, setSuppliers] = useState<partyModel.Party[]>([])
   const [form] = Form.useForm()
   const values = Form.useWatch([], form)
 
@@ -43,10 +43,10 @@ const PurchaseInvoiceFormModal = ({
 
   const isEdit = !!purchaseInvoice
 
-  const customerSelectOptions = [
-    ...customers.map((customer) => ({
-      label: customer.name,
-      value: customer.id
+  const supplierSelectOptions = [
+    ...suppliers.map((supplier) => ({
+      label: supplier.name,
+      value: supplier.id
     }))
   ]
 
@@ -54,7 +54,7 @@ const PurchaseInvoiceFormModal = ({
     let money = 0
     const fishes = values?.fishes || []
 
-    fishes.forEach((fish: any) => {
+    fishes.forEach((fish: containerModel.FishPurchaseDetail) => {
       money += (fish?.weightKg || 0) * (fish?.pricePerKg || 0)
     })
 
@@ -69,30 +69,32 @@ const PurchaseInvoiceFormModal = ({
     onClose()
   }, [form, onClose])
 
-  const handleSubmit = useCallback(async (values: any) => {
-    // const items = values.fishes.map((fish) =>
-    //   new invoiceModel.CreateFishDetailInput({
-    //     name: fish.name,
-    //     weightKg: Number(fish.weightKg),
-    //     pricePerKg: Number(fish.pricePerKg)
-    //   })
-    // )
+  const handleSubmit = useCallback(async (values: PurchaseInvoiceFormValues) => {
+    const fishes = values.fishes.map((fish) => (
+      new containerModel.FishPurchaseDetail({
+        name: fish.name,
+        weightKg: Number(fish.weightKg),
+        pricePerKg: Number(fish.pricePerKg)
+      })
+    ))
 
-    // const payload = new invoiceModel.CreateFishPurchaseInvoiceInput({
-    //   createdAt: values.createdAt.toISOString(),
-    //   type: 'purchase',
-    //   status: 'pending',
-    //   totalAmount: 0,
-    //   note: values.note || '',
-    //   customerId: values.customerId,
-    //   items
-    // })
+    const isNewSupplier = !!values.newSupplierName
+    const payload = new invoiceModel.CreateFishPurchaseInvoiceInput({
+      createdAt: values.createdAt.toISOString(),
+      type: 'purchase',
+      status: 'pending',
+      note: values.note || '',
+      supplierId: isNewSupplier ? "" : values.supplierId,
+      isNewSupplier: isNewSupplier,
+      newSupplierName: values.newSupplierName,
+      fishes: fishes
+    })
 
     try {
       if (isEdit && purchaseInvoice) {
-        // await UpdateFishPurchaseInvoice(purchaseInvoice.id, payload)
+        await UpdateFishPurchaseInvoice(purchaseInvoice.id, payload)
       } else {
-        // await CreateFishPurchaseInvoice(payload)
+        await CreateFishPurchaseInvoice(payload)
       }
     } catch {
       // interceptor handles error
@@ -105,19 +107,18 @@ const PurchaseInvoiceFormModal = ({
   useEffect(() => {
     if (!isOpen) return
 
-    const loadCustomers = async () => {
+    const loadSuppliers = async () => {
       const res = await GetParties(new partyModel.PartyFilter())
-      setCustomers(res.data)
+      setSuppliers(res.data)
     }
 
-    loadCustomers()
+    loadSuppliers()
 
     if (isOpen && purchaseInvoice) {
       form.setFieldsValue({
-        customerId: purchaseInvoice.customerId,
+        supplierId: purchaseInvoice.supplierId,
         fishes: purchaseInvoice.items,
         note: purchaseInvoice.note,
-        createdAt: dayjs(purchaseInvoice.createdAt)
       })
     } else {
       form.setFieldsValue({
@@ -130,36 +131,52 @@ const PurchaseInvoiceFormModal = ({
   return (
     <Modal
       title={
-        <Flex gap={12} align="center">
-          <Avatar
-            shape="square"
-            size={48}
-            icon={<FishIcon />}
-            className="bg-blue-500 !rounded-xl"
-          />
-          <div>
-            <Title level={4} className="!mb-0">
-              {localT('modal.title')}
-            </Title>
-            <Text type="secondary">{localT('title')}</Text>
-          </div>
-        </Flex>
+        <>
+          <Flex justify="space-between" align="center" className="w-full pr-8">
+            <Flex gap={12} align="center">
+              <Avatar
+                shape="square"
+                size={48}
+                icon={<FishIcon />}
+                className="bg-blue-500 bg-[radial-gradient(circle_at_bottom_right,theme(colors.cyan.400)_0%,transparent_80%)] !border-0 !shadow-none !rounded-xl"
+              />
+              <div className="flex flex-col justify-center">
+                <Title level={4} className="!mb-0">{localT('modal.title')}</Title>
+                <Text type='secondary'>{localT('title')}</Text>
+              </div>
+            </Flex>
+            <div className="text-right" hidden={!isEdit}>
+              <Text type="secondary" className="text-[12px] block uppercase">{localT('modal.invoice-no')}</Text>
+              <Text strong className="text-blue-500 font-mono">#{purchaseInvoice?.id}</Text>
+            </div>
+          </Flex>
+          <Divider className="mb-4" />
+        </>
       }
       open={isOpen}
       onCancel={handleCloseModal}
-      footer={null}
       width={800}
+      footer={null}
+      styles={{
+        body: {
+          maxHeight: '70vh',
+          overflowY: 'auto',
+        },
+      }}
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
-        {/* CUSTOMER */}
-        <Row gutter={16}>
+        {/* SUPPLIER */}
+        <Row gutter={[16, 16]} className="!mx-0">
           <Col span={12}>
             <Form.Item
-              name="customerId"
+              name="supplierId"
               label={localT('modal.form.supplier.label')}
               rules={[{ required: true }]}
             >
-              <Input placeholder="Supplier ID" />
+              <Select
+                placeholder={localT('modal.form.supplier.placeholder')}
+                options={supplierSelectOptions}
+              />
             </Form.Item>
           </Col>
 
@@ -177,82 +194,84 @@ const PurchaseInvoiceFormModal = ({
         {/* FISH LIST */}
         <Divider>{localT('modal.fishes')}</Divider>
 
-        <Form.List name="fishes">
-          {(fields, { add, remove }) => (
-            <>
-              {fields.map((field) => (
-                <Row key={field.key} gutter={8} className="mb-2">
-                  <Col span={8}>
-                    <Form.Item
-                      {...field}
-                      name={[field.name, 'name']}
-                      rules={[{ required: true }]}
-                    >
-                      <Input placeholder="Fish name" />
+        <Form.List
+          name='fishes'
+          rules={[
+            {
+              validator: async (_, fishes) => {
+                if (!fishes || fishes.length < 1) {
+                  return Promise.reject(new Error(localT('modal.validate.add-fish')))
+                }
+              }
+            }
+          ]}
+        >
+          {(fishFields, { add: addFish, remove: removeFish }, { errors }) => (
+            <div className="bg-white py-2 pl-2 rounded">
+              {fishFields.map((fishField) => (
+                <Row key={fishField.key} gutter={8} align="bottom" className="mb-2">
+                  <Col flex="auto">
+                    <Form.Item {...fishField} label={fishField.name === 0 ? localT('modal.form.fish.name') : ""} name={[fishField.name, 'name']} rules={[{ required: true, message: localT('modal.form.fish.name-validate') }]}>
+                      <Input />
                     </Form.Item>
                   </Col>
-
-                  <Col span={6}>
-                    <Form.Item
-                      {...field}
-                      name={[field.name, 'weightKg']}
-                      rules={[{ required: true }]}
-                    >
-                      <InputNumber className="w-full" placeholder="kg" min={0} />
+                  <Col flex="160px">
+                    <Form.Item {...fishField} label={fishField.name === 0 ? localT('modal.form.fish.weight') : ""} name={[fishField.name, 'weightKg']} rules={[{ required: true, message: localT('modal.form.fish.weight-validate') }]}>
+                      <InputNumber className="w-full" min={0} />
                     </Form.Item>
                   </Col>
-
-                  <Col span={6}>
-                    <Form.Item
-                      {...field}
-                      name={[field.name, 'pricePerKg']}
-                      rules={[{ required: true }]}
-                    >
-                      <InputNumber className="w-full" placeholder="price/kg" min={0} />
+                  <Col flex="160px">
+                    <Form.Item {...fishField} label={fishField.name === 0 ? localT('modal.form.fish.price') : ""} name={[fishField.name, 'pricePerKg']} rules={[{ required: true, message: localT('modal.form.fish.price-validate') }]}>
+                      <InputNumber className="w-full" min={0} />
                     </Form.Item>
                   </Col>
-
-                  <Col span={4}>
-                    <Button
-                      danger
-                      type="text"
-                      icon={<Trash2 size={16} />}
-                      onClick={() => remove(field.name)}
-                    />
+                  <Col flex="16px">
+                    <Button type="text" danger icon={<Trash2 size={14} />} onClick={() => removeFish(fishField.name)} className="mb-[24px]" disabled={fishFields.length === 1} />
                   </Col>
                 </Row>
               ))}
-
-              <Button
-                type="dashed"
-                block
-                icon={<Plus size={14} />}
-                onClick={() => add()}
-              >
-                {localT('modal.add-fish')}
-              </Button>
-            </>
+              <Button type="dashed" block icon={<Plus size={14} />} onClick={() => addFish()}>{localT('modal.add-fish')}</Button>
+              <Form.ErrorList errors={errors} />
+            </div>
           )}
         </Form.List>
 
         {/* NOTE */}
-        <Form.Item name="note" label={commonT('note')}>
-          <Input.TextArea rows={3} />
+        <Form.Item
+          name="note"
+          label={localT('modal.form.note.label')}
+        >
+          <Input.TextArea
+            rows={3}
+            placeholder={localT('modal.form.note.placeholder')}
+          />
         </Form.Item>
-
         {/* TOTAL */}
-        <Flex justify="end">
-          <Card className="w-[240px]">
-            <Flex justify="space-between">
-              <Text>Total Items</Text>
-              <Text>{totals.count}</Text>
+        <Flex justify="end" className="w-full">
+          <Flex
+            vertical
+            gap={8}
+            className="mb-4 px-4 py-4 bg-gray-50 rounded-lg gradient-btn min-w-[220px]"
+          >
+            <Flex justify="space-between" align="center" gap={16}>
+              <Text className="!text-white">
+                {localT('modal.total-items')}
+              </Text>
+              <Text strong className="!text-white">
+                {totals.count}
+              </Text>
             </Flex>
 
-            <Flex justify="space-between">
-              <Text>Total</Text>
-              <Text strong>{formatTHB(totals.money)}</Text>
+            <Flex justify="space-between" align="center" gap={16}>
+              <Text className="!text-white">
+                {localT('modal.total-amount')}
+              </Text>
+
+              <Text strong className="text-lg !text-white">
+                {formatTHB(totals.money)}
+              </Text>
             </Flex>
-          </Card>
+          </Flex>
         </Flex>
 
         <Button type="primary" htmlType="submit" block className="mt-4">

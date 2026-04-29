@@ -38,8 +38,10 @@ func NewApp() *App {
 		&transactionDomain.Transaction{},
 		&partyDomain.Party{},
 		&invoiceDomain.FishSaleInvoice{},
+		&invoiceDomain.FishPurchaseInvoice{},
 		&containerDomain.FishContainer{},
 		&containerDomain.FishSaleDetail{},
+		&containerDomain.FishPurchaseDetail{},
 		&containerDomain.Container{},
 	)
 	if err != nil {
