@@ -51,6 +51,28 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
     return { money, containers }
   }, [values])
 
+  const getContainerOptions = useCallback((currentIndex: number) => {
+    const selectedIds =
+      values?.containers
+        ?.map((c: { containerId: string }, index: number) =>
+          index !== currentIndex && c?.containerId !== 'NEW'
+            ? c?.containerId
+            : null
+        )
+        .filter(Boolean) || []
+
+    return [
+      { label: localT('modal.add-new-container'), value: 'NEW' },
+
+      ...existingContainers
+        .filter(c => !selectedIds.includes(c.id))
+        .map(c => ({
+          label: `${c.id} (${commonT(c.type.replace('_', '-'))} - ${commonT(c.color)})`,
+          value: c.id
+        }))
+    ]
+  }, [commonT, existingContainers, localT, values?.containers])
+
   const handleCloseModal = useCallback(() => {
     form.resetFields()
     onClose()
@@ -264,7 +286,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
                               form.setFieldValue(['containers', name, 'details'], selected);
                             }
                           }}
-                          options={existingContainerSelectOptions}
+                          options={getContainerOptions(name)}
                         />
                       </Form.Item>
                     </Col>
