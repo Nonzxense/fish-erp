@@ -146,9 +146,9 @@ const SaleInvoice = () => {
       id: filters.id ? filters.id : undefined,
       partyName: filters.partyName ? filters.partyName : undefined,
       fromDate: filters?.dateRange?.[0]
-        ? dayjs(filters.dateRange[0]).toISOString()
+        ? dayjs(filters.dateRange[0]).startOf('day').toISOString()
         : null,
-      toDate: filters?.dateRange?.[1] ? dayjs(filters.dateRange[1]).toISOString()
+      toDate: filters?.dateRange?.[1] ? dayjs(filters.dateRange[1]).endOf('day').toISOString()
         : null,
     }
     setFilter(newFilters)

@@ -44,6 +44,7 @@ const PurchaseInvoiceFormModal = ({
   const isEdit = !!purchaseInvoice
 
   const supplierSelectOptions = [
+    { label: localT('modal.add-new-supplier'), value: 'NEW' },
     ...suppliers.map((supplier) => ({
       label: supplier.name,
       value: supplier.id
@@ -66,6 +67,9 @@ const PurchaseInvoiceFormModal = ({
 
   const handleCloseModal = useCallback(() => {
     form.resetFields()
+    form.setFieldsValue({
+      fishes: [{}]
+    })
     onClose()
   }, [form, onClose])
 
@@ -116,6 +120,7 @@ const PurchaseInvoiceFormModal = ({
 
     if (isOpen && purchaseInvoice) {
       form.setFieldsValue({
+        createdAt: dayjs(purchaseInvoice.createdAt as string),
         supplierId: purchaseInvoice.supplierId,
         fishes: purchaseInvoice.items,
         note: purchaseInvoice.note,
@@ -161,6 +166,7 @@ const PurchaseInvoiceFormModal = ({
         body: {
           maxHeight: '70vh',
           overflowY: 'auto',
+          overflowX: 'hidden'
         },
       }}
     >
@@ -191,8 +197,26 @@ const PurchaseInvoiceFormModal = ({
           </Col>
         </Row>
 
+        {/* NEW SUPPLIER DETAILS (Conditional) */}
+        {values?.supplierId === 'NEW' && (
+          <div className="bg-blue-50/50 p-4 rounded-lg mb-4 border border-blue-100">
+            <Text strong className="block mb-2">{localT('modal.new-supplier-title')}</Text>
+            <Row gutter={8}>
+              <Col span={12}>
+                <Form.Item name='newSupplierName' label={localT('modal.form.supplier.new-name.label')} rules={[{ required: true, message: localT('modal.form.supplier.new-name.validate.required') }]}>
+                  <Input placeholder={localT('modal.form.supplier.new-name.label')} />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
+        )}
+
         {/* FISH LIST */}
-        <Divider>{localT('modal.fishes')}</Divider>
+        <Divider titlePlacement="left">
+          <Text type="secondary">
+            {localT('modal.fishes')}
+          </Text>
+        </Divider>
 
         <Form.List
           name='fishes'
@@ -207,10 +231,15 @@ const PurchaseInvoiceFormModal = ({
           ]}
         >
           {(fishFields, { add: addFish, remove: removeFish }, { errors }) => (
-            <div className="bg-white py-2 pl-2 rounded">
+            <div className="py-2 pl-2 rounded">
               {fishFields.map((fishField) => (
-                <Row key={fishField.key} gutter={8} align="bottom" className="mb-2">
-                  <Col flex="auto">
+                <Row
+                  key={fishField.key}
+                  gutter={8}
+                  align="bottom"
+                  className="mb-2"
+                >
+                  <Col flex="auto" className="min-w-0">
                     <Form.Item {...fishField} label={fishField.name === 0 ? localT('modal.form.fish.name') : ""} name={[fishField.name, 'name']} rules={[{ required: true, message: localT('modal.form.fish.name-validate') }]}>
                       <Input />
                     </Form.Item>

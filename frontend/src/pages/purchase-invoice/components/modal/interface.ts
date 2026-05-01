@@ -16,5 +16,11 @@ export interface PurchaseInvoiceFormValues {
   note?: string
   supplierId: string
   newSupplierName?: string
-  fishes: Fish[] 
+  fishes: Fish[]
+}
+
+export interface PurchaseInvoiceDetailProps {
+  isOpen: boolean
+  onClose: () => void
+  purchaseInvoice?: invoice.FishPurchaseInvoice
 }

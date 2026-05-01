@@ -12,6 +12,7 @@ import { invoice as invoiceModel } from '../../../wailsjs/go/models'
 import { formatDate, formatTHB } from '../../utils/formatter'
 import { getPaidStatusColor } from '../../utils/getTagColor'
 import { ChangeInvoiceStatus, GetFishPurchaseInvoices, GetFishTradeInvoiceSummary } from '../../../wailsjs/go/main/App'
+import PurchaseInvoiceDetailModal from './components/modal/PurchaseInvoiceDetailModal'
 
 const PurchaseInvoice = () => {
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
@@ -63,9 +64,9 @@ const PurchaseInvoice = () => {
       id: filters.id ? filters.id : undefined,
       partyName: filters.partyName ? filters.partyName : undefined,
       fromDate: filters?.dateRange?.[0]
-        ? dayjs(filters.dateRange[0]).toISOString()
+        ? dayjs(filters.dateRange[0]).startOf('day').toISOString()
         : null,
-      toDate: filters?.dateRange?.[1] ? dayjs(filters.dateRange[1]).toISOString()
+      toDate: filters?.dateRange?.[1] ? dayjs(filters.dateRange[1]).endOf('day').toISOString()
         : null,
     }
     setFilter(newFilters)
@@ -260,10 +261,16 @@ const PurchaseInvoice = () => {
 
   return (
     <>
+      <PurchaseInvoiceDetailModal
+        isOpen={isOpenModalDetail}
+        onClose={() => setIsOpenModalDetail(false)}
+        purchaseInvoice={selectedInvoice}
+      />
       <PurchaseInvoiceFormModal
         isOpen={isOpenModalForm}
         onChange={handleFormModalChange}
         onClose={handleCloseInvoiceFormModal}
+        purchaseInvoice={selectedInvoice}
       />
       <Space orientation="vertical" size="large" className="w-full">
         <Flex align="center" justify="space-between" className="w-full">
@@ -278,6 +285,7 @@ const PurchaseInvoice = () => {
               <Card variant="borderless">
                 <Statistic
                   title={localT('stat.total-invoices')}
+                  value={invoiceSummary?.totalInvoice}
                   styles={{ content: { color: '#1677ff' } }}
                 />
               </Card>
@@ -286,6 +294,7 @@ const PurchaseInvoice = () => {
               <Card variant="borderless">
                 <Statistic
                   title={localT('stat.pending')}
+                  value={invoiceSummary?.pending}
                   styles={{ content: { color: '#faad14' } }}
                 />
               </Card>
@@ -294,6 +303,7 @@ const PurchaseInvoice = () => {
               <Card variant="borderless">
                 <Statistic
                   title={localT('stat.paid')}
+                  value={invoiceSummary?.paid}
                   styles={{ content: { color: '#00c951' } }}
                 />
               </Card>
@@ -347,8 +357,8 @@ const PurchaseInvoice = () => {
                 </Form.Item>
               </Col>
               <Col span={6}>
-                <Form.Item label={localT('form.customer.label')} name="partyName">
-                  <Input placeholder={localT('form.customer.placeholder')} allowClear />
+                <Form.Item label={localT('form.supplier.label')} name="partyName">
+                  <Input placeholder={localT('form.supplier.placeholder')} allowClear />
                 </Form.Item>
               </Col>
               <Col span={6}>

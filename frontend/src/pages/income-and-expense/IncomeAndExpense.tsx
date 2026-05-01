@@ -146,9 +146,9 @@ const IncomeAndExpense = () => {
       type: filters?.type ? filters.type : undefined,
       category: filters?.category ? filters.category : undefined,
       fromDate: filters?.occurredAt?.[0]
-        ? dayjs(filters.occurredAt[0]).toISOString()
+        ? dayjs(filters.occurredAt[0]).startOf('day').toISOString()
         : null,
-      toDate: filters?.occurredAt?.[1] ? dayjs(filters.occurredAt[1]).toISOString()
+      toDate: filters?.occurredAt?.[1] ? dayjs(filters.occurredAt[1]).endOf('day').toISOString()
         : null,
     }
     setFilter(newFilters)

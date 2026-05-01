@@ -1,4 +1,6 @@
 {
+  "title": "ระบบจัดการใบแจ้งหนี้ซื้อปลา",
+  "subtitle": "จัดการรายการซื้อปลา",
   "stat": {
     "total-invoices": "จำนวนบิลทั้งหมด",
     "pending": "ค้างชำระ",
@@ -9,5 +11,66 @@
     "pending": "ค้างชำระ",
     "paid": "จ่ายแล้ว",
     "cancelled": "ยกเลิก"
+  },
+  "table": {
+    "invoice-no": "เลขที่บิล",
+    "date": "วันที่",
+    "supplier": "แพ",
+    "items": "จำนวนลัง",
+    "total": "จำนวนเงิน",
+    "status": "สถานะ",
+    "manage": "การจัดการ",
+    "description": "รายละเอียด",
+    "weight": "น้ำหนัก (กก.)",
+    "rate": "ราคา/กก."
+  },
+  "form": {
+    "invoice-no": {
+      "label": "เลขที่บิล",
+      "placeholder": "เลขที่บิล"
+    },
+    "supplier": {
+      "label": "แพ",
+      "placeholder": "แพ"
+    },
+    "date-range": {
+      "label": "วันที่"
+    }
+  },
+  "modal": {
+    "invoice-no": "เลขที่บิล",
+    "total-amount": "ยอดรวมทั้งหมด",
+    "summary": "สรุปรายการ",
+    "total-weight": "น้ำหนักรวม (กก.)",
+    "total-items": "จำนวนรายการ",
+    "title": "รายละเอียดบิล",
+    "add-fish": "เพิ่มปลา",
+    "add-new-supplier": "+ เพิ่มแพใหม่",
+    "new-supplier-title": "รายละเอียดแพใหม่",
+    "fishes": "รายละเอียดปลา",
+    "form": {
+      "supplier": {
+        "label": "แพ",
+        "placeholder": "เลือกแพ",
+        "new-name": {
+          "label": "ชื่อแพ",
+          "validate": {
+            "required": "กรุณากรอกชื่อแพ"
+          }
+        }
+      },
+      "fish": {
+        "name": "ชนิดปลา",
+        "weight": "น้ำหนัก (กก.)",
+        "price": "ราคา/กก.",
+        "name-validate": "กรุณากรอกชนิดปลา",
+        "weight-validate": "กรุณากรอกน้ำหนัก",
+        "price-validate": "กรุณากรอกราคา"
+      },
+      "note": {
+        "label": "หมายเหตุ",
+        "placeholder": "หมายเหตุเพิ่มเติม..."
+      }
+    }
   }
 }

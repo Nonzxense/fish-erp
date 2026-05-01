@@ -50,9 +50,11 @@
       "customer": {
         "label": "ลูกค้า",
         "placeholder": "เลือกลูกค้า",
-        "new-name": "ชื่อลูกค้า",
-        "validate": {
-          "required": "กรุณากรอกชื่อลูกค้า"
+        "new-name": {
+          "label": "ชื่อลูกค้า",
+          "validate": {
+            "required": "กรุณากรอกชื่อลูกค้า"
+          }
         }
       },
       "container": {

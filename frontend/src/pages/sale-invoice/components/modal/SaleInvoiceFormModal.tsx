@@ -215,8 +215,8 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
             <Text strong className="block mb-2">{localT('modal.new-customer-title')}</Text>
             <Row gutter={8}>
               <Col span={12}>
-                <Form.Item name='newCustomerName' label={localT('modal.form.customer.new-name')} rules={[{ required: true, message: localT('modal.form.customer.new-name.validate.required') }]}>
-                  <Input placeholder={localT('modal.form.customer.new-name')} />
+                <Form.Item name='newCustomerName' label={localT('modal.form.customer.new-name.label')} rules={[{ required: true, message: localT('modal.form.customer.new-name.validate.required') }]}>
+                  <Input placeholder={localT('modal.form.customer.new-name.label')} />
                 </Form.Item>
               </Col>
             </Row>
@@ -254,6 +254,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
                         label={localT('modal.form.container.label')}
                         name={[name, 'containerId']}
                         rules={[{ required: true, message: localT('modal.form.container.validate-required') }]}
+                        className='pl-2'
                       >
                         <Select
                           placeholder={localT('modal.form.container.placeholder')}
@@ -308,7 +309,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
                         ]}
                       >
                         {(fishFields, { add: addFish, remove: removeFish }, { errors }) => (
-                          <div className="bg-white py-2 pl-2 rounded">
+                          <div className="py-2 pl-2 rounded">
                             {fishFields.map((fishField) => (
                               <Row key={fishField.key} gutter={8} align="bottom" className="mb-2">
                                 <Col flex="auto">
