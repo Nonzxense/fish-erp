@@ -372,6 +372,38 @@ export namespace domain {
 		    return a;
 		}
 	}
+	export class PageResult_fish_internal_domain_truck_invoice_TruckInvoice_ {
+	    data: truckinvoice.TruckInvoice[];
+	    total: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PageResult_fish_internal_domain_truck_invoice_TruckInvoice_(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.data = this.convertValues(source["data"], truckinvoice.TruckInvoice);
+	        this.total = source["total"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 
@@ -835,6 +867,334 @@ export namespace transaction {
 	        this.totalExpense = source["totalExpense"];
 	        this.profit = source["profit"];
 	    }
+	}
+
+}
+
+export namespace truckinvoice {
+	
+	export class ItemInput {
+	    type: string;
+	    qty: number;
+	    price: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ItemInput(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.type = source["type"];
+	        this.qty = source["qty"];
+	        this.price = source["price"];
+	    }
+	}
+	export class CustomerContainerInput {
+	    customerId: string;
+	    status: string;
+	    items: ItemInput[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CustomerContainerInput(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.customerId = source["customerId"];
+	        this.status = source["status"];
+	        this.items = this.convertValues(source["items"], ItemInput);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class OtherExpenseInput {
+	    description: string;
+	    amount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new OtherExpenseInput(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.description = source["description"];
+	        this.amount = source["amount"];
+	    }
+	}
+	export class HelperWageInput {
+	    name: string;
+	    wage: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new HelperWageInput(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.wage = source["wage"];
+	    }
+	}
+	export class CreateTruckInvoiceInput {
+	    occurredAt: time.Time;
+	    type: string;
+	    status: string;
+	    carPlate: string;
+	    driverName: string;
+	    driverWage: number;
+	    note?: string;
+	    helpers: HelperWageInput[];
+	    otherExpenses: OtherExpenseInput[];
+	    customers: CustomerContainerInput[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CreateTruckInvoiceInput(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.occurredAt = this.convertValues(source["occurredAt"], time.Time);
+	        this.type = source["type"];
+	        this.status = source["status"];
+	        this.carPlate = source["carPlate"];
+	        this.driverName = source["driverName"];
+	        this.driverWage = source["driverWage"];
+	        this.note = source["note"];
+	        this.helpers = this.convertValues(source["helpers"], HelperWageInput);
+	        this.otherExpenses = this.convertValues(source["otherExpenses"], OtherExpenseInput);
+	        this.customers = this.convertValues(source["customers"], CustomerContainerInput);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class CustomerContainerItem {
+	    ID: number;
+	    ContainerID: number;
+	    Type: string;
+	    Qty: number;
+	    Price: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CustomerContainerItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ID = source["ID"];
+	        this.ContainerID = source["ContainerID"];
+	        this.Type = source["Type"];
+	        this.Qty = source["Qty"];
+	        this.Price = source["Price"];
+	    }
+	}
+	export class CustomerContainer {
+	    ID: number;
+	    Status: string;
+	    CustomerID: string;
+	    Customer: party.Party;
+	    InvoiceID: string;
+	    Items: CustomerContainerItem[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CustomerContainer(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ID = source["ID"];
+	        this.Status = source["Status"];
+	        this.CustomerID = source["CustomerID"];
+	        this.Customer = this.convertValues(source["Customer"], party.Party);
+	        this.InvoiceID = source["InvoiceID"];
+	        this.Items = this.convertValues(source["Items"], CustomerContainerItem);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	export class HelperWage {
+	    id: number;
+	    invoiceId: string;
+	    name: string;
+	    wage: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new HelperWage(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.invoiceId = source["invoiceId"];
+	        this.name = source["name"];
+	        this.wage = source["wage"];
+	    }
+	}
+	
+	
+	export class OtherExpense {
+	    id: number;
+	    invoiceId: string;
+	    description: string;
+	    amount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new OtherExpense(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.invoiceId = source["invoiceId"];
+	        this.description = source["description"];
+	        this.amount = source["amount"];
+	    }
+	}
+	
+	export class TruckInvoice {
+	    id: string;
+	    createdAt: time.Time;
+	    type: string;
+	    status: string;
+	    note?: string;
+	    carPlate: string;
+	    driverName: string;
+	    driverWage: number;
+	    helpers: HelperWage[];
+	    otherExpenses: OtherExpense[];
+	    customers: CustomerContainer[];
+	    totalExpense: number;
+	    totalIncome: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TruckInvoice(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.createdAt = this.convertValues(source["createdAt"], time.Time);
+	        this.type = source["type"];
+	        this.status = source["status"];
+	        this.note = source["note"];
+	        this.carPlate = source["carPlate"];
+	        this.driverName = source["driverName"];
+	        this.driverWage = source["driverWage"];
+	        this.helpers = this.convertValues(source["helpers"], HelperWage);
+	        this.otherExpenses = this.convertValues(source["otherExpenses"], OtherExpense);
+	        this.customers = this.convertValues(source["customers"], CustomerContainer);
+	        this.totalExpense = source["totalExpense"];
+	        this.totalIncome = source["totalIncome"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class TruckInvoiceFilter {
+	    id?: string;
+	    carPlate?: string;
+	    status?: string;
+	    fromDate?: time.Time;
+	    toDate?: time.Time;
+	    page: number;
+	    pageSize: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TruckInvoiceFilter(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.carPlate = source["carPlate"];
+	        this.status = source["status"];
+	        this.fromDate = this.convertValues(source["fromDate"], time.Time);
+	        this.toDate = this.convertValues(source["toDate"], time.Time);
+	        this.page = source["page"];
+	        this.pageSize = source["pageSize"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }

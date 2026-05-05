@@ -13,10 +13,6 @@
     "paid": "ชำระแล้ว"
   },
   "form": {
-    "invoice-no": {
-      "label": "เลขที่บิล",
-      "placeholder": "เลขที่บิล"
-    },
     "customer": {
       "label": "ลูกค้า",
       "placeholder": "ชื่อลูกค้า"
@@ -28,7 +24,6 @@
   "modal": {
     "title": "รายละเอียดบิล",
     "store-name": "ร้านขายปลา",
-    "invoice-no": "เลขที่บิล",
     "add-new-customer": "+ เพิ่มลูกค้าใหม่",
     "add-new-container": "+ เพิ่มลังใหม่",
     "add-container": "เพิ่มลังสินค้า",
@@ -88,7 +83,6 @@
     "cancelled": "ยกเลิก"
   },
   "table": {
-    "invoice-no": "เลขที่บิล",
     "date": "วันที่",
     "customer": "ลูกค้า",
     "items": "จำนวนลัง",
@@ -97,6 +91,7 @@
     "manage": "การจัดการ",
     "description": "รายละเอียด",
     "weight": "น้ำหนัก (กก.)",
-    "rate": "ราคา/กก."
+    "rate": "ราคา/กก.",
+    "note": "หมายเหตุ"
   }
 }

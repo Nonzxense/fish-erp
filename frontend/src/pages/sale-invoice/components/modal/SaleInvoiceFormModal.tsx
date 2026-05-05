@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Fish, SaleInvoiceFormModalProps, SaleInvoiceFormValues } from './interface'
-import { Avatar, Button, Card, Col, DatePicker, Divider, Flex, Form, Input, InputNumber, Modal, Row, Select, Space, Typography } from 'antd'
+import { Button, Card, Col, DatePicker, Divider, Flex, Form, Input, InputNumber, Modal, Row, Select, Space, Typography } from 'antd'
 import { Fish as FishIcon, Plus, Trash2, Box } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { container as containerModel, invoice as invoiceModel, party as partyModel } from '../../../../../wailsjs/go/models'
@@ -9,8 +9,9 @@ import dayjs from 'dayjs'
 import { formatDate, formatTHB } from '../../../../utils/formatter'
 import useContainerTypeOptions from '../../../../hooks/useContainerTypeOptions'
 import useContainerColorOptions from '../../../../hooks/useContainerColorOptions'
+import ModalHeader from '../../../../components/invoice-modal-title/ModalHeader'
 
-const { Text, Title } = Typography
+const { Text } = Typography
 
 const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleInvoiceFormModalProps) => {
   const [customers, setCustomers] = useState<partyModel.Party[]>([])
@@ -27,14 +28,6 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
     { label: localT('modal.add-new-customer'), value: 'NEW' },
     ...customers.map((customer) => ({
       label: customer.name, value: customer.id
-    }))
-  ]
-
-  const existingContainerSelectOptions = [
-    { label: localT('modal.add-new-container'), value: 'NEW' },
-    ...existingContainers.map(c => ({
-      label: `${c.id} (${commonT(c.type.replace('_', '-'))} - ${commonT(c.color)})`,
-      value: c.id
     }))
   ]
 
@@ -168,27 +161,25 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
   return (
     <Modal
       title={
-        <>
-          <Flex justify="space-between" align="center" className="w-full pr-8">
-            <Flex gap={12} align="center">
-              <Avatar
-                shape="square"
-                size={48}
-                icon={<FishIcon />}
-                className="bg-blue-500 bg-[radial-gradient(circle_at_bottom_right,theme(colors.cyan.400)_0%,transparent_80%)] !border-0 !shadow-none !rounded-xl"
-              />
-              <div className="flex flex-col justify-center">
-                <Title level={4} className="!mb-0">{localT('modal.title')}</Title>
-                <Text type='secondary'>{localT('title')}</Text>
-              </div>
-            </Flex>
-            <div className="text-right" hidden={!isEdit}>
-              <Text type="secondary" className="text-[12px] block uppercase">{localT('modal.invoice-no')}</Text>
-              <Text strong className="text-blue-500 font-mono">#{saleInvoice?.id}</Text>
-            </div>
-          </Flex>
-          <Divider className="mb-4" />
-        </>
+        <ModalHeader
+          icon={<FishIcon />}
+          title={localT('modal.title')}
+          subtitle={localT('title')}
+          rightContent={
+            <>
+              {isEdit && (
+                <div className="text-right">
+                  <Text type="secondary" className="text-[12px] block uppercase">
+                    {commonT('invoice-no')}
+                  </Text>
+                  <Text strong className="text-blue-500 font-mono">
+                    #{saleInvoice?.id}
+                  </Text>
+                </div>
+              )}
+            </>
+          }
+        />
       }
       open={isOpen}
       onCancel={handleCloseModal}

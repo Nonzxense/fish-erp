@@ -13,7 +13,6 @@
     "cancelled": "ยกเลิก"
   },
   "table": {
-    "invoice-no": "เลขที่บิล",
     "date": "วันที่",
     "supplier": "แพ",
     "items": "จำนวนลัง",
@@ -22,13 +21,10 @@
     "manage": "การจัดการ",
     "description": "รายละเอียด",
     "weight": "น้ำหนัก (กก.)",
-    "rate": "ราคา/กก."
+    "rate": "ราคา/กก.",
+    "note": "หมายเหตุ"
   },
   "form": {
-    "invoice-no": {
-      "label": "เลขที่บิล",
-      "placeholder": "เลขที่บิล"
-    },
     "supplier": {
       "label": "แพ",
       "placeholder": "แพ"
@@ -38,7 +34,6 @@
     }
   },
   "modal": {
-    "invoice-no": "เลขที่บิล",
     "total-amount": "ยอดรวมทั้งหมด",
     "summary": "สรุปรายการ",
     "total-weight": "น้ำหนักรวม (กก.)",

@@ -158,9 +158,9 @@ func (r *InvoiceRepository) UpdateFishSaleInvoice(
 			return err
 		}
 
-		// delete old fish_details
+		// delete old fish_sale_details
 		if err := tx.Exec(`
-			DELETE FROM fish_details
+			DELETE FROM fish_sale_details
 			WHERE fish_container_id IN (
 				SELECT id FROM fish_containers WHERE invoice_id = ?
 			)

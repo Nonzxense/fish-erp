@@ -17,6 +17,7 @@
   "yellow": "สีเหลือง",
   "red": "สีแดง",
   "kg": "กก.",
+  "invoice-no": "เลขที่บิล",
   "message": {
     "delete-success": "ลบรายการสำเร็จ"
   },

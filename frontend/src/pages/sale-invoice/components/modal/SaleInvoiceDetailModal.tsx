@@ -60,7 +60,7 @@ const SaleInvoiceDetailModal = ({
     <Modal
       open={isOpen}
       onCancel={onClose}
-      width={900}
+      width={800}
       footer={null}
       destroyOnHidden={false}
       styles={{
@@ -92,7 +92,7 @@ const SaleInvoiceDetailModal = ({
 
             <div className="text-right">
               <Text type="secondary" className="block text-xs uppercase">
-                {localT('modal.invoice-no')}
+                {commonT('invoice-no')}
               </Text>
               <Text strong className="font-mono text-blue-500">
                 #{invoiceNo}
@@ -197,7 +197,7 @@ const SaleInvoiceDetailModal = ({
             <>
               <Divider className="my-0" />
               <div>
-                <Text type="secondary">Note</Text>
+                <Text type="secondary">{localT('table.note')}</Text>
                 <div>
                   <Text>{saleInvoice.note}</Text>
                 </div>

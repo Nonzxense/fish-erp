@@ -26,6 +26,10 @@ export function CreateTransaction(arg1) {
   return window['go']['main']['App']['CreateTransaction'](arg1);
 }
 
+export function CreateTruckInvoice(arg1) {
+  return window['go']['main']['App']['CreateTruckInvoice'](arg1);
+}
+
 export function DeleteContainers(arg1) {
   return window['go']['main']['App']['DeleteContainers'](arg1);
 }
@@ -68,6 +72,10 @@ export function GetTransactionSummary(arg1, arg2) {
 
 export function GetTransactions(arg1) {
   return window['go']['main']['App']['GetTransactions'](arg1);
+}
+
+export function GetTruckInvoices(arg1) {
+  return window['go']['main']['App']['GetTruckInvoices'](arg1);
 }
 
 export function UpdateContainer(arg1, arg2) {

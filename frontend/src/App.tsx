@@ -8,6 +8,7 @@ import SaleInvoice from './pages/sale-invoice/SaleInvoice';
 import dayjs from 'dayjs';
 import thTh from 'antd/locale/th_TH'
 import PurchaseInvoice from './pages/purchase-invoice/PurchaseInvoice';
+import TruckInvoice from './pages/truck-invoice/TruckInvoice';
 
 dayjs.locale('th')
 const App = () => {
@@ -21,7 +22,7 @@ const App = () => {
             <Route path="/income-and-expenses" element={<IncomeAndExpense />} />
             <Route path="/sales-invoices" element={<SaleInvoice />} />
             <Route path="/purchase-invoices" element={<PurchaseInvoice />} />
-            <Route path="/truck-invoices" element={<div>Page</div>} />
+            <Route path="/truck-invoices" element={<TruckInvoice />} />
             <Route path="/containers" element={<Container />} />
             <Route path="/parties" element={<Party />} />
             <Route path="/settings" element={<div>Page</div>} />

@@ -13,6 +13,7 @@ import { ChangeInvoiceStatus, GetFishSaleInvoices, GetFishTradeInvoiceSummary } 
 import { getPaidStatusColor } from '../../utils/getTagColor'
 import SaleInvoiceDetailModal from './components/modal/SaleInvoiceDetailModal'
 import dayjs from 'dayjs'
+import { truncateString } from '../../utils/truncate'
 
 const SaleInvoice = () => {
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
@@ -167,7 +168,7 @@ const SaleInvoice = () => {
   const columns: TableColumnsType<invoiceModel.FishSaleInvoice> = useMemo(
     () => [
       {
-        title: localT('table.invoice-no'),
+        title: commonT('invoice-no'),
         key: 'id',
         dataIndex: 'id',
         render: (text) => <span className="font-mono font-medium">{text}</span>
@@ -185,9 +186,17 @@ const SaleInvoice = () => {
         render: (val) => val.name
       },
       {
+        title: localT('table.note'),
+        key: 'note',
+        dataIndex: 'note',
+        width: 250,
+        render: (val) => truncateString(val, 50)
+      },
+      {
         title: localT('table.items'),
         key: 'itemCount',
-        align: 'center',
+        align: 'right',
+        width: 100,
         render: (_, record) => record.items?.length || 0
       },
       {
@@ -202,7 +211,7 @@ const SaleInvoice = () => {
         key: 'status',
         dataIndex: 'status',
         align: 'center',
-        width: 180,
+        width: 150,
         render: (status, record) => (
           <Dropdown
             trigger={['click']}
@@ -362,8 +371,8 @@ const SaleInvoice = () => {
           >
             <Row gutter={16}>
               <Col span={6}>
-                <Form.Item label={localT('form.invoice-no.label')} name="id">
-                  <Input placeholder={localT('form.invoice-no.placeholder')} allowClear />
+                <Form.Item label={commonT('invoice-no')} name="id">
+                  <Input placeholder={commonT('invoice-no')} allowClear />
                 </Form.Item>
               </Col>
               <Col span={6}>

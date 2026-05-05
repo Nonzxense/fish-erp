@@ -4,6 +4,7 @@ import {container} from '../models';
 import {invoice} from '../models';
 import {party} from '../models';
 import {transaction} from '../models';
+import {truckinvoice} from '../models';
 import {domain} from '../models';
 import {time} from '../models';
 
@@ -18,6 +19,8 @@ export function CreateFishSaleInvoice(arg1:invoice.CreateFishSaleInvoiceInput):P
 export function CreateParty(arg1:party.CreatePartyInput):Promise<void>;
 
 export function CreateTransaction(arg1:transaction.CreateTransactionInput):Promise<void>;
+
+export function CreateTruckInvoice(arg1:truckinvoice.CreateTruckInvoiceInput):Promise<void>;
 
 export function DeleteContainers(arg1:Array<number>):Promise<void>;
 
@@ -40,6 +43,8 @@ export function GetParties(arg1:party.PartyFilter):Promise<domain.PageResult_fis
 export function GetTransactionSummary(arg1:time.Time,arg2:time.Time):Promise<transaction.TransactionSummary>;
 
 export function GetTransactions(arg1:transaction.TransactionFilter):Promise<domain.PageResult_fish_internal_domain_transaction_Transaction_>;
+
+export function GetTruckInvoices(arg1:truckinvoice.TruckInvoiceFilter):Promise<domain.PageResult_fish_internal_domain_truck_invoice_TruckInvoice_>;
 
 export function UpdateContainer(arg1:number,arg2:container.CreateContainerInput):Promise<void>;
 

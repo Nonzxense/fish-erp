@@ -13,6 +13,7 @@ import { formatDate, formatTHB } from '../../utils/formatter'
 import { getPaidStatusColor } from '../../utils/getTagColor'
 import { ChangeInvoiceStatus, GetFishPurchaseInvoices, GetFishTradeInvoiceSummary } from '../../../wailsjs/go/main/App'
 import PurchaseInvoiceDetailModal from './components/modal/PurchaseInvoiceDetailModal'
+import { truncateString } from '../../utils/truncate'
 
 const PurchaseInvoice = () => {
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
@@ -40,7 +41,6 @@ const PurchaseInvoice = () => {
     { label: localT('status.paid'), value: 'paid' },
     { label: localT('status.cancelled'), value: 'cancelled' },
   ], [localT])
-
 
   const resetPagination = useCallback(() => {
     setPagination((prev) => ({
@@ -163,7 +163,7 @@ const PurchaseInvoice = () => {
   const columns: TableColumnsType<invoiceModel.FishPurchaseInvoice> = useMemo(
     () => [
       {
-        title: localT('table.invoice-no'),
+        title: commonT('invoice-no'),
         key: 'id',
         dataIndex: 'id',
         render: (text) => <span className="font-mono font-medium">{text}</span>
@@ -178,7 +178,15 @@ const PurchaseInvoice = () => {
         title: localT('table.supplier'),
         key: 'supplier',
         dataIndex: 'supplier',
+        width: 180,
         render: (val) => val.name
+      },
+      {
+        title: localT('table.note'),
+        key: 'note',
+        dataIndex: 'note',
+        width: 250,
+        render: (val) => truncateString(val, 50)
       },
       {
         title: localT('table.total'),
@@ -192,7 +200,7 @@ const PurchaseInvoice = () => {
         key: 'status',
         dataIndex: 'status',
         align: 'center',
-        width: 180,
+        width: 150,
         render: (status, record) => (
           <Dropdown
             trigger={['click']}
@@ -352,8 +360,8 @@ const PurchaseInvoice = () => {
           >
             <Row gutter={16}>
               <Col span={6}>
-                <Form.Item label={localT('form.invoice-no.label')} name="id">
-                  <Input placeholder={localT('form.invoice-no.placeholder')} allowClear />
+                <Form.Item label={commonT('invoice-no')} name="id">
+                  <Input placeholder={commonT('invoice-no')} allowClear />
                 </Form.Item>
               </Col>
               <Col span={6}>
