@@ -1,6 +1,9 @@
 package transaction
 
-import "time"
+import (
+	"fish/internal/domain"
+	"time"
+)
 
 type TransactionFilter struct {
 	Type      *string    `json:"type"`
@@ -9,6 +12,5 @@ type TransactionFilter struct {
 	ToDate    *time.Time `json:"toDate"`
 	MinAmount *float64   `json:"minAmount"`
 	MaxAmount *float64   `json:"maxAmount"`
-	Page      int        `json:"page"`
-	PageSize  int        `json:"pageSize"`
+	domain.Pagination
 }

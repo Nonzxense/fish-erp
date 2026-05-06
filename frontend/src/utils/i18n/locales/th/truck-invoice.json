@@ -1,0 +1,54 @@
+{
+  "title": "ระบบจัดการใบค่ารถ",
+  "subtitle": "จัดการรายการขนส่ง",
+  "modal-title": "รายละเอียดบิล",
+  "card": {
+    "general": "ข้อมูลทั่วไป",
+    "helpers": "ลูกมือ",
+    "expenses": "ค่าใช้จ่ายอื่น",
+    "customers": "ลูกค้าที่ส่งของ"
+  },
+  "form": {
+    "date": "วันที่",
+    "car-plate": "ทะเบียนรถ",
+    "driver-name": "ชื่อคนขับ",
+    "driver-wage": "ค่าแรงคนขับ",
+    "note": "หมายเหตุ",
+    "customer": "ชื่อลูกค้า",
+    "status": "สถานะ"
+  },
+  "customer": {
+    "title": "ลูกค้า {{index}}",
+    "container": "ลังพลาสติก",
+    "foam": "ลังโฟม",
+    "total": "รวม"
+  },
+  "buttons": {
+    "add-helper": "เพิ่มลูกมือ",
+    "add-expense": "เพิ่มค่าใช้จ่าย",
+    "add-customer": "เพิ่มลูกค้า",
+    "submit": "บันทึกใบค่ารถ"
+  },
+  "fields": {
+    "name": "ชื่อ",
+    "wage": "ค่าแรง",
+    "description": "รายละเอียด",
+    "amount": "จำนวนเงิน"
+  },
+  "table": {
+    "date": "วันที่",
+    "note": "หมายเหตุ",
+    "car-plate": "ทะเบียนรถ",
+    "income": "รายรับ",
+    "expense": "ค่าใช้จ่าย",
+    "status": "สถานะ",
+    "manage": "การจัดการ"
+  },
+  "stat": {
+    "paid": "ชำระแล้ว",
+    "pending": "ค้างชำระ",
+    "total-invoices": "จำนวนบิลทั้งหมด"
+  },
+  "total-expense": "ค่าใช้จ่ายทั้งหมด",
+  "total-income": "รายรับทั้งหมด"
+}

@@ -3,18 +3,35 @@
   "button-export": "ส่งออก",
   "button-filter": "กรอง",
   "button-delete": "ลบรายการ",
+  "button-edit": "แก้ไขรายการ",
+  "button-view": "ดูรายการ",
   "plastic-l": "พลาสติกใหญ่",
   "plastic-s": "พลาสติกเล็ก",
   "foam-l": "โฟมใหญ่",
   "foam-m": "โฟมกลาง",
   "foam-s": "โฟมเล็ก",
+  "blue": "สีน้ำเงิน",
+  "light-green": "สีเขียวอ่อน",
+  "green": "สีเขียวเข้ม",
+  "orange": "สีส้ม",
+  "yellow": "สีเหลือง",
+  "red": "สีแดง",
+  "kg": "กก.",
+  "invoice-no": "เลขที่บิล",
+  "message": {
+    "delete-success": "ลบรายการสำเร็จ"
+  },
+  "container": "ลัง",
   "modal-common": {
+    "title-create": "เพิ่มรายการ",
+    "title-edit": "แก้ไขรายการ",
     "ok": "ยืนยัน",
     "cancel": "ยกเลิก"
   },
   "modal-delete": {
     "title": "ลบรายการ",
-    "desc": "คุณแน่ใจหรือไม่ว่าต้องการลบ {{amount}} รายการ?"
+    "desc": "คุณแน่ใจหรือไม่ว่าต้องการลบ {{amount}} รายการ?",
+    "success": "{{amount}} รายการถูกลบสำเร็จ"
   },
   "filter": {
     "today": "วันนี้",
@@ -23,11 +40,19 @@
     "six-months": "6 เดือน",
     "one-year": "1 ปี",
     "all-time": "ตลอดเวลา",
+    "all": "ทั้งหมด",
     "button-search": "ค้นหา",
     "button-clear": "ล้างการกรอง"
   },
+  "date": "วันที่",
+  "date-picker": "เลือกวันที่",
   "range-picker": {
     "start": "วันที่เริ่ม",
     "end": "วันที่สิ้นสุด"
+  },
+  "invoice-status": {
+    "pending": "ค้างชำระ",
+    "cancelled": "ยกเลิก",
+    "paid": "จ่ายแล้ว"
   }
 }

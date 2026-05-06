@@ -20,7 +20,8 @@ CREATE TABLE transactions (
 CREATE TABLE parties (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  phone TEXT
+  phone TEXT,
+  note TEXT
 );
 
 -- =========================

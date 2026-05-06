@@ -115,11 +115,11 @@ const IncomeAndExpense = () => {
         render: (_, record: transaction.Transaction) => {
           return (
             <Space>
-              <Tooltip title={localT('table.edit')}>
+              <Tooltip title={commonT('button-edit')}>
                 <Button
-                  hidden={!!record.billId}
+                  hidden={!!record.invoiceId}
                   icon={<PencilLine size={16} />}
-                  variant="link"
+                  variant="text"
                   color="blue"
                   onClick={() => handleEditTransaction(record)}
                 />
@@ -128,7 +128,7 @@ const IncomeAndExpense = () => {
           )
         }
       }
-    ], [handleEditTransaction, localT])
+    ], [handleEditTransaction, localT, commonT])
 
   const rowSelection = {
     selectedRowKeys,
@@ -146,9 +146,9 @@ const IncomeAndExpense = () => {
       type: filters?.type ? filters.type : undefined,
       category: filters?.category ? filters.category : undefined,
       fromDate: filters?.occurredAt?.[0]
-        ? dayjs(filters.occurredAt[0]).toISOString()
+        ? dayjs(filters.occurredAt[0]).startOf('day').toISOString()
         : null,
-      toDate: filters?.occurredAt?.[1] ? dayjs(filters.occurredAt[1]).toISOString()
+      toDate: filters?.occurredAt?.[1] ? dayjs(filters.occurredAt[1]).endOf('day').toISOString()
         : null,
     }
     setFilter(newFilters)

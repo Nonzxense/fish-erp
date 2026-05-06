@@ -9,6 +9,8 @@ import { DeleteContainers, GetContainers, GetContainerSummary } from '../../../w
 import { ContainerFilter } from './interface'
 import { Pagination } from '../../utils/types'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
+import useContainerColorOptions from '../../hooks/useContainerColorOptions'
+import useContainerTypeOptions from '../../hooks/useContainerTypeOptions'
 
 const { Text } = Typography
 
@@ -33,33 +35,8 @@ const Container = () => {
   const { t: commonT } = useTranslation('common')
   const [form] = Form.useForm()
   const { modal } = App.useApp()
-
-  const containerColorOptions = useMemo(() => [
-    {
-      label: localT('color.blue'),
-      value: 'blue'
-    },
-    {
-      label: localT('color.light-green'),
-      value: 'light-green'
-    },
-    {
-      label: localT('color.green'),
-      value: 'green'
-    },
-    {
-      label: localT('color.orange'),
-      value: 'orange'
-    },
-    {
-      label: localT('color.yellow'),
-      value: 'yellow'
-    },
-    {
-      label: localT('color.red'),
-      value: 'red'
-    },
-  ], [localT])
+  const colorOptions = useContainerColorOptions()
+  const typeOptions = useContainerTypeOptions()
 
   const segmentOptions = useMemo(() => [
     {
@@ -75,14 +52,6 @@ const Container = () => {
       value: 'with_customer'
     },
   ], [localT])
-
-  const typeOptions = useMemo(() => [
-    { label: commonT('plastic-l'), value: 'plastic_l' },
-    { label: commonT('plastic-s'), value: 'plastic_s' },
-    { label: commonT('foam-l'), value: 'foam_l' },
-    { label: commonT('foam-m'), value: 'foam_m' },
-    { label: commonT('foam-s'), value: 'foam_s' },
-  ], [commonT])
 
   const handleEditContainer = useCallback((container: container.Container) => {
     setSelectedContainerEdit(container)
@@ -115,7 +84,7 @@ const Container = () => {
         dataIndex: 'color',
         width: 120,
         render: (val: string) => (
-          <Text>{localT(`color.${val}`)}</Text>
+          <Text>{commonT(`${val}`)}</Text>
         )
       },
       {
@@ -138,11 +107,11 @@ const Container = () => {
         render: (_, record: container.Container) => {
           return (
             <Space>
-              <Tooltip title={localT('table.edit')}>
+              <Tooltip title={commonT('button-edit')}>
                 <Button
                   icon={<PencilLine size={16} />}
-                  variant="link"
-                  color="blue"
+                  variant="text"
+                  color="primary"
                   onClick={() => handleEditContainer(record)}
                 />
               </Tooltip>
@@ -365,7 +334,7 @@ const Container = () => {
                   name="color"
                 >
                   <Select
-                    options={containerColorOptions}
+                    options={colorOptions}
                     allowClear
                     placeholder={localT('form.color.placeholder')}
                   />
