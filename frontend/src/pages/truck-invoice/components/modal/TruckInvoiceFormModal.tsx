@@ -4,6 +4,7 @@ import {
   Col,
   DatePicker,
   Divider,
+  Flex,
   Form,
   Input,
   InputNumber,
@@ -11,7 +12,7 @@ import {
   Row,
   Select,
   Space,
-  Typography
+  Typography,
 } from 'antd'
 import {
   Truck,
@@ -21,14 +22,14 @@ import {
 import dayjs from 'dayjs'
 import ModalHeader from '../../../../components/invoice-modal-title/ModalHeader'
 import { useTranslation } from 'react-i18next'
-import { useCallback } from 'react'
-import { CustomerContainer, TruckInvoiceFormModalProps, TruckInvoiceFormValues } from './interface'
+import { useCallback, useMemo } from 'react'
+import { CustomerContainer, HelperWage, OtherExpense, TruckInvoiceFormModalProps, TruckInvoiceFormValues } from './interface'
 import { truckinvoice as truckinvoiceModel } from '../../../../../wailsjs/go/models'
 import { CreateTruckInvoice } from '../../../../../wailsjs/go/main/App'
 import { CUSTOMER_CONTAINER_KEYS } from '../../../../utils/constants'
+import { formatTHB } from '../../../../utils/formatter'
 
 const { Text } = Typography
-
 const customerOptions = [
   { label: 'บริษัท A', value: '43dfb340-fc65-4010-87e3-16fad6c556db' },
 ]
@@ -36,8 +37,11 @@ const customerOptions = [
 const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: TruckInvoiceFormModalProps) => {
   const [form] = Form.useForm()
   const { t: localT } = useTranslation('truck-invoice')
+  const { t: commonT } = useTranslation('common')
   const customers = Form.useWatch('customers', form)
-
+  const driverWage = Form.useWatch('driverWage', form)
+  const helpers = Form.useWatch('helpers', form)
+  const otherExpenses = Form.useWatch('otherExpenses', form)
 
   type ItemKey = typeof CUSTOMER_CONTAINER_KEYS[number]
 
@@ -65,6 +69,29 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
       return total + qty * price
     }, 0)
   }, [])
+
+  const totalExpense = useMemo(() => {
+    const driver = driverWage ?? 0
+
+    const helpersTotal = (helpers ?? []).reduce(
+      (sum: number, h: HelperWage) => sum + (h?.wage ?? 0),
+      0
+    )
+
+    const otherExpensesTotal = (otherExpenses ?? []).reduce(
+      (sum: number, e: OtherExpense) => sum + (e?.amount ?? 0),
+      0
+    )
+
+    return driver + helpersTotal + otherExpensesTotal
+  }, [driverWage, helpers, otherExpenses])
+
+  const totalIncome = useMemo(() => {
+    return (customers ?? []).reduce(
+      (sum: number, c: CustomerContainer) => sum + calculateCustomerTotal(c),
+      0
+    )
+  }, [calculateCustomerTotal, customers])
 
   const handleCloseModal = useCallback(() => {
     form.resetFields()
@@ -103,12 +130,15 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
     })
 
     try {
-      await CreateTruckInvoice(payload)
+      console.log(payload)
+      // await CreateTruckInvoice(payload)
     } catch {
       // interceptor handles error
     }
 
-  }, [mapItems])
+    // handleCloseModal()
+    onChange()
+  }, [handleCloseModal, mapItems, onChange])
 
   return (
     <Modal
@@ -124,17 +154,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
         }
       }}
       title={
-        <div className="mb-4">
-          <Space>
-            <Truck size={22} />
-            <div>
-              <div className="font-semibold text-lg">
-                บันทึกใบค่ารถ
-              </div>
-              <Text type="secondary">Transport Form</Text>
-            </div>
-          </Space>
-        </div>
+        <ModalHeader icon={<Truck />} title={localT('modal-title')} subtitle={localT('title')} />
       }
     >
       <Form
@@ -151,50 +171,34 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
         onFinishFailed={(err) => console.log(err)}
       >
         {/* ================= GENERAL ================= */}
-        <Card title="ข้อมูลทั่วไป">
+        <Card title={localT('card.general')}>
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item
-                label="วันที่"
-                name="date"
-                rules={[{ required: true }]}
-              >
+              <Form.Item label={localT('form.date')} name="date" rules={[{ required: true }]}>
                 <DatePicker className="w-full" />
               </Form.Item>
             </Col>
 
             <Col span={8}>
-              <Form.Item
-                label="ทะเบียนรถ"
-                name="carPlate"
-                rules={[{ required: true }]}
-              >
+              <Form.Item label={localT('form.car-plate')} name="carPlate" rules={[{ required: true }]}>
                 <Input placeholder="กข 1234" />
               </Form.Item>
             </Col>
 
             <Col span={8}>
-              <Form.Item
-                label="ชื่อคนขับ"
-                name="driverName"
-                rules={[{ required: true }]}
-              >
+              <Form.Item label={localT('form.driver-name')} name="driverName" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
             </Col>
 
             <Col span={8}>
-              <Form.Item
-                label="ค่าแรงคนขับ"
-                name="driverWage"
-                rules={[{ required: true }]}
-              >
+              <Form.Item label={localT('form.driver-wage')} name="driverWage" rules={[{ required: true }]}>
                 <InputNumber className="w-full" min={0} />
               </Form.Item>
             </Col>
 
             <Col span={16}>
-              <Form.Item label="หมายเหตุ" name="note">
+              <Form.Item label={localT('form.note')} name="note">
                 <Input />
               </Form.Item>
             </Col>
@@ -202,7 +206,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
         </Card>
 
         {/* ================= HELPERS ================= */}
-        <Card title="ลูกมือ">
+        <Card title={localT('card.helpers')}>
           <Form.List name="helpers">
             {(fields, { add, remove }) => (
               <>
@@ -211,7 +215,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                     <Col flex="auto">
                       <Form.Item
                         name={[field.name, 'name']}
-                        label="ชื่อ"
+                        label={localT('fields.name')}
                       >
                         <Input />
                       </Form.Item>
@@ -220,7 +224,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                     <Col flex="auto">
                       <Form.Item
                         name={[field.name, 'wage']}
-                        label="ค่าแรง"
+                        label={localT('fields.wage')}
                       >
                         <InputNumber className="w-full" />
                       </Form.Item>
@@ -245,7 +249,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                   icon={<Plus size={14} />}
                   onClick={() => add()}
                 >
-                  เพิ่มลูกมือ
+                  {localT('buttons.add-helper')}
                 </Button>
               </>
             )}
@@ -253,7 +257,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
         </Card>
 
         {/* ================= EXPENSES ================= */}
-        <Card title="ค่าใช้จ่ายอื่น">
+        <Card title={localT('card.expenses')}>
           <Form.List name="otherExpenses">
             {(fields, { add, remove }) => (
               <>
@@ -262,7 +266,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                     <Col flex="auto">
                       <Form.Item
                         name={[field.name, 'description']}
-                        label="รายละเอียด"
+                        label={localT('fields.description')}
                       >
                         <Input />
                       </Form.Item>
@@ -271,7 +275,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                     <Col flex="auto">
                       <Form.Item
                         name={[field.name, 'amount']}
-                        label="จำนวนเงิน"
+                        label={localT('fields.amount')}
                       >
                         <InputNumber className="w-full" />
                       </Form.Item>
@@ -296,7 +300,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                   icon={<Plus size={14} />}
                   onClick={() => add()}
                 >
-                  เพิ่มค่าใช้จ่าย
+                  {localT('buttons.add-expense')}
                 </Button>
               </>
             )}
@@ -304,7 +308,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
         </Card>
 
         {/* ================= CUSTOMERS ================= */}
-        <Card title="ลูกค้าที่ส่งของ">
+        <Card title={localT('card.customers')}>
           <Form.List name="customers">
             {(fields, { add, remove }) => (
               <>
@@ -313,7 +317,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                     key={field.key}
                     size="small"
                     className="mb-4"
-                    title={`ลูกค้า ${index + 1}`}
+                    title={localT('customer.title', { index: index + 1 })}
                     extra={
                       <Button
                         danger
@@ -328,7 +332,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                       <Col span={12}>
                         <Form.Item
                           name={[field.name, 'customerId']}
-                          label="ชื่อลูกค้า"
+                          label={localT('form.customer')}
                           rules={[{ required: true }]}
                         >
                           <Select
@@ -340,7 +344,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                       <Col span={12}>
                         <Form.Item
                           name={[field.name, 'status']}
-                          label="สถานะ"
+                          label={localT('form.status')}
                           rules={[{ required: true }]}
                           initialValue={'pending'}
                         >
@@ -348,11 +352,11 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                             options={[
                               {
                                 value: 'pending',
-                                label: localT('status.pending'),
+                                label: commonT('invoice-status.pending'),
                               },
                               {
                                 value: 'paid',
-                                label: localT('status.paid'),
+                                label: commonT('invoice-status.paid'),
                               }
                             ]}
                           />
@@ -361,27 +365,29 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                     </Row>
 
                     {/* ลัง */}
-                    < Divider titlePlacement='left' > ลัง</Divider>
+                    < Divider titlePlacement='left' >
+                      {localT('customer.container')}
+                    </Divider>
                     <Row gutter={16}>
                       <Col span={12}>
-                        <Form.Item label="ลังใหญ่">
+                        <Form.Item label={commonT('plastic-l')}>
                           <Space>
                             <Form.Item name={[field.name, 'big', 'qty']} noStyle initialValue={0}>
-                              <InputNumber placeholder="จำนวน" min={0} />
+                              <InputNumber min={0} precision={0} step={1} />
                             </Form.Item>
                             <span>x</span>
                             <Form.Item name={[field.name, 'big', 'price']} noStyle initialValue={300}>
-                              <InputNumber placeholder="ราคา" min={0} />
+                              <InputNumber min={0} />
                             </Form.Item>
                           </Space>
                         </Form.Item>
                       </Col>
 
                       <Col span={12}>
-                        <Form.Item label="ลังเล็ก">
+                        <Form.Item label={commonT('plastic-s')}>
                           <Space>
                             <Form.Item name={[field.name, 'small', 'qty']} noStyle initialValue={0}>
-                              <InputNumber min={0} />
+                              <InputNumber min={0} precision={0} step={1} />
                             </Form.Item>
                             <span>x</span>
                             <Form.Item name={[field.name, 'small', 'price']} noStyle initialValue={150}>
@@ -393,13 +399,15 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                     </Row>
 
                     {/* โฟม */}
-                    <Divider titlePlacement='left'>โฟม</Divider>
+                    <Divider titlePlacement='left'>
+                      {localT('customer.foam')}
+                    </Divider>
                     <Row gutter={16}>
                       <Col span={8}>
-                        <Form.Item label="โฟมใหญ่">
+                        <Form.Item label={commonT('foam-l')}>
                           <Space>
                             <Form.Item name={[field.name, 'foamBig', 'qty']} noStyle initialValue={0}>
-                              <InputNumber min={0} />
+                              <InputNumber min={0} precision={0} step={1} />
                             </Form.Item>
                             <span>x</span>
                             <Form.Item name={[field.name, 'foamBig', 'price']} noStyle initialValue={200}>
@@ -410,7 +418,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                       </Col>
 
                       <Col span={8}>
-                        <Form.Item label="โฟมกลาง">
+                        <Form.Item label={commonT('foam-m')}>
                           <Space>
                             <Form.Item name={[field.name, 'foamMid', 'qty']} noStyle initialValue={0}>
                               <InputNumber min={0} />
@@ -424,7 +432,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                       </Col>
 
                       <Col span={8}>
-                        <Form.Item label="โฟมเล็ก">
+                        <Form.Item label={commonT('foam-s')}>
                           <Space>
                             <Form.Item name={[field.name, 'foamSmall', 'qty']} noStyle initialValue={0}>
                               <InputNumber min={0} />
@@ -440,7 +448,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
 
                     {/* Total */}
                     <div className="text-right text-lg font-semibold text-blue-600">
-                      รวม: {calculateCustomerTotal(customers?.[index])} บาท
+                      {localT('customer.total')}: {formatTHB(calculateCustomerTotal(customers?.[index]))} บาท
                     </div>
                   </Card>
                 ))}
@@ -451,12 +459,40 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                   icon={<Plus size={14} />}
                   onClick={() => add()}
                 >
-                  เพิ่มลูกค้า
+                  {localT('buttons.add-customer')}
                 </Button>
               </>
             )}
           </Form.List>
         </Card >
+
+        {/* TOTAL */}
+        <Flex justify="end" className="w-full">
+          <Flex
+            vertical
+            gap={8}
+            className="mb-4 px-4 py-4 bg-gray-50 rounded-lg gradient-btn min-w-[220px]"
+          >
+            <Flex justify="space-between" align="center" gap={16}>
+              <Text className="!text-white">
+                {localT('total-expense')}
+              </Text>
+              <Text strong className="!text-white">
+                {formatTHB(totalExpense)}
+              </Text>
+            </Flex>
+
+            <Flex justify="space-between" align="center" gap={16}>
+              <Text className="!text-white">
+                {localT('total-income')}
+              </Text>
+
+              <Text strong className="text-lg !text-white">
+                {formatTHB(totalIncome)}
+              </Text>
+            </Flex>
+          </Flex>
+        </Flex>
 
         {/* ================= SUBMIT ================= */}
         < Form.Item noStyle >
@@ -466,7 +502,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
             block
             size="large"
           >
-            บันทึกใบค่ารถ
+            {localT('buttons.submit')}
           </Button>
         </Form.Item >
       </Form >

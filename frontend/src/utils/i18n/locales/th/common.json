@@ -40,6 +40,7 @@
     "six-months": "6 เดือน",
     "one-year": "1 ปี",
     "all-time": "ตลอดเวลา",
+    "all": "ทั้งหมด",
     "button-search": "ค้นหา",
     "button-clear": "ล้างการกรอง"
   },
@@ -48,5 +49,10 @@
   "range-picker": {
     "start": "วันที่เริ่ม",
     "end": "วันที่สิ้นสุด"
+  },
+  "invoice-status": {
+    "pending": "ค้างชำระ",
+    "cancelled": "ยกเลิก",
+    "paid": "จ่ายแล้ว"
   }
 }

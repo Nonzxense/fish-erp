@@ -5,12 +5,13 @@ import { Pagination } from '../../utils/types'
 import { TruckInvoiceFilter } from './interface'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
 import TruckInvoiceFormModal from './components/modal/TruckInvoiceFormModal'
-import { Button, Space, Table, TableColumnsType, Tag, Tooltip } from 'antd'
+import { Button, Card, Col, Flex, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tag, Tooltip } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '../../utils/formatter'
 import { truncateString } from '../../utils/truncate'
 import { getPaidStatusColor } from '../../utils/getTagColor'
 import { Eye, ListFilter, PencilLine, Plus } from 'lucide-react'
+import PageTitle from '../../components/page-title/PageTitle'
 
 const TruckInvoice = () => {
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
@@ -29,6 +30,26 @@ const TruckInvoice = () => {
   })
   const { t: commonT } = useTranslation('common')
   const { t: localT } = useTranslation('truck-invoice')
+
+  const segmentOptions = useMemo(() => [
+    { label: commonT('filter.all'), value: 'all' },
+    { label: commonT('invoice-status.pending'), value: 'pending' },
+    { label: commonT('invoice-status.paid'), value: 'paid' },
+    { label: commonT('invoice-status.cancelled'), value: 'cancelled' },
+  ], [commonT])
+
+  const resetPagination = useCallback(() => {
+    setPagination((prev) => ({
+      ...prev,
+      page: DEFAULT_PAGE,
+      pageSize: DEFAULT_PAGE_SIZE,
+    }))
+  }, [])
+
+  const handleSegmentStatusFilterChange = useCallback((status: string) => {
+    setSegmentStatus(status)
+    resetPagination()
+  }, [resetPagination])
 
   const loadInvoices = useCallback(async () => {
     try {
@@ -49,6 +70,15 @@ const TruckInvoice = () => {
       setIsLoading(false)
     }
   }, [filter, pagination.page, pagination.pageSize, segmentStatus])
+
+  const handleCloseFormModal = useCallback(() => {
+    setIsOpenModalForm(false)
+    setSelectedInvoice(undefined)
+  }, [])
+
+  const handleFormModalChange = useCallback(async () => {
+    loadInvoices()
+  }, [loadInvoices])
 
   const columns: TableColumnsType<truckinvoiceModel.TruckInvoice> = useMemo(
     () => [
@@ -100,7 +130,7 @@ const TruckInvoice = () => {
             color={getPaidStatusColor(status)}
             className="cursor-pointer px-3 py-1 text-sm"
           >
-            {localT(`status.${status}`)}
+            {commonT(`invoice-status.${status}`)}
           </Tag>
         )
       },
@@ -143,41 +173,88 @@ const TruckInvoice = () => {
     <>
       <TruckInvoiceFormModal
         isOpen={isOpenModalForm}
-        onClose={() => { }}
-        onChange={async () => { }}
+        onClose={handleCloseFormModal}
+        onChange={handleFormModalChange}
       />
-      <Space size="middle">
-        <Button
-          onClick={() => setIsShowFilters((isShow) => !isShow)}
-          size="large"
-          icon={<ListFilter size={16} />}
-          variant="outlined"
-          color="primary"
-          className="min-w-[140px]">
-          {commonT('button-filter')}
-        </Button>
-        <Button
-          onClick={() => setIsOpenModalForm(true)}
-          size="large"
-          icon={<Plus size={16} />}
-          className="min-w-[140px] gradient-btn">
-          {commonT('button-create')}
-        </Button>
+      <Space orientation="vertical" size="large" className="w-full">
+        <Flex align="center" justify="space-between" className="w-full">
+          <PageTitle
+            title={localT('title')}
+            subtitle={localT('subtitle')}
+          />
+        </Flex>
+        <div className="w-full">
+          <Row gutter={[16, 16]}>
+            <Col xs={24} md={8}>
+              <Card variant="borderless">
+                <Statistic
+                  title={localT('stat.total-invoices')}
+                  // value={invoiceSummary?.totalInvoice}
+                  styles={{ content: { color: '#1677ff' } }}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} md={8}>
+              <Card variant="borderless">
+                <Statistic
+                  title={localT('stat.pending')}
+                  // value={invoiceSummary?.pending}
+                  styles={{ content: { color: '#faad14' } }}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} md={8}>
+              <Card variant="borderless">
+                <Statistic
+                  title={localT('stat.paid')}
+                  // value={invoiceSummary?.paid}
+                  styles={{ content: { color: '#00c951' } }}
+                />
+              </Card>
+            </Col>
+          </Row>
+        </div>
+        <Flex justify="space-between" align="center" wrap="wrap" gap={16}>
+          <Segmented
+            options={segmentOptions}
+            value={segmentStatus}
+            onChange={handleSegmentStatusFilterChange}
+            className="select-none"
+          />
+          <Space size="middle">
+            <Button
+              onClick={() => setIsShowFilters((isShow) => !isShow)}
+              size="large"
+              icon={<ListFilter size={16} />}
+              variant="outlined"
+              color="primary"
+              className="min-w-[140px]">
+              {commonT('button-filter')}
+            </Button>
+            <Button
+              onClick={() => setIsOpenModalForm(true)}
+              size="large"
+              icon={<Plus size={16} />}
+              className="min-w-[140px] gradient-btn">
+              {commonT('button-create')}
+            </Button>
+          </Space>
+        </Flex>
+        <Table
+          columns={columns}
+          dataSource={invoices}
+          scroll={{ x: 'max-content' }}
+          rowKey={(record) => record.id}
+          // onChange={handleTableChange}
+          loading={isLoading}
+          pagination={{
+            current: pagination.page,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
+            showSizeChanger: true,
+          }}
+        />
       </Space>
-      <Table
-        columns={columns}
-        dataSource={invoices}
-        scroll={{ x: 'max-content' }}
-        rowKey={(record) => record.id}
-        // onChange={handleTableChange}
-        loading={isLoading}
-        pagination={{
-          current: pagination.page,
-          pageSize: pagination.pageSize,
-          total: pagination.total,
-          showSizeChanger: true,
-        }}
-      />
     </>
   )
 }
