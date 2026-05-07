@@ -3,8 +3,14 @@ name: Build & Release
 on:
   push:
     branches: [ main ]
-
   workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -14,6 +20,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Fetch tags
         run: git fetch --tags
@@ -41,16 +50,20 @@ jobs:
 
       - name: Read version
         id: version
+        shell: pwsh
         run: |
           $v = Get-Content version.txt
-          $tag = "v$v-beta"
+          $tag = "$v-beta"
           echo "VERSION=$tag" >> $env:GITHUB_OUTPUT
 
       - name: Check if tag already exists
+        shell: pwsh
         run: |
+          $tag = "${{ steps.version.outputs.VERSION }}"
           git fetch --tags
-          if (git tag -l "${{ steps.version.outputs.VERSION }}") {
-            Write-Error "Tag already exists. Change version.txt before running."
+          $exists = git tag -l $tag
+          if ($exists -eq $tag) {
+            Write-Error "Tag already exists. Update version.txt."
           }
 
       - name: Build Wails app
@@ -58,11 +71,13 @@ jobs:
           wails build -platform windows/amd64
 
       - name: Create Git Tag
+        shell: pwsh
         run: |
+          $tag = "${{ steps.version.outputs.VERSION }}"
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git tag ${{ steps.version.outputs.VERSION }}
-          git push origin ${{ steps.version.outputs.VERSION }}
+          git tag $tag
+          git push origin $tag
 
       - name: Create Pre-release
         uses: softprops/action-gh-release@v2
