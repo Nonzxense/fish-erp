@@ -17,7 +17,6 @@ const StartupProvider = () => {
       const result = await CheckForUpdates()
 
       if (result.available) {
-        console.log(result)
         modal.confirm({
           title: localT('modal.title'),
           content: localT('modal.desc'),

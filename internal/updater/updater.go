@@ -2,6 +2,7 @@ package updater
 
 import (
 	"encoding/json"
+	"fish/internal/buildinfo"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,17 +14,8 @@ import (
 	"github.com/Masterminds/semver/v3"
 )
 
-func GetCurrentVersion() string {
-	data, err := os.ReadFile("version.txt")
-	if err != nil {
-		return "v0.0.0"
-	}
-
-	return strings.TrimSpace(string(data))
-}
-
 const RepoAPI = "https://api.github.com/repos/Nonzxense/fish-erp/releases/latest"
-const RepoDownload = "https://api.github.com/repos/Nonzxense/fish-erp/releases/download"
+const RepoDownload = "https://github.com/Nonzxense/fish-erp/releases/download"
 
 type GithubRelease struct {
 	TagName string `json:"tag_name"`
@@ -53,13 +45,11 @@ func CheckForUpdates() (*UpdateInfo, error) {
 		return nil, err
 	}
 
-	currentVersion := GetCurrentVersion()
-
-	available := IsUpdateAvailable(currentVersion, release.TagName)
+	available := IsUpdateAvailable(buildinfo.Version, release.TagName)
 
 	return &UpdateInfo{
 		Available: available,
-		Current:   currentVersion,
+		Current:   buildinfo.Version,
 		Latest:    release.TagName,
 		URL:       RepoDownload + "/" + release.TagName + "/fish.exe",
 	}, nil
