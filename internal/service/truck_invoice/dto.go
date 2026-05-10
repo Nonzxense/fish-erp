@@ -21,7 +21,7 @@ type CreateTruckInvoiceInput struct {
 
 type HelperWageInput struct {
 	Name string       `json:"name"`
-	Wage common.Money `json:"wage" validate:"gte=0"`
+	Amount common.Money `json:"amount" validate:"gte=0"`
 }
 
 type OtherExpenseInput struct {

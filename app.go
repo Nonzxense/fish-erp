@@ -13,7 +13,7 @@ import (
 	"fish/internal/service/invoice"
 	"fish/internal/service/party"
 	"fish/internal/service/transaction"
-	"fish/internal/service/truck_invoice"
+	truckinvoice "fish/internal/service/truck_invoice"
 	"os"
 
 	"gorm.io/gorm"

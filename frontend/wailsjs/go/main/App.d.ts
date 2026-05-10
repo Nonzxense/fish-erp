@@ -43,11 +43,13 @@ export function GetFishSaleInvoices(arg1:invoice.InvoiceFilter):Promise<domain.P
 
 export function GetFishTradeInvoiceSummary(arg1:string):Promise<invoice.FishTradeInvoiceSummary>;
 
-export function GetParties(arg1:party.PartyFilter):Promise<domain.PageResult_fish_internal_domain_party_Party_>;
+export function GetParties(arg1:party.PartyFilter):Promise<domain.PageResult_fish_internal_domain_party_PartyWithDebt_>;
 
 export function GetTransactionSummary(arg1:time.Time,arg2:time.Time):Promise<transaction.TransactionSummary>;
 
 export function GetTransactions(arg1:transaction.TransactionFilter):Promise<domain.PageResult_fish_internal_domain_transaction_Transaction_>;
+
+export function GetTruckInvoice(arg1:string):Promise<truckinvoice.TruckInvoice>;
 
 export function GetTruckInvoices(arg1:truckinvoice.TruckInvoiceFilter):Promise<domain.PageResult_fish_internal_domain_truck_invoice_TruckInvoice_>;
 

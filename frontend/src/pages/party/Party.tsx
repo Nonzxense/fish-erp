@@ -9,9 +9,10 @@ import { party } from '../../../wailsjs/go/models'
 import { PartyFilter } from './interface'
 import { GetParties } from '../../../wailsjs/go/main/App'
 import { Pagination } from '../../utils/types'
+import { formatTHB } from '../../utils/formatter'
 
 const Party = () => {
-  const [parties, setParties] = useState<party.Party[]>([])
+  const [parties, setParties] = useState<party.PartyWithDebt[]>([])
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -50,7 +51,7 @@ const Party = () => {
     })
   }, [message, modal, commonT])
 
-  const handleViewDetail = useCallback((record: party.Party) => {
+  const handleViewDetail = useCallback((record: party.PartyWithDebt) => {
     modal.info({
       title: localT('modal.detail-title'),
       content: (
@@ -70,7 +71,7 @@ const Party = () => {
     },
   }
 
-  const columns: TableColumnsType<party.Party> = useMemo(
+  const columns: TableColumnsType<party.PartyWithDebt> = useMemo(
     () => [
       {
         title: localT('table.name'),
@@ -92,16 +93,22 @@ const Party = () => {
       },
       {
         title: localT('table.overdue-amount'),
-        key: 'overdueAmount',
-        dataIndex: 'overdueAmount',
+        key: 'totalDebt',
+        dataIndex: 'totalDebt',
         ellipsis: true,
+        align: 'right',
+        render: (val) => (
+          <span className="text-red-500">
+            {formatTHB(val)}
+          </span>
+        )
       },
       {
         title: localT('table.manage'),
         key: 'manage',
         align: 'center',
         width: 150,
-        render: (_, record: party.Party) => (
+        render: (_, record: party.PartyWithDebt) => (
           <Space>
             <Tooltip title={commonT('button-view')}>
               <Button
@@ -144,6 +151,7 @@ const Party = () => {
         pageSize: pagination.pageSize
       })
       const res = await GetParties(goFilter)
+      console.log(res.data)
       setParties(res.data)
       setPagination((prev) => ({
         ...prev,

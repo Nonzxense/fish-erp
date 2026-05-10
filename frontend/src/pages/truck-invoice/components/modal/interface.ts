@@ -23,7 +23,7 @@ export type TruckInvoiceFormValues = {
 
 export type HelperWage = {
   name: string
-  wage: number
+  amount: number
 }
 
 export type OtherExpense = {
@@ -46,4 +46,6 @@ export type CustomerContainer = {
   foamSmall: Item
 
   status: string
+
+  totalAmount: number
 }

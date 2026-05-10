@@ -22,26 +22,30 @@ import {
 import dayjs from 'dayjs'
 import ModalHeader from '../../../../components/invoice-modal-title/ModalHeader'
 import { useTranslation } from 'react-i18next'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CustomerContainer, HelperWage, OtherExpense, TruckInvoiceFormModalProps, TruckInvoiceFormValues } from './interface'
-import { truckinvoice as truckinvoiceModel } from '../../../../../wailsjs/go/models'
-import { CreateTruckInvoice } from '../../../../../wailsjs/go/main/App'
+import { party as partyModel, truckinvoice as truckinvoiceModel } from '../../../../../wailsjs/go/models'
+import { CreateTruckInvoice, GetParties } from '../../../../../wailsjs/go/main/App'
 import { CUSTOMER_CONTAINER_KEYS } from '../../../../utils/constants'
 import { formatTHB } from '../../../../utils/formatter'
 
 const { Text } = Typography
-const customerOptions = [
-  { label: 'บริษัท A', value: '43dfb340-fc65-4010-87e3-16fad6c556db' },
-]
 
 const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: TruckInvoiceFormModalProps) => {
+  const [customers, setCustomers] = useState<partyModel.Party[]>([])
   const [form] = Form.useForm()
   const { t: localT } = useTranslation('truck-invoice')
   const { t: commonT } = useTranslation('common')
-  const customers = Form.useWatch('customers', form)
+  const watchedCustomers = Form.useWatch('customers', form)
   const driverWage = Form.useWatch('driverWage', form)
   const helpers = Form.useWatch('helpers', form)
   const otherExpenses = Form.useWatch('otherExpenses', form)
+
+  const customerSelectOptions = [
+    ...customers.map((customer) => ({
+      label: customer.name, value: customer.id
+    }))
+  ]
 
   type ItemKey = typeof CUSTOMER_CONTAINER_KEYS[number]
 
@@ -74,7 +78,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
     const driver = driverWage ?? 0
 
     const helpersTotal = (helpers ?? []).reduce(
-      (sum: number, h: HelperWage) => sum + (h?.wage ?? 0),
+      (sum: number, h: HelperWage) => sum + (h?.amount ?? 0),
       0
     )
 
@@ -87,11 +91,11 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
   }, [driverWage, helpers, otherExpenses])
 
   const totalIncome = useMemo(() => {
-    return (customers ?? []).reduce(
+    return (watchedCustomers ?? []).reduce(
       (sum: number, c: CustomerContainer) => sum + calculateCustomerTotal(c),
       0
     )
-  }, [calculateCustomerTotal, customers])
+  }, [calculateCustomerTotal, watchedCustomers])
 
   const handleCloseModal = useCallback(() => {
     form.resetFields()
@@ -130,15 +134,28 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
     })
 
     try {
-      console.log(payload)
-      // await CreateTruckInvoice(payload)
+      await CreateTruckInvoice(payload)
     } catch {
       // interceptor handles error
     }
 
-    // handleCloseModal()
+    handleCloseModal()
     onChange()
   }, [handleCloseModal, mapItems, onChange])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const loadCustomers = async () => {
+      try {
+        const res = await GetParties(new partyModel.PartyFilter())
+        setCustomers(res.data)
+      } catch {
+        // handle by interceptor
+      }
+    }
+
+    loadCustomers()
+  }, [isOpen])
 
   return (
     <Modal
@@ -223,8 +240,8 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
 
                     <Col flex="auto">
                       <Form.Item
-                        name={[field.name, 'wage']}
-                        label={localT('fields.wage')}
+                        name={[field.name, 'amount']}
+                        label={localT('fields.amount')}
                       >
                         <InputNumber className="w-full" />
                       </Form.Item>
@@ -337,7 +354,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                         >
                           <Select
                             showSearch={{ optionFilterProp: 'label' }}
-                            options={customerOptions}
+                            options={customerSelectOptions}
                           />
                         </Form.Item>
                       </Col>
@@ -448,7 +465,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
 
                     {/* Total */}
                     <div className="text-right text-lg font-semibold text-blue-600">
-                      {localT('customer.total')}: {formatTHB(calculateCustomerTotal(customers?.[index]))} บาท
+                      {localT('customer.total')}: {formatTHB(calculateCustomerTotal(watchedCustomers?.[index]))} บาท
                     </div>
                   </Card>
                 ))}

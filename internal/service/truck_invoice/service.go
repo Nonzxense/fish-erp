@@ -54,7 +54,7 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 	for _, h := range input.Helpers {
 		invoice.Helpers = append(invoice.Helpers, truckInvoiceDomain.HelperWage{
 			Name:      h.Name,
-			Wage:      h.Wage,
+			Amount:    h.Amount,
 			InvoiceID: sequenceID,
 		})
 	}
@@ -70,6 +70,7 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 
 	// Customers
 	for _, c := range input.Customers {
+		var totalAmount common.Money
 		customer := truckInvoiceDomain.CustomerContainer{
 			CustomerID: c.CustomerID,
 			InvoiceID:  sequenceID,
@@ -83,8 +84,11 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 				Qty:   ci.Qty,
 				Price: ci.Price,
 			})
+
+			totalAmount += ci.Price.Mul(ci.Qty)
 		}
 
+		customer.TotalAmount = totalAmount
 		invoice.Customers = append(invoice.Customers, customer)
 	}
 
@@ -104,6 +108,10 @@ func (s *TruckInvoiceService) GetTruckInvoices(filter truckInvoiceDomain.TruckIn
 	return pageResult, err
 }
 
+func (s *TruckInvoiceService) GetTruckInvoice(id string) (truckInvoiceDomain.TruckInvoice, error) {
+	return s.repo.FindOne(id)
+}
+
 func (s *TruckInvoiceService) CalculateTotal(invoice truckInvoiceDomain.TruckInvoice) (common.Money, common.Money) {
 	var totalIncome common.Money
 	var totalExpense common.Money = invoice.DriverWage
@@ -121,8 +129,8 @@ func (s *TruckInvoiceService) CalculateTotal(invoice truckInvoiceDomain.TruckInv
 	}
 
 	for _, helper := range invoice.Helpers {
-		if helper.Wage > 0 {
-			totalExpense += helper.Wage
+		if helper.Amount > 0 {
+			totalExpense += helper.Amount
 		}
 	}
 

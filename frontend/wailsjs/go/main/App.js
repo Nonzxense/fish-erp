@@ -82,6 +82,10 @@ export function GetTransactions(arg1) {
   return window['go']['main']['App']['GetTransactions'](arg1);
 }
 
+export function GetTruckInvoice(arg1) {
+  return window['go']['main']['App']['GetTruckInvoice'](arg1);
+}
+
 export function GetTruckInvoices(arg1) {
   return window['go']['main']['App']['GetTruckInvoices'](arg1);
 }

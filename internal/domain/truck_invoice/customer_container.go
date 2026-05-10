@@ -11,14 +11,16 @@ import (
 type CustomerContainer struct {
 	ID uint `gorm:"primaryKey"`
 
-	Status string `gorm:"type:text;check:status IN ('pending','paid')"`
+	Status string `json:"status" gorm:"type:text;check:status IN ('pending','paid')"`
 
-	CustomerID string
-	Customer   party.Party `gorm:"foreignKey:CustomerID"`
+	CustomerID string      `json:"customerId"`
+	Customer   party.Party `json:"customer" gorm:"foreignKey:CustomerID"`
 
 	InvoiceID string `gorm:"not null"`
 
-	Items []CustomerContainerItem `gorm:"foreignKey:ContainerID;constraint:OnDelete:CASCADE"`
+	Items []CustomerContainerItem `json:"items" gorm:"foreignKey:ContainerID;constraint:OnDelete:CASCADE"`
+
+	TotalAmount common.Money `json:"totalAmount" gorm:"default:0"`
 }
 
 type CustomerContainerItem struct {
