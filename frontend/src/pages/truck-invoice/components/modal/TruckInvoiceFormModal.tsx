@@ -27,7 +27,7 @@ import { CustomerContainer, HelperWage, OtherExpense, TruckInvoiceFormModalProps
 import { party as partyModel, truckinvoice as truckinvoiceModel } from '../../../../../wailsjs/go/models'
 import { CreateTruckInvoice, GetParties } from '../../../../../wailsjs/go/main/App'
 import { CUSTOMER_CONTAINER_KEYS } from '../../../../utils/constants'
-import { formatTHB } from '../../../../utils/formatter'
+import { formatTHBRaw } from '../../../../utils/formatter'
 
 const { Text } = Typography
 
@@ -42,7 +42,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
   const otherExpenses = Form.useWatch('otherExpenses', form)
 
   const customerSelectOptions = [
-    ...customers.map((customer) => ({
+    ...(customers ?? []).map((customer) => ({
       label: customer.name, value: customer.id
     }))
   ]
@@ -389,11 +389,11 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                       <Col span={12}>
                         <Form.Item label={commonT('plastic-l')}>
                           <Space>
-                            <Form.Item name={[field.name, 'big', 'qty']} noStyle initialValue={0}>
+                            <Form.Item name={[field.name, 'plastic-l', 'qty']} noStyle initialValue={0}>
                               <InputNumber min={0} precision={0} step={1} />
                             </Form.Item>
                             <span>x</span>
-                            <Form.Item name={[field.name, 'big', 'price']} noStyle initialValue={300}>
+                            <Form.Item name={[field.name, 'plastic-l', 'price']} noStyle initialValue={300}>
                               <InputNumber min={0} />
                             </Form.Item>
                           </Space>
@@ -403,11 +403,11 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                       <Col span={12}>
                         <Form.Item label={commonT('plastic-s')}>
                           <Space>
-                            <Form.Item name={[field.name, 'small', 'qty']} noStyle initialValue={0}>
+                            <Form.Item name={[field.name, 'plastic-s', 'qty']} noStyle initialValue={0}>
                               <InputNumber min={0} precision={0} step={1} />
                             </Form.Item>
                             <span>x</span>
-                            <Form.Item name={[field.name, 'small', 'price']} noStyle initialValue={150}>
+                            <Form.Item name={[field.name, 'plastic-s', 'price']} noStyle initialValue={150}>
                               <InputNumber min={0} />
                             </Form.Item>
                           </Space>
@@ -423,11 +423,11 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                       <Col span={8}>
                         <Form.Item label={commonT('foam-l')}>
                           <Space>
-                            <Form.Item name={[field.name, 'foamBig', 'qty']} noStyle initialValue={0}>
+                            <Form.Item name={[field.name, 'foam-l', 'qty']} noStyle initialValue={0}>
                               <InputNumber min={0} precision={0} step={1} />
                             </Form.Item>
                             <span>x</span>
-                            <Form.Item name={[field.name, 'foamBig', 'price']} noStyle initialValue={200}>
+                            <Form.Item name={[field.name, 'foam-l', 'price']} noStyle initialValue={200}>
                               <InputNumber min={0} />
                             </Form.Item>
                           </Space>
@@ -437,11 +437,11 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                       <Col span={8}>
                         <Form.Item label={commonT('foam-m')}>
                           <Space>
-                            <Form.Item name={[field.name, 'foamMid', 'qty']} noStyle initialValue={0}>
+                            <Form.Item name={[field.name, 'foam-m', 'qty']} noStyle initialValue={0}>
                               <InputNumber min={0} />
                             </Form.Item>
                             <span>x</span>
-                            <Form.Item name={[field.name, 'foamMid', 'price']} noStyle initialValue={150}>
+                            <Form.Item name={[field.name, 'foam-m', 'price']} noStyle initialValue={150}>
                               <InputNumber min={0} />
                             </Form.Item>
                           </Space>
@@ -451,11 +451,11 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                       <Col span={8}>
                         <Form.Item label={commonT('foam-s')}>
                           <Space>
-                            <Form.Item name={[field.name, 'foamSmall', 'qty']} noStyle initialValue={0}>
+                            <Form.Item name={[field.name, 'foam-s', 'qty']} noStyle initialValue={0}>
                               <InputNumber min={0} />
                             </Form.Item>
                             <span>x</span>
-                            <Form.Item name={[field.name, 'foamSmall', 'price']} noStyle initialValue={100}>
+                            <Form.Item name={[field.name, 'foam-s', 'price']} noStyle initialValue={100}>
                               <InputNumber min={0} />
                             </Form.Item>
                           </Space>
@@ -465,7 +465,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
 
                     {/* Total */}
                     <div className="text-right text-lg font-semibold text-blue-600">
-                      {localT('customer.total')}: {formatTHB(calculateCustomerTotal(watchedCustomers?.[index]))} บาท
+                      {localT('customer.total')}: {formatTHBRaw(calculateCustomerTotal(watchedCustomers?.[index]))} บาท
                     </div>
                   </Card>
                 ))}
@@ -492,20 +492,20 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
           >
             <Flex justify="space-between" align="center" gap={16}>
               <Text className="!text-white">
-                {localT('total-expense')}
+                {commonT('total-expense')}
               </Text>
               <Text strong className="!text-white">
-                {formatTHB(totalExpense)}
+                {formatTHBRaw(totalExpense)}
               </Text>
             </Flex>
 
             <Flex justify="space-between" align="center" gap={16}>
               <Text className="!text-white">
-                {localT('total-income')}
+                {commonT('total-income')}
               </Text>
 
               <Text strong className="text-lg !text-white">
-                {formatTHB(totalIncome)}
+                {formatTHBRaw(totalIncome)}
               </Text>
             </Flex>
           </Flex>

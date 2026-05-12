@@ -30,7 +30,6 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 		return err
 	}
 
-	fmt.Println(input.OccurredAt)
 	sequenceID := fmt.Sprintf("TI-%d%02d-%04d",
 		input.OccurredAt.In(loc).Year(),
 		input.OccurredAt.In(loc).Month(),
@@ -47,14 +46,14 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 		},
 		CarPlate:   input.CarPlate,
 		DriverName: input.DriverName,
-		DriverWage: input.DriverWage,
+		DriverWage: common.NewMoney(input.DriverWage),
 	}
 
 	// Helpers
 	for _, h := range input.Helpers {
 		invoice.Helpers = append(invoice.Helpers, truckInvoiceDomain.HelperWage{
 			Name:      h.Name,
-			Amount:    h.Amount,
+			Amount:    common.NewMoney(h.Amount),
 			InvoiceID: sequenceID,
 		})
 	}
@@ -63,7 +62,7 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 	for _, e := range input.OtherExpenses {
 		invoice.OtherExpenses = append(invoice.OtherExpenses, truckInvoiceDomain.OtherExpense{
 			Description: e.Description,
-			Amount:      e.Amount,
+			Amount:      common.NewMoney(e.Amount),
 			InvoiceID:   sequenceID,
 		})
 	}
@@ -82,10 +81,10 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 			customer.Items = append(customer.Items, truckInvoiceDomain.CustomerContainerItem{
 				Type:  ci.Type,
 				Qty:   ci.Qty,
-				Price: ci.Price,
+				Price: common.NewMoney(ci.Price),
 			})
 
-			totalAmount += ci.Price.Mul(ci.Qty)
+			totalAmount += common.NewMoney(ci.Price * float64(ci.Qty))
 		}
 
 		customer.TotalAmount = totalAmount

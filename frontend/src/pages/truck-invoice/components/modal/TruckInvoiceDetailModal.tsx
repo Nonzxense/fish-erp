@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Divider,
   Flex,
   Modal,
@@ -9,7 +8,7 @@ import {
   Typography
 } from 'antd'
 import {
-  TruckIcon,
+  Truck,
   UsersIcon,
   WalletIcon
 } from 'lucide-react'
@@ -18,8 +17,9 @@ import { formatDate, formatTHB } from '../../../../utils/formatter'
 import { getPaidStatusColor } from '../../../../utils/getTagColor'
 import dayjs from 'dayjs'
 import { truckinvoice as truckinvoiceModel } from '../../../../../wailsjs/go/models'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { GetTruckInvoice } from '../../../../../wailsjs/go/main/App'
+import ModalHeader from '../../../../components/invoice-modal-title/ModalHeader'
 
 const { Title, Text } = Typography
 
@@ -40,14 +40,13 @@ const TruckInvoiceDetailModal = ({
 
   const invoiceNo = truckInvoice?.id ?? '-'
 
-  const totalCustomers = truckInvoice?.customers.length ?? 0
-  const totalHelpers = truckInvoice?.helpers.length ?? 0
 
   useEffect(() => {
     const loadTruckInvoices = async () => {
       if (!id) return
       try {
         const res = await GetTruckInvoice(id)
+        console.log(res)
         setTruckInvoice(res)
       } catch {
         // interceptor handles error
@@ -71,40 +70,21 @@ const TruckInvoiceDetailModal = ({
         }
       }}
       title={
-        <>
-          <Flex justify="space-between" align="center" className="w-full pr-8">
-            <Flex gap={12} align="center">
-              <Avatar
-                shape="square"
-                size={48}
-                icon={<TruckIcon size={22} />}
-                className="bg-orange-500 bg-[radial-gradient(circle_at_bottom_right,theme(colors.yellow.400)_0%,transparent_80%)] !border-0 !shadow-none !rounded-xl"
-              />
-
-              <div>
-                <Title level={4} className="!mb-0">
-                  {localT('modal.title')}
-                </Title>
-
-                <Text type="secondary">
-                  {localT('title')}
-                </Text>
-              </div>
-            </Flex>
-
+        <ModalHeader
+          icon={<Truck />}
+          title={localT('modal-title')}
+          subtitle={localT('title')}
+          rightContent={
             <div className="text-right">
-              <Text type="secondary" className="block text-xs uppercase">
+              <Text type="secondary" className="text-[12px] block uppercase">
                 {commonT('invoice-no')}
               </Text>
-
-              <Text strong className="font-mono text-orange-500">
+              <Text strong className="text-orange-500 font-mono">
                 #{invoiceNo}
               </Text>
             </div>
-          </Flex>
-
-          <Divider className="mb-4" />
-        </>
+          }
+          className="bg-orange-500 bg-[radial-gradient(circle_at_bottom_right,theme(colors.yellow.400)_0%,transparent_80%)] !border-0 !shadow-none !rounded-xl" />
       }
     >
       {!truckInvoice ? (
@@ -163,23 +143,10 @@ const TruckInvoiceDetailModal = ({
 
                 <div className="mt-1">
                   <Tag color={getPaidStatusColor(truckInvoice.status)}>
-                    {localT(`status.${truckInvoice.status}`)}
+                    {commonT(`invoice-status.${truckInvoice.status}`)}
                   </Tag>
                 </div>
               </div>
-
-              <div>
-                <Text type="secondary">
-                  {localT('table.type')}
-                </Text>
-
-                <div>
-                  <Tag color="blue">
-                    {truckInvoice.type}
-                  </Tag>
-                </div>
-              </div>
-
             </div>
           </Flex>
 
@@ -191,7 +158,7 @@ const TruckInvoiceDetailModal = ({
               <UsersIcon size={18} />
 
               <Title level={5} className="!mb-0">
-                {localT('modal.customers')}
+                {localT('card.customers')}
               </Title>
             </Flex>
 
@@ -204,16 +171,15 @@ const TruckInvoiceDetailModal = ({
               scroll={{ x: true }}
               columns={[
                 {
-                  title: localT('table.customer'),
-                  render: (_, record) =>
-                    record.customer?.name || '-'
+                  title: localT('table.name'),
+                  render: (_, record) => record.customer?.name || '-'
                 },
                 {
                   title: localT('table.status'),
                   align: 'center',
                   render: (_, record) => (
                     <Tag color={getPaidStatusColor(record.status)}>
-                      {localT(`status.${record.status}`)}
+                      {commonT(`invoice-status.${record.status}`)}
                     </Tag>
                   )
                 },
@@ -224,6 +190,40 @@ const TruckInvoiceDetailModal = ({
                     formatTHB(record.totalAmount || 0)
                 }
               ]}
+              expandable={{
+                expandedRowRender: (record) => (
+                  <Table
+                    bordered
+                    size="small"
+                    pagination={false}
+                    rowKey="id"
+                    dataSource={record.items}
+                    columns={[
+                      {
+                        title: localT('table.type'),
+                        render: (_, item) => commonT(item.Type)
+                      },
+                      {
+                        title: localT('table.qty'),
+                        align: 'right',
+                        render: (_, item) => item.Qty
+                      },
+                      {
+                        title: localT('table.price'),
+                        align: 'right',
+                        render: (_, item) =>
+                          formatTHB(item.Price)
+                      },
+                      {
+                        title: localT('table.amount'),
+                        align: 'right',
+                        render: (_, item) =>
+                          formatTHB(item.Qty * item.Price)
+                      }
+                    ]}
+                  />
+                )
+              }}
             />
           </div>
 
@@ -234,7 +234,7 @@ const TruckInvoiceDetailModal = ({
 
               <div>
                 <Title level={5}>
-                  {localT('modal.helpers')}
+                  {localT('card.helpers')}
                 </Title>
 
                 <Table
@@ -267,7 +267,7 @@ const TruckInvoiceDetailModal = ({
 
               <div>
                 <Title level={5}>
-                  {localT('modal.other-expenses')}
+                  {localT('card.expenses')}
                 </Title>
 
                 <Table
@@ -323,7 +323,7 @@ const TruckInvoiceDetailModal = ({
                   <WalletIcon size={18} />
 
                   <Text strong>
-                    {localT('modal.summary')}
+                    {localT('summary')}
                   </Text>
                 </Flex>
               </div>
@@ -332,27 +332,7 @@ const TruckInvoiceDetailModal = ({
 
                 <Flex justify="space-between">
                   <Text type="secondary">
-                    {localT('modal.total-customers')}
-                  </Text>
-
-                  <Text strong>
-                    {totalCustomers}
-                  </Text>
-                </Flex>
-
-                <Flex justify="space-between">
-                  <Text type="secondary">
-                    {localT('modal.total-helpers')}
-                  </Text>
-
-                  <Text strong>
-                    {totalHelpers}
-                  </Text>
-                </Flex>
-
-                <Flex justify="space-between">
-                  <Text type="secondary">
-                    {localT('modal.total-income')}
+                    {commonT('total-income')}
                   </Text>
 
                   <Text strong className="text-emerald-600">
@@ -362,7 +342,7 @@ const TruckInvoiceDetailModal = ({
 
                 <Flex justify="space-between">
                   <Text type="secondary">
-                    {localT('modal.total-expense')}
+                    {commonT('total-expense')}
                   </Text>
 
                   <Text strong className="text-red-500">
@@ -374,7 +354,7 @@ const TruckInvoiceDetailModal = ({
 
                 <Flex justify="space-between" align="center">
                   <Title level={5} className="!mb-0">
-                    {localT('modal.net-profit')}
+                    {commonT('net-profit')}
                   </Title>
 
                   <Title

@@ -18,6 +18,9 @@
   "red": "สีแดง",
   "kg": "กก.",
   "invoice-no": "เลขที่บิล",
+  "total-income": "รายรับทั้งหมด",
+  "total-expense": "ค่าใช้จ่ายทั้งหมด",
+  "net-profit": "กำไรสุทธิ",
   "message": {
     "delete-success": "ลบรายการสำเร็จ"
   },

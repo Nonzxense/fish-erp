@@ -2,8 +2,6 @@ package repository
 
 import (
 	domain "fish/internal/domain/party"
-	"fmt"
-
 	"gorm.io/gorm"
 )
 
@@ -109,7 +107,7 @@ func (r *PartyRepository) FindAll(
 	}
 
 	err := query.Scan(&parties).Error
-	fmt.Println(parties)
+
 	return parties, total, err
 }
 

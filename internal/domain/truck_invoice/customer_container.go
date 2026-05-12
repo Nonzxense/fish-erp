@@ -27,7 +27,7 @@ type CustomerContainerItem struct {
 	ID          uint `gorm:"primaryKey"`
 	ContainerID uint
 
-	Type  string `gorm:"type:text"` // "big", "small", "foam_big", etc.
+	Type  string `gorm:"type:text"` // "plastic-l", "plastic-s", "foam-m", etc.
 	Qty   int32
 	Price common.Money
 }

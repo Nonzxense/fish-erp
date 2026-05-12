@@ -5,4 +5,5 @@ export interface ModalHeaderProps {
   title: string
   subtitle?: string
   rightContent?: React.ReactNode
+  className?: string
 }

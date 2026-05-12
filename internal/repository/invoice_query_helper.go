@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fish/internal/domain/common"
 	"fish/internal/domain/container"
 	domain "fish/internal/domain/invoice"
 	"fish/internal/domain/transaction"
@@ -89,7 +90,7 @@ func (r *InvoiceRepository) createInvoiceTransactionByID(
 	var result struct {
 		ID          string
 		CreatedAt   time.Time
-		TotalAmount float64
+		TotalAmount common.Money
 	}
 
 	if err := tx.Model(model).

@@ -39,11 +39,11 @@ export type Item = {
 export type CustomerContainer = {
   customerId: string
 
-  big: Item
-  small: Item
-  foamBig: Item
-  foamMid: Item
-  foamSmall: Item
+  'foam-l': Item
+  'foam-m': Item
+  'foam-s': Item
+  'plastic-l': Item
+  'plastic-s': Item
 
   status: string
 

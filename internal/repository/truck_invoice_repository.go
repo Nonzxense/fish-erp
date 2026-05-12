@@ -68,7 +68,7 @@ func (r *TruckInvoiceRepository) Create(ti *domain.TruckInvoice) error {
 				t := transaction.Transaction{
 					ID:         uuid.NewString(),
 					InvoiceID:  &ti.ID,
-					Amount:     float64(customer.Total()),
+					Amount:     customer.Total(),
 					OccurredAt: ti.CreatedAt,
 					Type:       "income",
 					Category:   ptr.String("ค่าบรรทุกปลา"),
