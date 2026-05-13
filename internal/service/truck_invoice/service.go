@@ -73,7 +73,7 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 		customer := truckInvoiceDomain.CustomerContainer{
 			CustomerID: c.CustomerID,
 			InvoiceID:  sequenceID,
-			Status:     c.Status,
+			PaidAmount: common.Money(c.PaidAmount),
 			Items:      []truckInvoiceDomain.CustomerContainerItem{},
 		}
 
@@ -88,6 +88,7 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 		}
 
 		customer.TotalAmount = totalAmount
+		customer.RefreshStatus()
 		invoice.Customers = append(invoice.Customers, customer)
 	}
 

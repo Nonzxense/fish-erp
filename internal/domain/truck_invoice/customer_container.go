@@ -11,7 +11,7 @@ import (
 type CustomerContainer struct {
 	ID uint `gorm:"primaryKey"`
 
-	Status string `json:"status" gorm:"type:text;check:status IN ('pending','paid')"`
+	Status string `json:"status" gorm:"type:text;check:status IN ('pending','partial',paid')"`
 
 	CustomerID string      `json:"customerId"`
 	Customer   party.Party `json:"customer" gorm:"foreignKey:CustomerID"`
@@ -21,6 +21,7 @@ type CustomerContainer struct {
 	Items []CustomerContainerItem `json:"items" gorm:"foreignKey:ContainerID;constraint:OnDelete:CASCADE"`
 
 	TotalAmount common.Money `json:"totalAmount" gorm:"default:0"`
+	PaidAmount  common.Money `json:"paidAmount" gorm:"default:0"`
 }
 
 type CustomerContainerItem struct {
@@ -30,6 +31,17 @@ type CustomerContainerItem struct {
 	Type  string `gorm:"type:text"` // "plastic-l", "plastic-s", "foam-m", etc.
 	Qty   int32
 	Price common.Money
+}
+
+func (c *CustomerContainer) RefreshStatus() {
+	switch {
+	case c.PaidAmount <= 0:
+		c.Status = "pending"
+	case c.PaidAmount >= c.TotalAmount:
+		c.Status = "paid"
+	default:
+		c.Status = "partial"
+	}
 }
 
 func (c CustomerContainerItem) Value() (driver.Value, error) {

@@ -202,3 +202,125 @@ func (r *TruckInvoiceRepository) FindOne(id string) (domain.TruckInvoice, error)
 
 	return invoice, err
 }
+
+func (r *TruckInvoiceRepository) Update(id string, newInvoice *domain.TruckInvoice) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var oldInvoice domain.TruckInvoice
+
+		if err := tx.
+			Preload("Customers").
+			Preload("Customers.Items").
+			Preload("Helpers").
+			Preload("OtherExpenses").
+			First(&oldInvoice, "id = ?", id).Error; err != nil {
+			return err
+		}
+
+		newHelperMap := make(map[uint]bool, len(newInvoice.Helpers))
+		newExpenseMap := make(map[uint]bool, len(newInvoice.OtherExpenses))
+
+		for _, helper := range newInvoice.Helpers {
+			if helper.ID != 0 {
+				newHelperMap[helper.ID] = true
+			}
+		}
+
+		for _, expense := range newInvoice.OtherExpenses {
+			if expense.ID != 0 {
+				newExpenseMap[expense.ID] = true
+			}
+		}
+
+		// delete removed helpers
+		for _, helper := range oldInvoice.Helpers {
+			if !newHelperMap[helper.ID] {
+				if err := tx.Delete(&helper).Error; err != nil {
+					return err
+				}
+			}
+		}
+
+		// delete removed expenses
+		for _, expense := range oldInvoice.OtherExpenses {
+			if !newExpenseMap[expense.ID] {
+				if err := tx.Delete(&expense).Error; err != nil {
+					return err
+				}
+			}
+		}
+
+		t := make([]transaction.Transaction, 0,
+			len(newInvoice.Helpers)+
+				len(newInvoice.OtherExpenses)+
+				len(newInvoice.Customers),
+		)
+
+		// helpers
+		for i := range newInvoice.Helpers {
+			helper := &newInvoice.Helpers[i]
+			helper.InvoiceID = newInvoice.ID
+
+			if helper.ID == 0 {
+				// create new helper
+				if err := tx.Create(helper).Error; err != nil {
+					return err
+				}
+			} else {
+				// update existing helper
+				if err := tx.Model(helper).
+					Where("id = ?", helper.ID).
+					Updates(map[string]any{
+						"name":   helper.Name,
+						"amount": helper.Amount,
+					}).Error; err != nil {
+					return err
+				}
+			}
+
+			t = append(t, transaction.Transaction{
+				ID:         uuid.NewString(),
+				InvoiceID:  &newInvoice.ID,
+				Amount:     helper.Amount,
+				OccurredAt: newInvoice.CreatedAt,
+				Type:       "expense",
+				Category:   ptr.String("ค่าจ้างเด็กรถ"),
+				Note:       ptr.String("ใบเสร็จ " + newInvoice.ID + " เด็กรถ " + helper.Name),
+			})
+		}
+
+		// expenses
+		for i := range newInvoice.OtherExpenses {
+			expense := &newInvoice.OtherExpenses[i]
+			expense.InvoiceID = newInvoice.ID
+
+			if expense.ID == 0 {
+				// create new expense
+				if err := tx.Create(expense).Error; err != nil {
+					return err
+				}
+			} else {
+				// update existing expense
+				if err := tx.Model(expense).
+					Where("id = ?", expense.ID).
+					Updates(map[string]any{
+						"description": expense.Description,
+						"amount":      expense.Amount,
+					}).Error; err != nil {
+					return err
+				}
+			}
+
+			t = append(t, transaction.Transaction{
+				ID:         uuid.NewString(),
+				InvoiceID:  &newInvoice.ID,
+				Amount:     expense.Amount,
+				OccurredAt: newInvoice.CreatedAt,
+				Type:       "expense",
+				Category:   ptr.String("ค่าใช้จ่ายรถบรรทุก"),
+				Note:       ptr.String("ใบเสร็จ " + newInvoice.ID + " " + expense.Description),
+			})
+		}
+
+		return nil
+	})
+}

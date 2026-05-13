@@ -912,6 +912,7 @@ export namespace truckinvoice {
 	export class CustomerContainerInput {
 	    customerId: string;
 	    status: string;
+	    PaidAmount: number;
 	    items: ItemInput[];
 	
 	    static createFrom(source: any = {}) {
@@ -922,6 +923,7 @@ export namespace truckinvoice {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.customerId = source["customerId"];
 	        this.status = source["status"];
+	        this.PaidAmount = source["PaidAmount"];
 	        this.items = this.convertValues(source["items"], ItemInput);
 	    }
 	
@@ -1047,6 +1049,7 @@ export namespace truckinvoice {
 	    InvoiceID: string;
 	    items: CustomerContainerItem[];
 	    totalAmount: number;
+	    paidAmount: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new CustomerContainer(source);
@@ -1061,6 +1064,7 @@ export namespace truckinvoice {
 	        this.InvoiceID = source["InvoiceID"];
 	        this.items = this.convertValues(source["items"], CustomerContainerItem);
 	        this.totalAmount = source["totalAmount"];
+	        this.paidAmount = source["paidAmount"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
