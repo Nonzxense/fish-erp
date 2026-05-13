@@ -11,7 +11,7 @@ import (
 type CustomerContainer struct {
 	ID uint `gorm:"primaryKey"`
 
-	Status string `json:"status" gorm:"type:text;check:status IN ('pending','partial',paid')"`
+	Status string `json:"status" gorm:"type:text;check:status IN ('pending','partial','paid')"`
 
 	CustomerID string      `json:"customerId"`
 	Customer   party.Party `json:"customer" gorm:"foreignKey:CustomerID"`
