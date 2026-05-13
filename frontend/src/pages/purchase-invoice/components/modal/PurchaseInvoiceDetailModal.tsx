@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { formatDate, formatTHB } from '../../../../utils/formatter'
 import { getPaidStatusColor } from '../../../../utils/getTagColor'
 import dayjs from 'dayjs'
+import ModalHeader from '../../../../components/invoice-modal-title/ModalHeader'
 
 const { Title, Text } = Typography
 
@@ -47,40 +48,21 @@ const PurchaseInvoiceDetailModal = ({
         }
       }}
       title={
-        <>
-          <Flex justify="space-between" align="center" className="w-full pr-8">
-            <Flex gap={12} align="center">
-              <Avatar
-                shape="square"
-                size={48}
-                icon={<FishIcon />}
-                className="bg-blue-500 bg-[radial-gradient(circle_at_bottom_right,theme(colors.cyan.400)_0%,transparent_80%)] !border-0 !shadow-none !rounded-xl"
-              />
-
-              <div>
-                <Title level={4} className="!mb-0">
-                  {localT('modal.title')}
-                </Title>
-
-                <Text type="secondary">
-                  {localT('title')}
-                </Text>
-              </div>
-            </Flex>
-
+        <ModalHeader
+          icon={<FishIcon />}
+          title={localT('modal.title')}
+          subtitle={localT('title')}
+          rightContent={
             <div className="text-right">
-              <Text type="secondary" className="block text-xs uppercase">
+              <Text type="secondary" className="text-[12px] block uppercase">
                 {commonT('invoice-no')}
               </Text>
-
-              <Text strong className="font-mono text-blue-500">
-                #{invoiceNo}
+              <Text strong className="text-blue-500 font-mono">
+                #{purchaseInvoice?.id}
               </Text>
             </div>
-          </Flex>
-
-          <Divider className="mb-4" />
-        </>
+          }
+        />
       }
     >
       {!purchaseInvoice ? (

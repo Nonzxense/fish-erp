@@ -7,11 +7,12 @@ import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
 import TruckInvoiceFormModal from './components/modal/TruckInvoiceFormModal'
 import { Button, Card, Col, Flex, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tag, Tooltip } from 'antd'
 import { useTranslation } from 'react-i18next'
-import { formatDate } from '../../utils/formatter'
+import { formatDate, formatTHB } from '../../utils/formatter'
 import { truncateString } from '../../utils/truncate'
 import { getPaidStatusColor } from '../../utils/getTagColor'
 import { Eye, ListFilter, PencilLine, Plus } from 'lucide-react'
 import PageTitle from '../../components/page-title/PageTitle'
+import TruckInvoiceDetailModal from './components/modal/TruckInvoiceDetailModal'
 
 const TruckInvoice = () => {
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
@@ -76,6 +77,11 @@ const TruckInvoice = () => {
     setSelectedInvoice(undefined)
   }, [])
 
+  const handleViewDetail = useCallback((record: truckinvoiceModel.TruckInvoice) => {
+    setSelectedInvoice(record)
+    setIsOpenModalDetail(true)
+  }, [])
+
   const handleFormModalChange = useCallback(async () => {
     loadInvoices()
   }, [loadInvoices])
@@ -111,13 +117,25 @@ const TruckInvoice = () => {
         title: localT('table.income'),
         key: 'totalIncome',
         dataIndex: 'totalIncome',
+        align: "right",
         width: 150,
+        render: (val) => (
+          <span className='text-green-500'>
+            {formatTHB(val)}
+          </span>
+        )
       },
       {
         title: localT('table.expense'),
         key: 'totalExpense',
         dataIndex: 'totalExpense',
+        align: "right",
         width: 150,
+        render: (val) => (
+          <span className='text-red-500'>
+            {formatTHB(val)}
+          </span>
+        )
       },
       {
         title: localT('table.status'),
@@ -145,7 +163,7 @@ const TruckInvoice = () => {
               <Button
                 icon={<Eye size={16} />}
                 type="text"
-              // onClick={() => handleViewDetail(record)}
+                onClick={() => handleViewDetail(record)}
               />
             </Tooltip>
             <Tooltip title={commonT('button-edit')}>
@@ -162,7 +180,7 @@ const TruckInvoice = () => {
         )
       }
     ],
-    [localT, commonT]
+    [commonT, localT, handleViewDetail]
   )
 
   useEffect(() => {
@@ -171,6 +189,11 @@ const TruckInvoice = () => {
 
   return (
     <>
+      <TruckInvoiceDetailModal
+        isOpen={isOpenModalDetail}
+        onClose={() => setIsOpenModalDetail(false)}
+        id={selectedInvoice?.id}
+      />
       <TruckInvoiceFormModal
         isOpen={isOpenModalForm}
         onClose={handleCloseFormModal}

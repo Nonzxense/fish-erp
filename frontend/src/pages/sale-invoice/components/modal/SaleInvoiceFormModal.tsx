@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { container as containerModel, invoice as invoiceModel, party as partyModel } from '../../../../../wailsjs/go/models'
 import { CreateFishSaleInvoice, GetContainers, GetParties, UpdateFishSaleInvoice } from '../../../../../wailsjs/go/main/App'
 import dayjs from 'dayjs'
-import { formatDate, formatTHB } from '../../../../utils/formatter'
+import { formatDate, formatTHBRaw } from '../../../../utils/formatter'
 import useContainerTypeOptions from '../../../../hooks/useContainerTypeOptions'
 import useContainerColorOptions from '../../../../hooks/useContainerColorOptions'
 import ModalHeader from '../../../../components/invoice-modal-title/ModalHeader'
@@ -26,7 +26,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
 
   const customerSelectOptions = [
     { label: localT('modal.add-new-customer'), value: 'NEW' },
-    ...customers.map((customer) => ({
+    ...(customers ?? []).map((customer) => ({
       label: customer.name, value: customer.id
     }))
   ]
@@ -144,7 +144,13 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
       form.setFieldsValue({
         id: saleInvoice.id,
         customerId: saleInvoice.customerId,
-        containers: saleInvoice.items,
+        containers: saleInvoice.items.map((container) => ({
+          ...container,
+          fishes: container.fishes.map((fish) => ({
+            ...fish,
+            pricePerKg: fish.pricePerKg / 100,
+          }))
+        })),
         note: saleInvoice.note
       })
     } else {
@@ -391,7 +397,7 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
               </Text>
 
               <Text strong className="text-lg !text-white">
-                {formatTHB(totals.money)}
+                {formatTHBRaw(totals.money)}
               </Text>
             </Flex>
           </Flex>

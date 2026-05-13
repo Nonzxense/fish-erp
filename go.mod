@@ -3,6 +3,7 @@ module fish
 go 1.23
 
 require (
+	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/google/uuid v1.6.0
 	github.com/wailsapp/wails/v2 v2.11.0

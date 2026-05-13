@@ -6,6 +6,10 @@ export function ChangeInvoiceStatus(arg1, arg2, arg3) {
   return window['go']['main']['App']['ChangeInvoiceStatus'](arg1, arg2, arg3);
 }
 
+export function CheckForUpdates() {
+  return window['go']['main']['App']['CheckForUpdates']();
+}
+
 export function CreateContainer(arg1) {
   return window['go']['main']['App']['CreateContainer'](arg1);
 }
@@ -42,6 +46,10 @@ export function DeleteTransactions(arg1) {
   return window['go']['main']['App']['DeleteTransactions'](arg1);
 }
 
+export function DownloadUpdate(arg1) {
+  return window['go']['main']['App']['DownloadUpdate'](arg1);
+}
+
 export function GetContainerSummary() {
   return window['go']['main']['App']['GetContainerSummary']();
 }
@@ -74,8 +82,16 @@ export function GetTransactions(arg1) {
   return window['go']['main']['App']['GetTransactions'](arg1);
 }
 
+export function GetTruckInvoice(arg1) {
+  return window['go']['main']['App']['GetTruckInvoice'](arg1);
+}
+
 export function GetTruckInvoices(arg1) {
   return window['go']['main']['App']['GetTruckInvoices'](arg1);
+}
+
+export function RunUpdate(arg1) {
+  return window['go']['main']['App']['RunUpdate'](arg1);
 }
 
 export function UpdateContainer(arg1, arg2) {

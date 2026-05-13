@@ -308,17 +308,17 @@ export namespace domain {
 		    return a;
 		}
 	}
-	export class PageResult_fish_internal_domain_party_Party_ {
-	    data: party.Party[];
+	export class PageResult_fish_internal_domain_party_PartyWithDebt_ {
+	    data: party.PartyWithDebt[];
 	    total: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new PageResult_fish_internal_domain_party_Party_(source);
+	        return new PageResult_fish_internal_domain_party_PartyWithDebt_(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.data = this.convertValues(source["data"], party.Party);
+	        this.data = this.convertValues(source["data"], party.PartyWithDebt);
 	        this.total = source["total"];
 	    }
 	
@@ -706,6 +706,26 @@ export namespace party {
 	        this.pageSize = source["pageSize"];
 	    }
 	}
+	export class PartyWithDebt {
+	    id: string;
+	    name: string;
+	    phone?: string;
+	    note?: string;
+	    totalDebt: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PartyWithDebt(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.phone = source["phone"];
+	        this.note = source["note"];
+	        this.totalDebt = source["totalDebt"];
+	    }
+	}
 
 }
 
@@ -892,6 +912,7 @@ export namespace truckinvoice {
 	export class CustomerContainerInput {
 	    customerId: string;
 	    status: string;
+	    PaidAmount: number;
 	    items: ItemInput[];
 	
 	    static createFrom(source: any = {}) {
@@ -902,6 +923,7 @@ export namespace truckinvoice {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.customerId = source["customerId"];
 	        this.status = source["status"];
+	        this.PaidAmount = source["PaidAmount"];
 	        this.items = this.convertValues(source["items"], ItemInput);
 	    }
 	
@@ -939,7 +961,7 @@ export namespace truckinvoice {
 	}
 	export class HelperWageInput {
 	    name: string;
-	    wage: number;
+	    amount: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new HelperWageInput(source);
@@ -948,7 +970,7 @@ export namespace truckinvoice {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
-	        this.wage = source["wage"];
+	        this.amount = source["amount"];
 	    }
 	}
 	export class CreateTruckInvoiceInput {
@@ -1021,11 +1043,13 @@ export namespace truckinvoice {
 	}
 	export class CustomerContainer {
 	    ID: number;
-	    Status: string;
-	    CustomerID: string;
-	    Customer: party.Party;
+	    status: string;
+	    customerId: string;
+	    customer: party.Party;
 	    InvoiceID: string;
-	    Items: CustomerContainerItem[];
+	    items: CustomerContainerItem[];
+	    totalAmount: number;
+	    paidAmount: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new CustomerContainer(source);
@@ -1034,11 +1058,13 @@ export namespace truckinvoice {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.Status = source["Status"];
-	        this.CustomerID = source["CustomerID"];
-	        this.Customer = this.convertValues(source["Customer"], party.Party);
+	        this.status = source["status"];
+	        this.customerId = source["customerId"];
+	        this.customer = this.convertValues(source["customer"], party.Party);
 	        this.InvoiceID = source["InvoiceID"];
-	        this.Items = this.convertValues(source["Items"], CustomerContainerItem);
+	        this.items = this.convertValues(source["items"], CustomerContainerItem);
+	        this.totalAmount = source["totalAmount"];
+	        this.paidAmount = source["paidAmount"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1065,7 +1091,7 @@ export namespace truckinvoice {
 	    id: number;
 	    invoiceId: string;
 	    name: string;
-	    wage: number;
+	    amount: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new HelperWage(source);
@@ -1076,7 +1102,7 @@ export namespace truckinvoice {
 	        this.id = source["id"];
 	        this.invoiceId = source["invoiceId"];
 	        this.name = source["name"];
-	        this.wage = source["wage"];
+	        this.amount = source["amount"];
 	    }
 	}
 	
@@ -1195,6 +1221,29 @@ export namespace truckinvoice {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace updater {
+	
+	export class UpdateInfo {
+	    available: boolean;
+	    current: string;
+	    latest: string;
+	    url: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.available = source["available"];
+	        this.current = source["current"];
+	        this.latest = source["latest"];
+	        this.url = source["url"];
+	    }
 	}
 
 }
