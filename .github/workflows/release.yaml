@@ -38,8 +38,8 @@ jobs:
           node-version: "22.14.0"
 
       - name: Install Wails
-        run: 
-          go install github.com/wailsapp/wails/v2/cmd/wails@latest
+        run: |
+          go install github.com/wailsapp/wails/v2/cmd/wails@v2.11.0
           echo "$env:USERPROFILE\go\bin" >> $env:GITHUB_PATH
 
       - name: Install frontend deps
@@ -70,7 +70,7 @@ jobs:
 
       - name: Build Wails app
         run: |
-          build.bat
+          .\build.bat
 
       - name: Create Git Tag
         shell: pwsh
