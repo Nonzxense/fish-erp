@@ -166,7 +166,7 @@ const TruckInvoiceDetailModal = ({
               bordered
               size="small"
               pagination={false}
-              rowKey="id"
+              rowKey="ID"
               dataSource={truckInvoice.customers}
               scroll={{ x: true }}
               columns={[
@@ -196,7 +196,7 @@ const TruckInvoiceDetailModal = ({
                     bordered
                     size="small"
                     pagination={false}
-                    rowKey="id"
+                    rowKey="ID"
                     dataSource={record.items}
                     columns={[
                       {
@@ -279,7 +279,7 @@ const TruckInvoiceDetailModal = ({
                   columns={[
                     {
                       title: localT('table.description'),
-                      dataIndex: 'name'
+                      dataIndex: 'description'
                     },
                     {
                       title: localT('table.amount'),
