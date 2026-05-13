@@ -13,7 +13,6 @@ import { ChangeInvoiceStatus, GetFishSaleInvoices, GetFishTradeInvoiceSummary } 
 import { getPaidStatusColor } from '../../utils/getTagColor'
 import SaleInvoiceDetailModal from './components/modal/SaleInvoiceDetailModal'
 import dayjs from 'dayjs'
-import { truncateString } from '../../utils/truncate'
 
 const SaleInvoice = () => {
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
@@ -117,7 +116,6 @@ const SaleInvoice = () => {
     }))
   }
 
-
   const handleChangeStatus = useCallback(
     (record: invoiceModel.FishSaleInvoice, newStatus: string) => {
       if (record.status === newStatus) return
@@ -190,7 +188,7 @@ const SaleInvoice = () => {
         key: 'note',
         dataIndex: 'note',
         width: 250,
-        render: (val) => truncateString(val, 50)
+        ellipsis: true
       },
       {
         title: localT('table.items'),

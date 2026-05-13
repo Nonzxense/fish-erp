@@ -11,6 +11,6 @@ func (a *App) CreateParty(input party.CreatePartyInput) error {
 	return a.partyService.CreateParty(input)
 }
 
-func (a *App) GetParties(filter *partyDomain.PartyFilter) (domain.PageResult[partyDomain.Party], error) {
+func (a *App) GetParties(filter *partyDomain.PartyFilter) (domain.PageResult[partyDomain.PartyWithDebt], error) {
 	return a.partyService.GetParties(filter)
 }

@@ -3,8 +3,8 @@ import { ModalHeaderProps } from './interface'
 
 const { Text, Title } = Typography
 
-const ModalHeader = ({ icon, title, subtitle, rightContent }: ModalHeaderProps) => {
-
+const ModalHeader = ({ icon, title, subtitle, rightContent, className }: ModalHeaderProps) => {
+  const defaultClassName = 'bg-blue-500 bg-[radial-gradient(circle_at_bottom_right,theme(colors.cyan.400)_0%,transparent_80%)] !border-0 !shadow-none !rounded-xl'
   return (
     <>
       <Flex justify="space-between" align="center" className="w-full pr-8">
@@ -13,7 +13,7 @@ const ModalHeader = ({ icon, title, subtitle, rightContent }: ModalHeaderProps) 
             shape="square"
             size={48}
             icon={icon}
-            className="bg-blue-500 bg-[radial-gradient(circle_at_bottom_right,theme(colors.cyan.400)_0%,transparent_80%)] !border-0 !shadow-none !rounded-xl"
+            className={className ? className : defaultClassName}
           />
           <div className="flex flex-col justify-center">
             <Title level={4} className="!mb-0">{title}</Title>

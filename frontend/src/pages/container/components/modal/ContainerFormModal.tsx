@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { CreateContainer, UpdateContainer } from "../../../../../wailsjs/go/main/App"
 import { container as containerModel } from "../../../../../wailsjs/go/models"
 import useContainerColorOptions from "../../../../hooks/useContainerColorOptions"
+import useContainerTypeOptions from "../../../../hooks/useContainerTypeOptions"
 
 const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerFormModalProp) => {
   const [isLoading, _setIsLoading] = useState<boolean>(false)
@@ -12,6 +13,7 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
   const { t: localT } = useTranslation('container')
   const { t: commonT } = useTranslation('common')
   const containerColorOptions = useContainerColorOptions()
+  const containerTypeOptions = useContainerTypeOptions()
   const isEdit = !!container
 
   const handleSubmit = async (values: ContainerFormValues) => {
@@ -90,13 +92,7 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
         >
           <Select
             placeholder={localT('form.type.placeholder')}
-            options={[
-              { label: commonT('plastic-l'), value: 'plastic_l' },
-              { label: commonT('plastic-s'), value: 'plastic_s' },
-              { label: commonT('foam-l'), value: 'foam_l' },
-              { label: commonT('foam-m'), value: 'foam_m' },
-              { label: commonT('foam-s'), value: 'foam_s' },
-            ]}
+            options={containerTypeOptions}
           />
         </Form.Item>
         <Form.Item

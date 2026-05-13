@@ -22,7 +22,7 @@ import {
   UpdateFishPurchaseInvoice
 } from '../../../../../wailsjs/go/main/App'
 import dayjs from 'dayjs'
-import { formatDate, formatTHB } from '../../../../utils/formatter'
+import { formatDate, formatTHBRaw } from '../../../../utils/formatter'
 import { PurchaseInvoiceFormModalProps, PurchaseInvoiceFormValues } from './interface'
 import ModalHeader from '../../../../components/invoice-modal-title/ModalHeader'
 
@@ -122,7 +122,10 @@ const PurchaseInvoiceFormModal = ({
       form.setFieldsValue({
         createdAt: dayjs(purchaseInvoice.createdAt as string),
         supplierId: purchaseInvoice.supplierId,
-        fishes: purchaseInvoice.items,
+        fishes: purchaseInvoice.items.map((fish) => ({
+          ...fish,
+          pricePerKg: fish.pricePerKg / 100,
+        })),
         note: purchaseInvoice.note,
       })
     } else {
@@ -295,7 +298,7 @@ const PurchaseInvoiceFormModal = ({
               </Text>
 
               <Text strong className="text-lg !text-white">
-                {formatTHB(totals.money)}
+                {formatTHBRaw(totals.money)}
               </Text>
             </Flex>
           </Flex>

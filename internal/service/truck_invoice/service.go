@@ -30,7 +30,6 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 		return err
 	}
 
-	fmt.Println(input.OccurredAt)
 	sequenceID := fmt.Sprintf("TI-%d%02d-%04d",
 		input.OccurredAt.In(loc).Year(),
 		input.OccurredAt.In(loc).Month(),
@@ -47,14 +46,14 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 		},
 		CarPlate:   input.CarPlate,
 		DriverName: input.DriverName,
-		DriverWage: input.DriverWage,
+		DriverWage: common.NewMoney(input.DriverWage),
 	}
 
 	// Helpers
 	for _, h := range input.Helpers {
 		invoice.Helpers = append(invoice.Helpers, truckInvoiceDomain.HelperWage{
 			Name:      h.Name,
-			Wage:      h.Wage,
+			Amount:    common.NewMoney(h.Amount),
 			InvoiceID: sequenceID,
 		})
 	}
@@ -63,17 +62,18 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 	for _, e := range input.OtherExpenses {
 		invoice.OtherExpenses = append(invoice.OtherExpenses, truckInvoiceDomain.OtherExpense{
 			Description: e.Description,
-			Amount:      e.Amount,
+			Amount:      common.NewMoney(e.Amount),
 			InvoiceID:   sequenceID,
 		})
 	}
 
 	// Customers
 	for _, c := range input.Customers {
+		var totalAmount common.Money
 		customer := truckInvoiceDomain.CustomerContainer{
 			CustomerID: c.CustomerID,
 			InvoiceID:  sequenceID,
-			Status:     c.Status,
+			PaidAmount: common.Money(c.PaidAmount),
 			Items:      []truckInvoiceDomain.CustomerContainerItem{},
 		}
 
@@ -81,10 +81,14 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 			customer.Items = append(customer.Items, truckInvoiceDomain.CustomerContainerItem{
 				Type:  ci.Type,
 				Qty:   ci.Qty,
-				Price: ci.Price,
+				Price: common.NewMoney(ci.Price),
 			})
+
+			totalAmount += common.NewMoney(ci.Price * float64(ci.Qty))
 		}
 
+		customer.TotalAmount = totalAmount
+		customer.RefreshStatus()
 		invoice.Customers = append(invoice.Customers, customer)
 	}
 
@@ -104,6 +108,10 @@ func (s *TruckInvoiceService) GetTruckInvoices(filter truckInvoiceDomain.TruckIn
 	return pageResult, err
 }
 
+func (s *TruckInvoiceService) GetTruckInvoice(id string) (truckInvoiceDomain.TruckInvoice, error) {
+	return s.repo.FindOne(id)
+}
+
 func (s *TruckInvoiceService) CalculateTotal(invoice truckInvoiceDomain.TruckInvoice) (common.Money, common.Money) {
 	var totalIncome common.Money
 	var totalExpense common.Money = invoice.DriverWage
@@ -121,8 +129,8 @@ func (s *TruckInvoiceService) CalculateTotal(invoice truckInvoiceDomain.TruckInv
 	}
 
 	for _, helper := range invoice.Helpers {
-		if helper.Wage > 0 {
-			totalExpense += helper.Wage
+		if helper.Amount > 0 {
+			totalExpense += helper.Amount
 		}
 	}
 

@@ -23,7 +23,7 @@ export type TruckInvoiceFormValues = {
 
 export type HelperWage = {
   name: string
-  wage: number
+  amount: number
 }
 
 export type OtherExpense = {
@@ -39,11 +39,13 @@ export type Item = {
 export type CustomerContainer = {
   customerId: string
 
-  big: Item
-  small: Item
-  foamBig: Item
-  foamMid: Item
-  foamSmall: Item
+  'foam-l': Item
+  'foam-m': Item
+  'foam-s': Item
+  'plastic-l': Item
+  'plastic-s': Item
 
   status: string
+
+  totalAmount: number
 }

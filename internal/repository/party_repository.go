@@ -2,7 +2,6 @@ package repository
 
 import (
 	domain "fish/internal/domain/party"
-
 	"gorm.io/gorm"
 )
 
@@ -31,34 +30,83 @@ func (r *PartyRepository) DeleteParties(ids []int) error {
 		Delete(&domain.Party{}).Error
 }
 
-func (r *PartyRepository) FindAll(filter *domain.PartyFilter) ([]domain.Party, int64, error) {
-	var parties []domain.Party
+func (r *PartyRepository) FindAll(
+	filter *domain.PartyFilter,
+) ([]domain.PartyWithDebt, int64, error) {
+
+	var parties []domain.PartyWithDebt
 	var total int64
 
-	query := r.db.Model(&domain.Party{})
+	fsiSubQuery := r.db.
+		Table("fish_sale_invoices").
+		Select(`
+			customer_id,
+			SUM(total_amount) as total_debt
+		`).
+		Where("status = ?", "pending").
+		Group("customer_id")
+
+	ccSubQuery := r.db.
+		Table("customer_containers").
+		Select(`
+			customer_id,
+			SUM(total_amount) as total_debt
+		`).
+		Where("status = ?", "pending").
+		Group("customer_id")
+
+	query := r.db.
+		Table("parties").
+		Select(`
+			parties.id,
+			parties.name,
+			parties.phone,
+			parties.note,
+			COALESCE(fsi.total_debt, 0) +
+			COALESCE(cc.total_debt, 0) as total_debt
+		`).
+		Joins(`
+			LEFT JOIN (?) fsi
+			ON parties.id = fsi.customer_id
+		`, fsiSubQuery).
+		Joins(`
+			LEFT JOIN (?) cc
+			ON parties.id = cc.customer_id
+		`, ccSubQuery)
 
 	if filter != nil {
 		if filter.Name != nil {
-			query = query.Where("name LIKE ?", "%"+*filter.Name+"%")
+			query = query.Where(
+				"parties.name LIKE ?",
+				"%"+*filter.Name+"%",
+			)
 		}
+
 		if filter.Phone != nil {
-			query = query.Where("phone LIKE ?", "%"+*filter.Phone+"%")
+			query = query.Where(
+				"parties.phone LIKE ?",
+				"%"+*filter.Phone+"%",
+			)
 		}
+
 		if filter.Type != nil {
-			query = query.Where("type = ?", filter.Type)
+			query = query.Where(
+				"parties.type = ?",
+				*filter.Type,
+			)
 		}
 	}
+
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Handle Pagination
 	if filter.Page > 0 && filter.PageSize > 0 {
 		offset := (filter.Page - 1) * filter.PageSize
 		query = query.Offset(offset).Limit(filter.PageSize)
 	}
 
-	err := query.Find(&parties).Error
+	err := query.Scan(&parties).Error
 
 	return parties, total, err
 }

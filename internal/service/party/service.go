@@ -26,9 +26,9 @@ func (s *PartyService) CreateParty(input CreatePartyInput) error {
 	return s.repo.CreateParty(party)
 }
 
-func (s *PartyService) GetParties(filter *partyDomain.PartyFilter) (domain.PageResult[partyDomain.Party], error) {
+func (s *PartyService) GetParties(filter *partyDomain.PartyFilter) (domain.PageResult[partyDomain.PartyWithDebt], error) {
 	parties, total, error := s.repo.FindAll(filter)
-	pageResult := domain.PageResult[partyDomain.Party]{
+	pageResult := domain.PageResult[partyDomain.PartyWithDebt]{
 		Data:  parties,
 		Total: total,
 	}

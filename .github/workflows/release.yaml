@@ -38,7 +38,9 @@ jobs:
           node-version: "22.14.0"
 
       - name: Install Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+        run: 
+          go install github.com/wailsapp/wails/v2/cmd/wails@latest
+          echo "$env:USERPROFILE\go\bin" >> $env:GITHUB_PATH
 
       - name: Install frontend deps
         run: |
@@ -52,8 +54,8 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $v = Get-Content version.txt
-          $tag = "v$v-beta"
+          $v = (Get-Content version.txt).Trim()
+          $tag = "${v}-beta"
           echo "VERSION=$tag" >> $env:GITHUB_OUTPUT
 
       - name: Check if tag already exists
@@ -68,7 +70,7 @@ jobs:
 
       - name: Build Wails app
         run: |
-          wails build -platform windows/amd64
+          build.bat
 
       - name: Create Git Tag
         shell: pwsh

@@ -9,11 +9,13 @@ import dayjs from 'dayjs';
 import thTh from 'antd/locale/th_TH'
 import PurchaseInvoice from './pages/purchase-invoice/PurchaseInvoice';
 import TruckInvoice from './pages/truck-invoice/TruckInvoice';
+import StartupProvider from './startup/StartupProvider';
 
 dayjs.locale('th')
 const App = () => {
   return (
     <AntApp>
+      <StartupProvider />
       <ConfigProvider locale={thTh}>
         <Routes>
           <Route element={<AppLayout />}>

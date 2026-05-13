@@ -1,7 +1,7 @@
 package container
 
 type ContainerSummary struct {
-	Total          float64 `json:"total"`
-	AtStore      float64 `json:"atStore"`
-	WithCustomer float64 `json:"withCustomer"`
+	Total        int32 `json:"total"`
+	AtStore      int32 `json:"atStore"`
+	WithCustomer int32 `json:"withCustomer"`
 }

@@ -2,6 +2,7 @@ package invoice
 
 import (
 	"fish/internal/domain"
+	"fish/internal/domain/common"
 	containerDomain "fish/internal/domain/container"
 	invoiceDomain "fish/internal/domain/invoice"
 	partyDomain "fish/internal/domain/party"
@@ -171,12 +172,12 @@ func (s *InvoiceService) buildFishPurchaseInvoice(input CreateFishPurchaseInvoic
 		invoice.Fishes = append(invoice.Fishes, containerDomain.FishPurchaseDetail{
 			Name:       f.Name,
 			WeightKg:   f.WeightKg,
-			PricePerKg: f.PricePerKg,
+			PricePerKg: common.NewMoney(f.PricePerKg),
 		})
 	}
 
 	for _, f := range invoice.Fishes {
-		invoice.TotalAmount += f.WeightKg * f.PricePerKg
+		invoice.TotalAmount = invoice.TotalAmount.Add(f.PricePerKg.Mul(f.WeightKg))
 	}
 
 	return invoice, nil
@@ -314,16 +315,16 @@ func (s *InvoiceService) mapFishToContainer(invoiceID string, containerID uint, 
 			FishContainerID: containerID,
 			Name:            f.Name,
 			WeightKg:        f.WeightKg,
-			PricePerKg:      f.PricePerKg,
+			PricePerKg:      common.NewMoney(f.PricePerKg),
 		})
 	}
 	return fc
 }
 
-func (s *InvoiceService) calculateContainerTotal(fc containerDomain.FishContainer) float64 {
-	var total float64
+func (s *InvoiceService) calculateContainerTotal(fc containerDomain.FishContainer) common.Money {
+	var total common.Money
 	for _, f := range fc.Fishes {
-		total += f.WeightKg * f.PricePerKg
+		total += f.PricePerKg.Mul(f.WeightKg)
 	}
 	return total
 }

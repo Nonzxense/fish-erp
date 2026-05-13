@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"fish/internal/domain"
+	"fish/internal/domain/common"
 	transactionDomain "fish/internal/domain/transaction"
 	"fish/internal/repository"
 	"time"
@@ -21,7 +22,7 @@ func (s *TransactionService) CreateTransaction(input CreateTransactionInput) err
 	tx := &transactionDomain.Transaction{
 		ID:         uuid.NewString(),
 		Type:       input.Type,
-		Amount:     (input.Amount),
+		Amount:     common.NewMoney(input.Amount),
 		Category:   input.Category,
 		OccurredAt: input.OccurredAt,
 		Note:       input.Note,
@@ -46,7 +47,7 @@ func (s *TransactionService) UpdateTransaction(id string, input CreateTransactio
 	tx := &transactionDomain.Transaction{
 		ID:         id,
 		Type:       input.Type,
-		Amount:     (input.Amount),
+		Amount:     common.NewMoney(input.Amount),
 		Category:   input.Category,
 		OccurredAt: input.OccurredAt,
 		Note:       input.Note,
