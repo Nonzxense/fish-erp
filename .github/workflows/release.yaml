@@ -38,7 +38,7 @@ jobs:
           node-version: "22.14.0"
 
       - name: Install Wails
-        run: 
+        run: |
           go install github.com/wailsapp/wails/v2/cmd/wails@latest
           echo "$env:USERPROFILE\go\bin" >> $env:GITHUB_PATH
 
