@@ -5,6 +5,7 @@ import (
 	domain "fish/internal/domain/invoice"
 	transaction "fish/internal/domain/transaction"
 	"fmt"
+	"log"
 
 	"gorm.io/gorm"
 )
@@ -24,6 +25,7 @@ func (r *InvoiceRepository) GetDB() *gorm.DB {
 func (r *InvoiceRepository) CreateFishSaleInvoice(
 	invoice *domain.FishSaleInvoice,
 ) error {
+	log.Printf("CREATE INVOICE: %+v", invoice)
 	return r.db.Transaction(func(tx *gorm.DB) error {
 
 		// 1 invoice
