@@ -9,7 +9,7 @@ go build ^
 
 echo Building app...
 wails build ^
-  -platform windows/amd64 ^
+  -clean ^
   -ldflags "-X fish/internal/buildinfo.Version=%VERSION%"
 
 if %errorlevel% neq 0 exit /b %errorlevel%
