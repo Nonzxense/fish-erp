@@ -105,10 +105,8 @@ const SaleInvoiceFormModal = ({ isOpen, onClose, onChange, saleInvoice }: SaleIn
     })
     try {
       if (isEdit && saleInvoice) {
-        console.log("CREATE INVOICE PAYLOAD", payload)
         await UpdateFishSaleInvoice(saleInvoice.id, payload)
       } else {
-        console.log("CREATE INVOICE PAYLOAD", payload)
         await CreateFishSaleInvoice(payload)
       }
     } catch {

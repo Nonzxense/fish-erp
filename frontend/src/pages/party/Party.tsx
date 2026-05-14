@@ -151,7 +151,6 @@ const Party = () => {
         pageSize: pagination.pageSize
       })
       const res = await GetParties(goFilter)
-      console.log(res.data)
       setParties(res.data)
       setPagination((prev) => ({
         ...prev,

@@ -1,9 +1,9 @@
 package count
 
 import (
-	"time"
-
 	"gorm.io/gorm"
+	"time"
+	_ "time/tzdata"
 )
 
 func GetCountForMonth[T any](db *gorm.DB, date time.Time) (int64, error) {

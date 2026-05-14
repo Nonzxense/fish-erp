@@ -11,10 +11,9 @@ import (
 	"fish/internal/utils/count"
 	"fish/internal/utils/ptr"
 	"fmt"
-	"log"
-	"time"
-
 	"github.com/google/uuid"
+	"time"
+	_ "time/tzdata"
 )
 
 type InvoiceService struct {
@@ -32,10 +31,8 @@ func NewInvoiceService(
 }
 
 func (s *InvoiceService) CreateFishSaleInvoice(input CreateFishSaleInvoiceInput) error {
-	log.Printf("CREATE INVOICE SERVICE: %+v", input)
 	invoice, err := s.buildFishSaleInvoice(input)
 	if err != nil {
-		log.Printf("CREATE INVOICE SERVICE FAILED: %+v", err)
 		return err
 	}
 

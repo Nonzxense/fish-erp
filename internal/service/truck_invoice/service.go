@@ -9,6 +9,7 @@ import (
 	"fish/internal/utils/count"
 	"fmt"
 	"time"
+	_ "time/tzdata"
 )
 
 type TruckInvoiceService struct {
