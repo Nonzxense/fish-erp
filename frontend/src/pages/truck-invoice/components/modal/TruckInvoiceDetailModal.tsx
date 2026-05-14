@@ -46,7 +46,6 @@ const TruckInvoiceDetailModal = ({
       if (!id) return
       try {
         const res = await GetTruckInvoice(id)
-        console.log(res)
         setTruckInvoice(res)
       } catch {
         // interceptor handles error
