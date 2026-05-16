@@ -7,12 +7,12 @@ import (
 
 type TruckInvoice struct {
 	invoiceDomain.BaseInvoice
-	CarPlate      string              `json:"carPlate"`
-	DriverName    string              `json:"driverName"`
-	DriverWage    common.Money        `json:"driverWage"`
-	Helpers       []HelperWage        `json:"helpers" gorm:"foreignKey:InvoiceId;constraint:OnDelete:CASCADE"`
-	OtherExpenses []OtherExpense      `json:"otherExpenses" gorm:"foreignKey:InvoiceId;constraint:OnDelete:CASCADE"`
-	Customers     []CustomerContainer `json:"customers" gorm:"foreignKey:InvoiceId;constraint:OnDelete:CASCADE"`
+	CarPlate         string            `json:"carPlate"`
+	DriverName       string            `json:"driverName"`
+	DriverWage       common.Money      `json:"driverWage"`
+	Helpers          []HelperWage      `json:"helpers" gorm:"foreignKey:InvoiceId;constraint:OnDelete:CASCADE"`
+	OtherExpenses    []OtherExpense    `json:"otherExpenses" gorm:"foreignKey:InvoiceId;constraint:OnDelete:CASCADE"`
+	ShippingInvoices []ShippingInvoice `json:"shippingInvoices" gorm:"foreignKey:InvoiceId;constraint:OnDelete:CASCADE"`
 
 	TotalExpense common.Money `json:"totalExpense" gorm:"default:0"`
 	TotalIncome  common.Money `json:"totalIncome" gorm:"default:0"`

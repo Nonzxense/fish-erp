@@ -47,7 +47,7 @@ func (r *PartyRepository) FindAll(
 		Group("customer_id")
 
 	ccSubQuery := r.db.
-		Table("customer_containers").
+		Table("shipping_invoices").
 		Select(`
 			customer_id,
 			SUM(total_amount - paid_amount) as total_debt

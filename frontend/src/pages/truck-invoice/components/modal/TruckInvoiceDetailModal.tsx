@@ -166,7 +166,7 @@ const TruckInvoiceDetailModal = ({
               size="small"
               pagination={false}
               rowKey="ID"
-              dataSource={truckInvoice.customers}
+              dataSource={truckInvoice.shippingInvoices}
               scroll={{ x: true }}
               columns={[
                 {

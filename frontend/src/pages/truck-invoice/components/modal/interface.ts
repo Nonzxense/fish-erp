@@ -18,7 +18,7 @@ export type TruckInvoiceFormValues = {
   driverWage: number
   helpers: HelperWage[]
   otherExpenses: OtherExpense[]
-  customers: CustomerContainer[]
+  shippingInvoices: ShippingInvoice[]
 }
 
 export type HelperWage = {
@@ -36,7 +36,7 @@ export type Item = {
   price: number
 }
 
-export type CustomerContainer = {
+export type ShippingInvoice = {
   customerId: string
 
   'foam-l': Item

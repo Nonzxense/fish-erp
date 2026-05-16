@@ -23,10 +23,10 @@ import dayjs from 'dayjs'
 import ModalHeader from '../../../../components/invoice-modal-title/ModalHeader'
 import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CustomerContainer, HelperWage, OtherExpense, TruckInvoiceFormModalProps, TruckInvoiceFormValues } from './interface'
+import { ShippingInvoice, HelperWage, OtherExpense, TruckInvoiceFormModalProps, TruckInvoiceFormValues } from './interface'
 import { party as partyModel, truckinvoice as truckinvoiceModel } from '../../../../../wailsjs/go/models'
 import { CreateTruckInvoice, GetParties } from '../../../../../wailsjs/go/main/App'
-import { CUSTOMER_CONTAINER_KEYS } from '../../../../utils/constants'
+import { SHIPPING_CONTAINER_KEYS } from '../../../../utils/constants'
 import { formatTHBRaw } from '../../../../utils/formatter'
 
 const { Text } = Typography
@@ -47,10 +47,10 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
     }))
   ]
 
-  type ItemKey = typeof CUSTOMER_CONTAINER_KEYS[number]
+  type ItemKey = typeof SHIPPING_CONTAINER_KEYS[number]
 
-  const mapItems = useCallback((customer: CustomerContainer) =>
-    CUSTOMER_CONTAINER_KEYS
+  const mapItems = useCallback((customer: ShippingInvoice) =>
+    SHIPPING_CONTAINER_KEYS
       .map((key) => {
         const item = customer[key]
 
@@ -61,10 +61,10 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
       .filter((x): x is { type: ItemKey; qty: number; price: number } => x !== null)
     , [])
 
-  const calculateCustomerTotal = useCallback((c?: Partial<CustomerContainer>) => {
+  const calculateCustomerTotal = useCallback((c?: Partial<ShippingInvoice>) => {
     if (!c) return 0
 
-    return CUSTOMER_CONTAINER_KEYS.reduce((total, key) => {
+    return SHIPPING_CONTAINER_KEYS.reduce((total, key) => {
       const item = c[key]
 
       const qty = item?.qty ?? 0
@@ -92,7 +92,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
 
   const totalIncome = useMemo(() => {
     return (watchedCustomers ?? []).reduce(
-      (sum: number, c: CustomerContainer) => sum + calculateCustomerTotal(c),
+      (sum: number, c: ShippingInvoice) => sum + calculateCustomerTotal(c),
       0
     )
   }, [calculateCustomerTotal, watchedCustomers])
@@ -110,8 +110,8 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
       })
     ))
 
-    const customers = values.customers.map((customer) => (
-      new truckinvoiceModel.CustomerContainerInput({
+    const customers = values.shippingInvoices.map((customer) => (
+      new truckinvoiceModel.ShippingInvoiceInput({
         ...customer,
         items: mapItems(customer)
       })

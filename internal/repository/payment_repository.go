@@ -31,7 +31,7 @@ func (r *PaymentRepository) ApplyPayment(tx *gorm.DB, refType, refId string, all
 	case constants.RefFishSaleInvoice:
 		model = &invoiceDomain.FishSaleInvoice{}
 	case constants.RefTruckInvoice:
-		model = &truckInvoiceDomain.CustomerContainer{}
+		model = &truckInvoiceDomain.ShippingInvoice{}
 	default:
 		return fmt.Errorf("invalid reference type.")
 	}
@@ -73,7 +73,7 @@ func (r *PaymentRepository) GetUnpaidInvoicesByPartyID(
 
 	var sales []invoiceDomain.FishSaleInvoice
 	var purchases []invoiceDomain.FishPurchaseInvoice
-	var truckCustomers []truckInvoiceDomain.CustomerContainer
+	var shipping []truckInvoiceDomain.ShippingInvoice
 
 	err := r.db.
 		Where("paid_amount < total_amount").
@@ -96,13 +96,13 @@ func (r *PaymentRepository) GetUnpaidInvoicesByPartyID(
 	}
 
 	err = r.db.
-		Model(&truckInvoiceDomain.CustomerContainer{}).
-		Joins("JOIN truck_invoices ON truck_invoices.id = customer_containers.invoice_id").
-		Where("customer_containers.paid_amount < customer_containers.total_amount").
-		Where("customer_containers.customer_id = ?", partyID).
+		Model(&truckInvoiceDomain.ShippingInvoice{}).
+		Joins("JOIN truck_invoices ON truck_invoices.id = shipping_invoices.invoice_id").
+		Where("shipping_invoices.paid_amount < shipping_invoices.total_amount").
+		Where("shipping_invoices.customer_id = ?", partyID).
 		Preload("TruckInvoice").
 		Order("truck_invoices.created_at ASC").
-		Find(&truckCustomers).Error
+		Find(&shipping).Error
 
 	if err != nil {
 		return nil, err
@@ -132,7 +132,7 @@ func (r *PaymentRepository) GetUnpaidInvoicesByPartyID(
 		})
 	}
 
-	for _, tc := range truckCustomers {
+	for _, tc := range shipping {
 		result = append(result, paymentDomain.UnpaidInvoice{
 			ReferenceType: constants.RefTruckInvoice,
 			ReferenceID:   tc.ID,

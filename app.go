@@ -54,10 +54,10 @@ func NewApp() *App {
 		&containerDomain.FishPurchaseDetail{},
 		&containerDomain.Container{},
 		&truckInvoiceDomain.TruckInvoice{},
-		&truckInvoiceDomain.CustomerContainer{},
+		&truckInvoiceDomain.ShippingInvoice{},
 		&truckInvoiceDomain.HelperWage{},
 		&truckInvoiceDomain.OtherExpense{},
-		&truckInvoiceDomain.CustomerContainerItem{},
+		&truckInvoiceDomain.ShippingItem{},
 		&paymentDomain.Payment{},
 		&paymentDomain.PaymentAllocation{},
 	)

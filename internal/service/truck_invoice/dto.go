@@ -15,7 +15,7 @@ type CreateTruckInvoiceInput struct {
 
 	Helpers       []HelperWageInput        `json:"helpers"`
 	OtherExpenses []OtherExpenseInput      `json:"otherExpenses"`
-	Customers     []CustomerContainerInput `json:"customers"`
+	Customers     []ShippingInvoiceInput `json:"customers"`
 }
 
 type HelperWageInput struct {
@@ -28,7 +28,7 @@ type OtherExpenseInput struct {
 	Amount      float64 `json:"amount" validate:"gte=0"`
 }
 
-type CustomerContainerInput struct {
+type ShippingInvoiceInput struct {
 	CustomerID string `json:"customerId"`
 	Status     string `json:"status" validate:"oneof=pending paid"`
 	PaidAmount float64

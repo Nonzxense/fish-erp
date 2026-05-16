@@ -960,14 +960,14 @@ export namespace truckinvoice {
 	        this.price = source["price"];
 	    }
 	}
-	export class CustomerContainerInput {
+	export class ShippingInvoiceInput {
 	    customerId: string;
 	    status: string;
 	    PaidAmount: number;
 	    items: ItemInput[];
 	
 	    static createFrom(source: any = {}) {
-	        return new CustomerContainerInput(source);
+	        return new ShippingInvoiceInput(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -1034,7 +1034,7 @@ export namespace truckinvoice {
 	    note?: string;
 	    helpers: HelperWageInput[];
 	    otherExpenses: OtherExpenseInput[];
-	    customers: CustomerContainerInput[];
+	    customers: ShippingInvoiceInput[];
 	
 	    static createFrom(source: any = {}) {
 	        return new CreateTruckInvoiceInput(source);
@@ -1051,7 +1051,7 @@ export namespace truckinvoice {
 	        this.note = source["note"];
 	        this.helpers = this.convertValues(source["helpers"], HelperWageInput);
 	        this.otherExpenses = this.convertValues(source["otherExpenses"], OtherExpenseInput);
-	        this.customers = this.convertValues(source["customers"], CustomerContainerInput);
+	        this.customers = this.convertValues(source["customers"], ShippingInvoiceInput);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1072,72 +1072,6 @@ export namespace truckinvoice {
 		    return a;
 		}
 	}
-	export class CustomerContainerItem {
-	    id: number;
-	    containerId: string;
-	    type: string;
-	    qty: number;
-	    price: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new CustomerContainerItem(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.containerId = source["containerId"];
-	        this.type = source["type"];
-	        this.qty = source["qty"];
-	        this.price = source["price"];
-	    }
-	}
-	export class CustomerContainer {
-	    id: string;
-	    status: string;
-	    customerId: string;
-	    customer: party.Party;
-	    invoiceId: string;
-	    items: CustomerContainerItem[];
-	    totalAmount: number;
-	    paidAmount: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new CustomerContainer(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.status = source["status"];
-	        this.customerId = source["customerId"];
-	        this.customer = this.convertValues(source["customer"], party.Party);
-	        this.invoiceId = source["invoiceId"];
-	        this.items = this.convertValues(source["items"], CustomerContainerItem);
-	        this.totalAmount = source["totalAmount"];
-	        this.paidAmount = source["paidAmount"];
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	
-	
 	export class HelperWage {
 	    id: number;
 	    invoiceId: string;
@@ -1177,6 +1111,72 @@ export namespace truckinvoice {
 	    }
 	}
 	
+	export class ShippingItem {
+	    id: number;
+	    containerId: string;
+	    type: string;
+	    qty: number;
+	    price: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ShippingItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.containerId = source["containerId"];
+	        this.type = source["type"];
+	        this.qty = source["qty"];
+	        this.price = source["price"];
+	    }
+	}
+	export class ShippingInvoice {
+	    id: string;
+	    status: string;
+	    customerId: string;
+	    customer: party.Party;
+	    invoiceId: string;
+	    items: ShippingItem[];
+	    totalAmount: number;
+	    paidAmount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ShippingInvoice(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.status = source["status"];
+	        this.customerId = source["customerId"];
+	        this.customer = this.convertValues(source["customer"], party.Party);
+	        this.invoiceId = source["invoiceId"];
+	        this.items = this.convertValues(source["items"], ShippingItem);
+	        this.totalAmount = source["totalAmount"];
+	        this.paidAmount = source["paidAmount"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
 	export class TruckInvoice {
 	    id: string;
 	    createdAt: time.Time;
@@ -1188,7 +1188,7 @@ export namespace truckinvoice {
 	    driverWage: number;
 	    helpers: HelperWage[];
 	    otherExpenses: OtherExpense[];
-	    customers: CustomerContainer[];
+	    shippingInvoices: ShippingInvoice[];
 	    totalExpense: number;
 	    totalIncome: number;
 	
@@ -1208,7 +1208,7 @@ export namespace truckinvoice {
 	        this.driverWage = source["driverWage"];
 	        this.helpers = this.convertValues(source["helpers"], HelperWage);
 	        this.otherExpenses = this.convertValues(source["otherExpenses"], OtherExpense);
-	        this.customers = this.convertValues(source["customers"], CustomerContainer);
+	        this.shippingInvoices = this.convertValues(source["shippingInvoices"], ShippingInvoice);
 	        this.totalExpense = source["totalExpense"];
 	        this.totalIncome = source["totalIncome"];
 	    }

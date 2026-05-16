@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-type CustomerContainer struct {
+type ShippingInvoice struct {
 	ID string `json:"id" gorm:"primaryKey"`
 
 	Status string `json:"status" gorm:"type:text;check:status IN ('pending','partial','paid')"`
@@ -19,13 +19,13 @@ type CustomerContainer struct {
 	InvoiceID    string        `json:"invoiceId"`
 	TruckInvoice *TruckInvoice `json:"-" gorm:"foreignKey:InvoiceID"`
 
-	Items []CustomerContainerItem `json:"items" gorm:"foreignKey:ContainerID;constraint:OnDelete:CASCADE"`
+	Items []ShippingItem `json:"items" gorm:"foreignKey:ContainerID;constraint:OnDelete:CASCADE"`
 
 	TotalAmount common.Money `json:"totalAmount" gorm:"default:0"`
 	PaidAmount  common.Money `json:"paidAmount" gorm:"default:0"`
 }
 
-type CustomerContainerItem struct {
+type ShippingItem struct {
 	ID uint `json:"id" gorm:"primaryKey"`
 
 	ContainerID string `json:"containerId"`
@@ -35,7 +35,7 @@ type CustomerContainerItem struct {
 	Price common.Money `json:"price"`
 }
 
-func (c *CustomerContainer) RefreshStatus() {
+func (c *ShippingInvoice) RefreshStatus() {
 	switch {
 	case c.PaidAmount <= 0:
 		c.Status = "pending"
@@ -46,19 +46,19 @@ func (c *CustomerContainer) RefreshStatus() {
 	}
 }
 
-func (c CustomerContainerItem) Value() (driver.Value, error) {
+func (c ShippingItem) Value() (driver.Value, error) {
 	return json.Marshal(c)
 }
 
-func (c *CustomerContainerItem) Scan(value interface{}) error {
+func (c *ShippingItem) Scan(value interface{}) error {
 	bytes, ok := value.([]byte)
 	if !ok {
-		return fmt.Errorf("failed to scan CustomerContainerItem")
+		return fmt.Errorf("failed to scan ShippingItem")
 	}
 	return json.Unmarshal(bytes, c)
 }
 
-func (c CustomerContainer) Total() common.Money {
+func (c ShippingInvoice) Total() common.Money {
 	var total common.Money
 
 	for _, item := range c.Items {

@@ -27,7 +27,7 @@ func (r *TruckInvoiceRepository) Create(ti *domain.TruckInvoice) error {
 		t := make([]transaction.Transaction, 0,
 			len(ti.Helpers)+
 				len(ti.OtherExpenses)+
-				len(ti.Customers),
+				len(ti.ShippingInvoices),
 		)
 
 		// invoice
@@ -79,23 +79,23 @@ func (r *TruckInvoiceRepository) Create(ti *domain.TruckInvoice) error {
 			}
 		}
 
-		// customers
-		if len(ti.Customers) > 0 {
-			for i := range ti.Customers {
-				ti.Customers[i].InvoiceID = ti.ID
+		// shipping invoices
+		if len(ti.ShippingInvoices) > 0 {
+			for i := range ti.ShippingInvoices {
+				ti.ShippingInvoices[i].InvoiceID = ti.ID
 			}
 
-			if len(ti.Customers) > 0 {
-				if err := tx.Create(&ti.Customers).Error; err != nil {
+			if len(ti.ShippingInvoices) > 0 {
+				if err := tx.Create(&ti.ShippingInvoices).Error; err != nil {
 					return err
 				}
 			}
 
 			customerIDs := make([]string, 0)
 
-			for _, customer := range ti.Customers {
-				if customer.Status == "paid" {
-					customerIDs = append(customerIDs, customer.CustomerID)
+			for _, si := range ti.ShippingInvoices {
+				if si.Status == "paid" {
+					customerIDs = append(customerIDs, si.CustomerID)
 				}
 			}
 
@@ -114,25 +114,6 @@ func (r *TruckInvoiceRepository) Create(ti *domain.TruckInvoice) error {
 				for _, p := range parties {
 					partyMap[p.ID] = p.Name
 				}
-			}
-
-			for _, customer := range ti.Customers {
-				if customer.Status != "paid" {
-					continue
-				}
-
-				t = append(t, transaction.Transaction{
-					ID:         uuid.NewString(),
-					InvoiceID:  &ti.ID,
-					Amount:     customer.Total(),
-					OccurredAt: ti.CreatedAt,
-					Type:       "income",
-					Category:   ptr.String("ค่าบรรทุกปลา"),
-					Note: ptr.String(
-						"ใบเสร็จ " + ti.ID +
-							" ลูกค้า " + partyMap[customer.CustomerID],
-					),
-				})
 			}
 		}
 
@@ -252,7 +233,7 @@ func (r *TruckInvoiceRepository) Update(id string, newInvoice *domain.TruckInvoi
 		t := make([]transaction.Transaction, 0,
 			len(newInvoice.Helpers)+
 				len(newInvoice.OtherExpenses)+
-				len(newInvoice.Customers),
+				len(newInvoice.ShippingInvoices),
 		)
 
 		// helpers

@@ -70,19 +70,19 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 		})
 	}
 
-	// Customers
+	// Shipping
 	for _, c := range input.Customers {
 		var totalAmount common.Money
-		customer := truckInvoiceDomain.CustomerContainer{
+		customer := truckInvoiceDomain.ShippingInvoice{
 			ID:         uuid.NewString(),
 			CustomerID: c.CustomerID,
 			InvoiceID:  sequenceID,
 			PaidAmount: common.Money(c.PaidAmount),
-			Items:      []truckInvoiceDomain.CustomerContainerItem{},
+			Items:      []truckInvoiceDomain.ShippingItem{},
 		}
 
 		for _, ci := range c.Items {
-			customer.Items = append(customer.Items, truckInvoiceDomain.CustomerContainerItem{
+			customer.Items = append(customer.Items, truckInvoiceDomain.ShippingItem{
 				Type:  ci.Type,
 				Qty:   ci.Qty,
 				Price: common.NewMoney(ci.Price),
@@ -93,7 +93,7 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 
 		customer.TotalAmount = totalAmount
 		customer.RefreshStatus()
-		invoice.Customers = append(invoice.Customers, customer)
+		invoice.ShippingInvoices = append(invoice.ShippingInvoices, customer)
 	}
 
 	invoice.TotalIncome, invoice.TotalExpense = s.CalculateTotal(*invoice)
@@ -120,7 +120,7 @@ func (s *TruckInvoiceService) CalculateTotal(invoice truckInvoiceDomain.TruckInv
 	var totalIncome common.Money
 	var totalExpense common.Money = invoice.DriverWage
 
-	for _, customer := range invoice.Customers {
+	for _, customer := range invoice.ShippingInvoices {
 		for _, item := range customer.Items {
 			totalIncome += item.Price.Mul(item.Qty)
 		}
