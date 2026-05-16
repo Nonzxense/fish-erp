@@ -31,14 +31,17 @@ func (r *PaymentRepository) ApplyPayment(tx *gorm.DB, refType, refId string, all
 	case constants.RefFishSaleInvoice:
 		model = &invoiceDomain.FishSaleInvoice{}
 	case constants.RefTruckInvoice:
-		model = &truckInvoiceDomain.TruckInvoice{}
+		model = &truckInvoiceDomain.CustomerContainer{}
 	default:
 		return fmt.Errorf("invalid reference type.")
 	}
 
 	if err := tx.Model(model).
 		Where("id = ?", refId).
-		Update("paid_amount", allocation).Error; err != nil {
+		Update(
+			"paid_amount",
+			gorm.Expr("paid_amount + ?", allocation),
+		).Error; err != nil {
 		return err
 	}
 
@@ -132,7 +135,7 @@ func (r *PaymentRepository) GetUnpaidInvoicesByPartyID(
 	for _, tc := range truckCustomers {
 		result = append(result, paymentDomain.UnpaidInvoice{
 			ReferenceType: constants.RefTruckInvoice,
-			ReferenceID:   tc.InvoiceID,
+			ReferenceID:   tc.ID,
 
 			TotalAmount: tc.TotalAmount,
 			PaidAmount:  tc.PaidAmount,

@@ -41,18 +41,18 @@ func (r *PartyRepository) FindAll(
 		Table("fish_sale_invoices").
 		Select(`
 			customer_id,
-			SUM(total_amount) as total_debt
+			SUM(total_amount - paid_amount) as total_debt
 		`).
-		Where("status = ?", "pending").
+		Where("paid_amount < total_amount").
 		Group("customer_id")
 
 	ccSubQuery := r.db.
 		Table("customer_containers").
 		Select(`
 			customer_id,
-			SUM(total_amount) as total_debt
+			SUM(total_amount - paid_amount) as total_debt
 		`).
-		Where("status = ?", "pending").
+		Where("paid_amount < total_amount").
 		Group("customer_id")
 
 	query := r.db.

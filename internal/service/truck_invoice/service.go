@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"time"
 	_ "time/tzdata"
+
+	"github.com/google/uuid"
 )
 
 type TruckInvoiceService struct {
@@ -72,6 +74,7 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 	for _, c := range input.Customers {
 		var totalAmount common.Money
 		customer := truckInvoiceDomain.CustomerContainer{
+			ID:         uuid.NewString(),
 			CustomerID: c.CustomerID,
 			InvoiceID:  sequenceID,
 			PaidAmount: common.Money(c.PaidAmount),

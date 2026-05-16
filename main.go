@@ -20,9 +20,9 @@ func main() {
 		Title:  "fish",
 		Width:  1024,
 		Height: 768,
-		Debug: options.Debug{
-			OpenInspectorOnStartup: true,
-		},
+		// Debug: options.Debug{
+		// 	OpenInspectorOnStartup: true,
+		// },
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

@@ -1074,7 +1074,7 @@ export namespace truckinvoice {
 	}
 	export class CustomerContainerItem {
 	    id: number;
-	    containerId: number;
+	    containerId: string;
 	    type: string;
 	    qty: number;
 	    price: number;
@@ -1093,7 +1093,7 @@ export namespace truckinvoice {
 	    }
 	}
 	export class CustomerContainer {
-	    id: number;
+	    id: string;
 	    status: string;
 	    customerId: string;
 	    customer: party.Party;

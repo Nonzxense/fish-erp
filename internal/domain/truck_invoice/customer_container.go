@@ -9,7 +9,7 @@ import (
 )
 
 type CustomerContainer struct {
-	ID uint `json:"id" gorm:"primaryKey"`
+	ID string `json:"id" gorm:"primaryKey"`
 
 	Status string `json:"status" gorm:"type:text;check:status IN ('pending','partial','paid')"`
 
@@ -28,7 +28,7 @@ type CustomerContainer struct {
 type CustomerContainerItem struct {
 	ID uint `json:"id" gorm:"primaryKey"`
 
-	ContainerID uint `json:"containerId"`
+	ContainerID string `json:"containerId"`
 
 	Type  string       `json:"type" gorm:"type:text"` // "plastic-l", "plastic-s", "foam-m", etc.
 	Qty   int32        `json:"qty"`
