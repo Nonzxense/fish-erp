@@ -5,11 +5,12 @@ import { ListFilter, PencilLine, Plus, Trash2, Eye } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
 import PartyFormModal from './components/modal/PartyFormModal'
-import { party } from '../../../wailsjs/go/models'
+import { party, payment } from '../../../wailsjs/go/models'
 import { PartyFilter } from './interface'
-import { GetParties } from '../../../wailsjs/go/main/App'
+import { AllocatePaymentFIFO, GetParties } from '../../../wailsjs/go/main/App'
 import { Pagination } from '../../utils/types'
 import { formatTHB } from '../../utils/formatter'
+import dayjs from 'dayjs'
 
 const Party = () => {
   const [parties, setParties] = useState<party.PartyWithDebt[]>([])
@@ -47,7 +48,18 @@ const Party = () => {
       okText: commonT('modal-common.ok'),
       cancelText: commonT('modal-common.cancel'),
       okButtonProps: { danger: true },
-      onOk: () => message.success(commonT('message.delete-success'))
+      onOk: () => {
+        const payload = new payment.PaymentInput({
+          partyId: id,
+          amount: 210000,
+          direction: "in",
+          paymentDate: dayjs().startOf('day').toISOString(),
+          method: "cash",
+        })
+
+        AllocatePaymentFIFO(payload)
+        message.success(commonT('message.delete-success'))
+      }
     })
   }, [message, modal, commonT])
 

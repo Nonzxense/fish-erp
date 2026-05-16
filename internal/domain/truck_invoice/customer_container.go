@@ -9,14 +9,15 @@ import (
 )
 
 type CustomerContainer struct {
-	ID uint `gorm:"primaryKey"`
+	ID uint `json:"id" gorm:"primaryKey"`
 
 	Status string `json:"status" gorm:"type:text;check:status IN ('pending','partial','paid')"`
 
 	CustomerID string      `json:"customerId"`
 	Customer   party.Party `json:"customer" gorm:"foreignKey:CustomerID"`
 
-	InvoiceID string `gorm:"not null"`
+	InvoiceID    string        `json:"invoiceId"`
+	TruckInvoice *TruckInvoice `json:"-" gorm:"foreignKey:InvoiceID"`
 
 	Items []CustomerContainerItem `json:"items" gorm:"foreignKey:ContainerID;constraint:OnDelete:CASCADE"`
 
@@ -25,12 +26,13 @@ type CustomerContainer struct {
 }
 
 type CustomerContainerItem struct {
-	ID          uint `gorm:"primaryKey"`
-	ContainerID uint
+	ID uint `json:"id" gorm:"primaryKey"`
 
-	Type  string `gorm:"type:text"` // "plastic-l", "plastic-s", "foam-m", etc.
-	Qty   int32
-	Price common.Money
+	ContainerID uint `json:"containerId"`
+
+	Type  string       `json:"type" gorm:"type:text"` // "plastic-l", "plastic-s", "foam-m", etc.
+	Qty   int32        `json:"qty"`
+	Price common.Money `json:"price"`
 }
 
 func (c *CustomerContainer) RefreshStatus() {

@@ -507,6 +507,7 @@ export namespace invoice {
 	    supplier: party.Party;
 	    items: container.FishPurchaseDetail[];
 	    totalAmount: number;
+	    paidAmount: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new FishPurchaseInvoice(source);
@@ -523,6 +524,7 @@ export namespace invoice {
 	        this.supplier = this.convertValues(source["supplier"], party.Party);
 	        this.items = this.convertValues(source["items"], container.FishPurchaseDetail);
 	        this.totalAmount = source["totalAmount"];
+	        this.paidAmount = source["paidAmount"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -553,6 +555,7 @@ export namespace invoice {
 	    customer: party.Party;
 	    items: container.FishContainer[];
 	    totalAmount: number;
+	    paidAmount: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new FishSaleInvoice(source);
@@ -569,6 +572,7 @@ export namespace invoice {
 	        this.customer = this.convertValues(source["customer"], party.Party);
 	        this.items = this.convertValues(source["items"], container.FishContainer);
 	        this.totalAmount = source["totalAmount"];
+	        this.paidAmount = source["paidAmount"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -729,6 +733,51 @@ export namespace party {
 
 }
 
+export namespace payment {
+	
+	export class PaymentInput {
+	    partyId: string;
+	    amount: number;
+	    direction: string;
+	    paymentDate: time.Time;
+	    method: string;
+	    note?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new PaymentInput(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.partyId = source["partyId"];
+	        this.amount = source["amount"];
+	        this.direction = source["direction"];
+	        this.paymentDate = this.convertValues(source["paymentDate"], time.Time);
+	        this.method = source["method"];
+	        this.note = source["note"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace time {
 	
 	export class Time {
@@ -791,6 +840,7 @@ export namespace transaction {
 	    amount: number;
 	    type: string;
 	    occurredAt: time.Time;
+	    paymentId?: number;
 	    invoiceId?: string;
 	    category?: string;
 	    note?: string;
@@ -805,6 +855,7 @@ export namespace transaction {
 	        this.amount = source["amount"];
 	        this.type = source["type"];
 	        this.occurredAt = this.convertValues(source["occurredAt"], time.Time);
+	        this.paymentId = source["paymentId"];
 	        this.invoiceId = source["invoiceId"];
 	        this.category = source["category"];
 	        this.note = source["note"];
@@ -1022,11 +1073,11 @@ export namespace truckinvoice {
 		}
 	}
 	export class CustomerContainerItem {
-	    ID: number;
-	    ContainerID: number;
-	    Type: string;
-	    Qty: number;
-	    Price: number;
+	    id: number;
+	    containerId: number;
+	    type: string;
+	    qty: number;
+	    price: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new CustomerContainerItem(source);
@@ -1034,19 +1085,19 @@ export namespace truckinvoice {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.ID = source["ID"];
-	        this.ContainerID = source["ContainerID"];
-	        this.Type = source["Type"];
-	        this.Qty = source["Qty"];
-	        this.Price = source["Price"];
+	        this.id = source["id"];
+	        this.containerId = source["containerId"];
+	        this.type = source["type"];
+	        this.qty = source["qty"];
+	        this.price = source["price"];
 	    }
 	}
 	export class CustomerContainer {
-	    ID: number;
+	    id: number;
 	    status: string;
 	    customerId: string;
 	    customer: party.Party;
-	    InvoiceID: string;
+	    invoiceId: string;
 	    items: CustomerContainerItem[];
 	    totalAmount: number;
 	    paidAmount: number;
@@ -1057,11 +1108,11 @@ export namespace truckinvoice {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.ID = source["ID"];
+	        this.id = source["id"];
 	        this.status = source["status"];
 	        this.customerId = source["customerId"];
 	        this.customer = this.convertValues(source["customer"], party.Party);
-	        this.InvoiceID = source["InvoiceID"];
+	        this.invoiceId = source["invoiceId"];
 	        this.items = this.convertValues(source["items"], CustomerContainerItem);
 	        this.totalAmount = source["totalAmount"];
 	        this.paidAmount = source["paidAmount"];

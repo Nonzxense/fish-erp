@@ -9,6 +9,7 @@ import (
 	containerDomain "fish/internal/domain/container"
 	invoiceDomain "fish/internal/domain/invoice"
 	partyDomain "fish/internal/domain/party"
+	paymentDomain "fish/internal/domain/payment"
 	transactionDomain "fish/internal/domain/transaction"
 	truckInvoiceDomain "fish/internal/domain/truck_invoice"
 
@@ -17,6 +18,7 @@ import (
 	"fish/internal/service/container"
 	"fish/internal/service/invoice"
 	"fish/internal/service/party"
+	"fish/internal/service/payment"
 	"fish/internal/service/transaction"
 	truckinvoice "fish/internal/service/truck_invoice"
 
@@ -32,6 +34,7 @@ type App struct {
 	partyService        *party.PartyService
 	invoiceService      *invoice.InvoiceService
 	truckInvoiceService *truckinvoice.TruckInvoiceService
+	paymentService      *payment.PaymentService
 }
 
 // NewApp creates a new App application struct
@@ -40,8 +43,6 @@ func NewApp() *App {
 	if err != nil {
 		panic(err)
 	}
-
-	db = db.Debug()
 
 	err = db.AutoMigrate(
 		&transactionDomain.Transaction{},
@@ -57,6 +58,8 @@ func NewApp() *App {
 		&truckInvoiceDomain.HelperWage{},
 		&truckInvoiceDomain.OtherExpense{},
 		&truckInvoiceDomain.CustomerContainerItem{},
+		&paymentDomain.Payment{},
+		&paymentDomain.PaymentAllocation{},
 	)
 
 	if err != nil {
@@ -68,6 +71,7 @@ func NewApp() *App {
 	partyRepo := repository.NewPartyRepository(db)
 	invoiceRepo := repository.NewInvoiceRepository(db)
 	truckInvoiceRepo := repository.NewTruckInvoiceRepository(db)
+	paymentRepo := repository.NewPaymentRepository(db)
 
 	return &App{
 		db:                  db,
@@ -76,6 +80,7 @@ func NewApp() *App {
 		partyService:        party.NewPartyService(partyRepo),
 		invoiceService:      invoice.NewInvoiceService(invoiceRepo, partyRepo, containerRepo),
 		truckInvoiceService: truckinvoice.NewTruckInvoiceService(truckInvoiceRepo),
+		paymentService:      payment.NewPaymentService(paymentRepo, transactionRepo, db),
 	}
 }
 

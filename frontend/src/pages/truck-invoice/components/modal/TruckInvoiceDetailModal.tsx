@@ -200,24 +200,24 @@ const TruckInvoiceDetailModal = ({
                     columns={[
                       {
                         title: localT('table.type'),
-                        render: (_, item) => commonT(item.Type)
+                        render: (_, item) => commonT(item.type)
                       },
                       {
                         title: localT('table.qty'),
                         align: 'right',
-                        render: (_, item) => item.Qty
+                        render: (_, item) => item.qty
                       },
                       {
                         title: localT('table.price'),
                         align: 'right',
                         render: (_, item) =>
-                          formatTHB(item.Price)
+                          formatTHB(item.price)
                       },
                       {
                         title: localT('table.amount'),
                         align: 'right',
                         render: (_, item) =>
-                          formatTHB(item.Qty * item.Price)
+                          formatTHB(item.qty * item.price)
                       }
                     ]}
                   />

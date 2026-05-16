@@ -19,6 +19,13 @@ func (r *TransactionRepository) Create(tx *domain.Transaction) error {
 	return r.db.Create(tx).Error
 }
 
+func (r *TransactionRepository) CreateWithTx(
+	db *gorm.DB,
+	tx *domain.Transaction,
+) error {
+	return db.Create(tx).Error
+}
+
 func (r *TransactionRepository) FindAll(filter *domain.TransactionFilter) ([]domain.Transaction, int64, error) {
 	var transactions []domain.Transaction
 	var total int64

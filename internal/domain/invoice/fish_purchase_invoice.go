@@ -11,5 +11,6 @@ type FishPurchaseInvoice struct {
 	SupplierID  string                         `json:"supplierId" gorm:"column:supplier_id"`
 	Supplier    party.Party                    `json:"supplier" gorm:"foreignKey:SupplierId"`
 	Fishes      []container.FishPurchaseDetail `json:"items" gorm:"foreignKey:InvoiceId;constraint:OnDelete:CASCADE"`
-	TotalAmount common.Money                   `json:"totalAmount"`
+	TotalAmount common.Money                   `json:"totalAmount" gorm:"default:0"`
+	PaidAmount  common.Money                   `json:"paidAmount" gorm:"default:0"`
 }
