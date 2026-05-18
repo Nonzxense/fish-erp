@@ -36,7 +36,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
   const [form] = Form.useForm()
   const { t: localT } = useTranslation('truck-invoice')
   const { t: commonT } = useTranslation('common')
-  const watchedCustomers = Form.useWatch('customers', form)
+  const watchedShippingInvoices = Form.useWatch('shippingInvoices', form)
   const driverWage = Form.useWatch('driverWage', form)
   const helpers = Form.useWatch('helpers', form)
   const otherExpenses = Form.useWatch('otherExpenses', form)
@@ -49,10 +49,10 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
 
   type ItemKey = typeof SHIPPING_CONTAINER_KEYS[number]
 
-  const mapItems = useCallback((customer: ShippingInvoice) =>
+  const mapItems = useCallback((si: ShippingInvoice) =>
     SHIPPING_CONTAINER_KEYS
       .map((key) => {
-        const item = customer[key]
+        const item = si[key]
 
         if (!item || item.qty <= 0) return null
 
@@ -91,11 +91,11 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
   }, [driverWage, helpers, otherExpenses])
 
   const totalIncome = useMemo(() => {
-    return (watchedCustomers ?? []).reduce(
+    return (watchedShippingInvoices ?? []).reduce(
       (sum: number, c: ShippingInvoice) => sum + calculateCustomerTotal(c),
       0
     )
-  }, [calculateCustomerTotal, watchedCustomers])
+  }, [calculateCustomerTotal, watchedShippingInvoices])
 
   const handleCloseModal = useCallback(() => {
     form.resetFields()
@@ -182,7 +182,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
           date: dayjs(),
           helpers: [{}],
           otherExpenses: [{}],
-          customers: [{}]
+          shippingInvoices: [{}]
         }}
         onFinish={handleSubmit}
         onFinishFailed={(err) => console.log(err)}
@@ -326,7 +326,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
 
         {/* ================= CUSTOMERS ================= */}
         <Card title={localT('card.customers')}>
-          <Form.List name="customers">
+          <Form.List name="shippingInvoices">
             {(fields, { add, remove }) => (
               <>
                 {fields.map((field, index) => (
@@ -465,7 +465,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
 
                     {/* Total */}
                     <div className="text-right text-lg font-semibold text-blue-600">
-                      {localT('customer.total')}: {formatTHBRaw(calculateCustomerTotal(watchedCustomers?.[index]))} บาท
+                      {localT('customer.total')}: {formatTHBRaw(calculateCustomerTotal(watchedShippingInvoices?.[index]))} บาท
                     </div>
                   </Card>
                 ))}

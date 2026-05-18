@@ -1,4 +1,5 @@
 import { TagProps } from "antd"
+import { PAYMENT_CANCELLED, PAYMENT_PAID, PAYMENT_PARTIAL, PAYMENT_PENDING } from "./constants"
 
 export const getTransactionTypeColor = (
   type?: string
@@ -21,11 +22,13 @@ export const getPaidStatusColor = (
   if (!status) return 'default'
 
   switch (status.toLowerCase()) {
-    case 'paid':
+    case PAYMENT_PAID:
       return 'success'
-    case 'pending':
+    case PAYMENT_PENDING:
       return 'warning'
-    case 'cancelled':
+    case PAYMENT_PARTIAL:
+      return 'processing'
+    case PAYMENT_CANCELLED:
       return 'error'
     default:
       return 'default'

@@ -20,6 +20,7 @@ import { truckinvoice as truckinvoiceModel } from '../../../../../wailsjs/go/mod
 import { useEffect, useState } from 'react'
 import { GetTruckInvoice } from '../../../../../wailsjs/go/main/App'
 import ModalHeader from '../../../../components/invoice-modal-title/ModalHeader'
+import { getPaymentStatus } from '../../../../utils/getPaymentStatus'
 
 const { Title, Text } = Typography
 
@@ -176,17 +177,38 @@ const TruckInvoiceDetailModal = ({
                 {
                   title: localT('table.status'),
                   align: 'center',
-                  render: (_, record) => (
-                    <Tag color={getPaidStatusColor(record.status)}>
-                      {commonT(`invoice-status.${record.status}`)}
-                    </Tag>
-                  )
+                  render: (_, record) => {
+                    const status = getPaymentStatus(record.totalAmount, record.paidAmount)
+                    return (
+                      <Tag color={getPaidStatusColor(status)}>
+                        {commonT(`invoice-status.${status}`)}
+                      </Tag>
+                    )
+                  }
                 },
                 {
                   title: localT('table.total'),
                   align: 'right',
-                  render: (_, record) =>
-                    formatTHB(record.totalAmount || 0)
+                  render: (_, record) => {
+                    const remaining =
+                      (record.totalAmount || 0) - (record.paidAmount || 0)
+
+                    return (
+                      <Flex vertical align="end" gap={0}>
+                        <Text>
+                          {formatTHB(record.totalAmount || 0)}
+                        </Text>
+
+                        {remaining > 0 && (
+                          <Text type="secondary">
+                            {localT('table.remaining')}:
+                            {' '}
+                            {formatTHB(remaining)}
+                          </Text>
+                        )}
+                      </Flex>
+                    )
+                  }
                 }
               ]}
               expandable={{

@@ -4,6 +4,9 @@
   "overdue": "ค้างชำระ",
   "overdue-amount": "ยอดค้างชำระ",
   "all": "ทั้งหมด",
+  "button": {
+    "receive-payment": "ชำระเงิน"
+  },
   "table": {
     "name": "ชื่อ",
     "phone": "เบอร์โทรศัพท์",
@@ -26,6 +29,20 @@
     "note": {
       "label": "หมายเหตุ",
       "placeholder": "หมายเหตุเพิ่มเติม..."
+    },
+    "amount": {
+      "label": "จำนวนเงิน",
+      "placeholder": "จำนวนเงิน",
+      "required": "กรุณากรอกจำนวนเงิน"
+    },
+    "payment-date": {
+      "label": "วันที่"
+    },
+    "method": {
+      "label": "วิธีการชำระเงิน"
     }
+  },
+  "modal": {
+    "receive-payment-title": "ชำระเงิน"
   }
 }

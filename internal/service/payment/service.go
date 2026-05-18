@@ -2,10 +2,10 @@ package payment
 
 import (
 	"fish/internal/constants"
+	"fish/internal/domain/common"
 	"fish/internal/domain/payment"
 	"fish/internal/domain/transaction"
 	"fish/internal/repository"
-	"fmt"
 	"slices"
 
 	"github.com/google/uuid"
@@ -35,7 +35,7 @@ func (s *PaymentService) AllocatePaymentFIFO(
 ) error {
 
 	invoices, err := s.paymentRepo.GetUnpaidInvoicesByPartyID(input.PartyID)
-	fmt.Printf("Unpaid invoices: %v", invoices)
+
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (s *PaymentService) AllocatePaymentFIFO(
 			return err
 		}
 
-		remainingAmount := input.Amount
+		remainingAmount := common.NewMoney(input.Amount)
 
 		for _, inv := range invoices {
 
@@ -100,7 +100,7 @@ func (s *PaymentService) CreatePayment(
 ) (*payment.Payment, error) {
 
 	p := payment.Payment{
-		Amount:      input.Amount,
+		Amount:      common.NewMoney(input.Amount),
 		PaymentDate: input.PaymentDate,
 		PartyID:     input.PartyID,
 		Direction:   input.Direction,
@@ -121,7 +121,7 @@ func (s *PaymentService) CreatePayment(
 
 	t := transaction.Transaction{
 		ID:         uuid.NewString(),
-		Amount:     input.Amount,
+		Amount:     common.NewMoney(input.Amount),
 		Type:       transactionType,
 		OccurredAt: input.PaymentDate,
 		PaymentID:  &p.ID,

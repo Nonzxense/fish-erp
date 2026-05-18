@@ -2,6 +2,7 @@ package repository
 
 import (
 	domain "fish/internal/domain/party"
+
 	"gorm.io/gorm"
 )
 
@@ -46,7 +47,7 @@ func (r *PartyRepository) FindAll(
 		Where("paid_amount < total_amount").
 		Group("customer_id")
 
-	ccSubQuery := r.db.
+	shiSubQuery := r.db.
 		Table("shipping_invoices").
 		Select(`
 			customer_id,
@@ -63,16 +64,16 @@ func (r *PartyRepository) FindAll(
 			parties.phone,
 			parties.note,
 			COALESCE(fsi.total_debt, 0) +
-			COALESCE(cc.total_debt, 0) as total_debt
+			COALESCE(shi.total_debt, 0) as total_debt
 		`).
 		Joins(`
 			LEFT JOIN (?) fsi
 			ON parties.id = fsi.customer_id
 		`, fsiSubQuery).
 		Joins(`
-			LEFT JOIN (?) cc
-			ON parties.id = cc.customer_id
-		`, ccSubQuery)
+			LEFT JOIN (?) shi
+			ON parties.id = shi.customer_id
+		`, shiSubQuery)
 
 	if filter != nil {
 		if filter.Name != nil {

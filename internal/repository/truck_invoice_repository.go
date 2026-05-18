@@ -1,13 +1,13 @@
 package repository
 
 import (
-	partyDomain "fish/internal/domain/party"
 	"fish/internal/domain/transaction"
 	domain "fish/internal/domain/truck_invoice"
 	"fish/internal/utils/ptr"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type TruckInvoiceRepository struct {
@@ -31,7 +31,7 @@ func (r *TruckInvoiceRepository) Create(ti *domain.TruckInvoice) error {
 		)
 
 		// invoice
-		if err := tx.Omit("Helpers", "OtherExpenses", "Customers").Create(ti).Error; err != nil {
+		if err := tx.Omit("Helpers", "OtherExpenses", "Customers", clause.Associations).Create(ti).Error; err != nil {
 			return err
 		}
 
@@ -81,39 +81,8 @@ func (r *TruckInvoiceRepository) Create(ti *domain.TruckInvoice) error {
 
 		// shipping invoices
 		if len(ti.ShippingInvoices) > 0 {
-			for i := range ti.ShippingInvoices {
-				ti.ShippingInvoices[i].InvoiceID = ti.ID
-			}
-
-			if len(ti.ShippingInvoices) > 0 {
-				if err := tx.Create(&ti.ShippingInvoices).Error; err != nil {
-					return err
-				}
-			}
-
-			customerIDs := make([]string, 0)
-
-			for _, si := range ti.ShippingInvoices {
-				if si.Status == "paid" {
-					customerIDs = append(customerIDs, si.CustomerID)
-				}
-			}
-
-			partyMap := make(map[string]string)
-
-			if len(customerIDs) > 0 {
-				var parties []partyDomain.Party
-
-				if err := tx.
-					Select("id", "name").
-					Where("id IN ?", customerIDs).
-					Find(&parties).Error; err != nil {
-					return err
-				}
-
-				for _, p := range parties {
-					partyMap[p.ID] = p.Name
-				}
+			if err := tx.Create(&ti.ShippingInvoices).Error; err != nil {
+				return err
 			}
 		}
 
@@ -172,9 +141,9 @@ func (r *TruckInvoiceRepository) FindOne(id string) (domain.TruckInvoice, error)
 	var invoice domain.TruckInvoice
 
 	err := r.db.
-		Preload("Customers").
-		Preload("Customers.Customer").
-		Preload("Customers.Items").
+		Preload("ShippingInvoices").
+		Preload("ShippingInvoices.Customer").
+		Preload("ShippingInvoices.Items").
 		Preload("Helpers").
 		Preload("OtherExpenses").
 		Where("id = ?", id).

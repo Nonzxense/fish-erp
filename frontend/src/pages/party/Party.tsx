@@ -1,7 +1,7 @@
 import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip } from 'antd'
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
-import { ListFilter, PencilLine, Plus, Trash2, Eye } from 'lucide-react'
+import { ListFilter, PencilLine, Plus, Trash2, Eye, Wallet } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
 import PartyFormModal from './components/modal/PartyFormModal'
@@ -11,6 +11,7 @@ import { AllocatePaymentFIFO, GetParties } from '../../../wailsjs/go/main/App'
 import { Pagination } from '../../utils/types'
 import { formatTHB } from '../../utils/formatter'
 import dayjs from 'dayjs'
+import PaymentModal from './components/modal/PaymentModal'
 
 const Party = () => {
   const [parties, setParties] = useState<party.PartyWithDebt[]>([])
@@ -18,6 +19,8 @@ const Party = () => {
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [filter, setFilter] = useState<PartyFilter>({})
+  const [selectedParty, setSelectedParty] = useState<party.PartyWithDebt>()
+  const [isOpenPaymentModal, setIsOpenPaymentModal] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [segmentStatus, setSegmentStatus] = useState<string>('all')
   const [pagination, setPagination] = useState<Pagination>({
@@ -41,6 +44,14 @@ const Party = () => {
     message.info(`${commonT('message.editing')} ${record.name}`)
   }, [message, commonT])
 
+  const handleReceivePayment = useCallback(
+    (record: party.PartyWithDebt) => {
+      setSelectedParty(record)
+      setIsOpenPaymentModal(true)
+    },
+    []
+  )
+
   const handleDelete = useCallback((id: string) => {
     modal.confirm({
       title: commonT('modal-delete.title'),
@@ -49,15 +60,7 @@ const Party = () => {
       cancelText: commonT('modal-common.cancel'),
       okButtonProps: { danger: true },
       onOk: () => {
-        const payload = new payment.PaymentInput({
-          partyId: id,
-          amount: 210000,
-          direction: "in",
-          paymentDate: dayjs().startOf('day').toISOString(),
-          method: "cash",
-        })
 
-        AllocatePaymentFIFO(payload)
         message.success(commonT('message.delete-success'))
       }
     })
@@ -129,6 +132,14 @@ const Party = () => {
                 onClick={() => handleViewDetail(record)}
               />
             </Tooltip>
+            <Tooltip title={localT('button.receive-payment')}>
+              <Button
+                icon={<Wallet size={16} />}
+                variant="text"
+                color="green"
+                onClick={() => handleReceivePayment(record)}
+              />
+            </Tooltip>
             <Tooltip title={commonT('button-edit')}>
               <Button
                 icon={<PencilLine size={16} />}
@@ -149,7 +160,7 @@ const Party = () => {
         )
       }
     ],
-    [handleViewDetail, handleEdit, handleDelete, localT, commonT]
+    [localT, commonT, handleViewDetail, handleEdit, handleReceivePayment, handleDelete]
   )
 
   const loadParties = useCallback(async () => {
@@ -178,6 +189,12 @@ const Party = () => {
   }, [loadParties])
   return (
     <>
+      <PaymentModal
+        isOpen={isOpenPaymentModal}
+        onClose={() => setIsOpenPaymentModal(false)}
+        party={selectedParty}
+        onSuccess={loadParties}
+      />
       <PartyFormModal
         isOpen={isOpenModalForm}
         onClose={() => setIsOpenModalForm(false)}

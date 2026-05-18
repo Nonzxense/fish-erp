@@ -21,6 +21,10 @@
   "total-income": "รายรับทั้งหมด",
   "total-expense": "ค่าใช้จ่ายทั้งหมด",
   "net-profit": "กำไรสุทธิ",
+  "payment-method": {
+    "cash": "เงินสด",
+    "transfer": "เงินโอน"
+  },
   "message": {
     "delete-success": "ลบรายการสำเร็จ"
   },
@@ -56,6 +60,7 @@
   "invoice-status": {
     "pending": "ค้างชำระ",
     "cancelled": "ยกเลิก",
-    "paid": "จ่ายแล้ว"
+    "paid": "จ่ายแล้ว",
+    "partial": "ชำระบางส่วน"
   }
 }
