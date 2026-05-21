@@ -12,6 +12,7 @@ import { Pagination } from '../../utils/types'
 import { formatTHB } from '../../utils/formatter'
 import dayjs from 'dayjs'
 import PaymentModal from './components/modal/PaymentModal'
+import { useNavigate } from 'react-router-dom'
 
 const Party = () => {
   const [parties, setParties] = useState<party.PartyWithDebt[]>([])
@@ -32,6 +33,7 @@ const Party = () => {
   const { t: localT } = useTranslation('party')
   const { t: commonT } = useTranslation('common')
   const [form] = Form.useForm()
+  const navigate = useNavigate()
   const { modal, message } = App.useApp()
 
   const segmentOptions = useMemo(() => [
@@ -67,17 +69,8 @@ const Party = () => {
   }, [message, modal, commonT])
 
   const handleViewDetail = useCallback((record: party.PartyWithDebt) => {
-    modal.info({
-      title: localT('modal.detail-title'),
-      content: (
-        <div>
-          <p><b>{localT('table.name')}:</b> {record.name}</p>
-          <p><b>{localT('table.phone')}:</b> {record.phone}</p>
-          <p><b>{localT('table.note')}:</b> {record.note}</p>
-        </div>
-      )
-    })
-  }, [modal, localT])
+    navigate(record.id)
+  }, [navigate])
 
   const rowSelection = {
     selectedRowKeys,

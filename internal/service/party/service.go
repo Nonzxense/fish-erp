@@ -3,17 +3,22 @@ package party
 import (
 	"fish/internal/domain"
 	partyDomain "fish/internal/domain/party"
+	"fish/internal/dto"
 	"fish/internal/repository"
+	"fish/internal/service/invoice"
+	"fish/internal/service/payment"
 
 	"github.com/google/uuid"
 )
 
 type PartyService struct {
-	repo *repository.PartyRepository
+	repo           *repository.PartyRepository
+	paymentService *payment.PaymentService
+	invoiceService *invoice.InvoiceService
 }
 
-func NewPartyService(repo *repository.PartyRepository) *PartyService {
-	return &PartyService{repo: repo}
+func NewPartyService(repo *repository.PartyRepository, paymentService *payment.PaymentService) *PartyService {
+	return &PartyService{repo: repo, paymentService: paymentService}
 }
 
 func (s *PartyService) CreateParty(input CreatePartyInput) error {
@@ -35,6 +40,19 @@ func (s *PartyService) GetParties(filter *partyDomain.PartyFilter) (domain.PageR
 	return pageResult, error
 }
 
-func (s *PartyService) GetParty(id string) (partyDomain.Party, error) {
-	return s.repo.FindOne(id)
+func (s *PartyService) GetParty(id string) (dto.PartyDetailDTO, error) {
+	party, err := s.repo.GetByIDWithDebt(id)
+	if err != nil {
+		return dto.PartyDetailDTO{}, err
+	}
+
+	partyDetail := dto.PartyDetailDTO{
+		ID:        party.ID,
+		Name:      party.Name,
+		Phone:     party.Phone,
+		Note:      party.Note,
+		TotalDebt: party.TotalDebt,
+	}
+
+	return partyDetail, nil
 }

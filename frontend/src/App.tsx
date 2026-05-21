@@ -10,6 +10,7 @@ import thTh from 'antd/locale/th_TH'
 import PurchaseInvoice from './pages/purchase-invoice/PurchaseInvoice';
 import TruckInvoice from './pages/truck-invoice/TruckInvoice';
 import StartupProvider from './startup/StartupProvider';
+import PartyDetail from './pages/party/PartyDetail';
 
 dayjs.locale('th')
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
             <Route path="/truck-invoices" element={<TruckInvoice />} />
             <Route path="/containers" element={<Container />} />
             <Route path="/parties" element={<Party />} />
+            <Route path="/parties/:id" element={<PartyDetail />} />
             <Route path="/settings" element={<div>Page</div>} />
           </Route>
         </Routes>

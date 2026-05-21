@@ -123,8 +123,8 @@ const SaleInvoice = () => {
       modal.confirm({
         title: localT('modal-status.title'),
         content: localT('modal-status.desc', {
-          from: localT(`status.${record.status}`),
-          to: localT(`status.${newStatus}`)
+          from: commonT(`invoice-status.${record.status}`),
+          to: commonT(`invoice-status.${newStatus}`)
         }),
         okText: commonT('modal-common.ok'),
         cancelText: commonT('modal-common.cancel'),
@@ -210,34 +210,13 @@ const SaleInvoice = () => {
         dataIndex: 'status',
         align: 'center',
         width: 150,
-        render: (status, record) => (
-          <Dropdown
-            trigger={['click']}
-            menu={{
-              onClick: ({ key }) => handleChangeStatus(record, key),
-              items: [
-                {
-                  key: 'pending',
-                  label: localT('status.pending'),
-                },
-                {
-                  key: 'paid',
-                  label: localT('status.paid'),
-                },
-                {
-                  key: 'cancelled',
-                  label: localT('status.cancelled'),
-                }
-              ]
-            }}
+        render: (status) => (
+          <Tag
+            color={getPaidStatusColor(status)}
+            className="px-3 py-1 text-sm"
           >
-            <Tag
-              color={getPaidStatusColor(status)}
-              className="cursor-pointer px-3 py-1 text-sm"
-            >
-              {localT(`status.${status}`)}
-            </Tag>
-          </Dropdown>
+            {commonT(`invoice-status.${status}`)}
+          </Tag>
         )
       },
       {
@@ -268,7 +247,7 @@ const SaleInvoice = () => {
         )
       }
     ],
-    [localT, handleChangeStatus, commonT, handleViewDetail, handleEdit]
+    [localT, commonT, handleViewDetail, handleEdit]
   )
 
   useEffect(() => {

@@ -4,6 +4,7 @@ import (
 	"fish/internal/domain/common"
 	"fish/internal/domain/container"
 	domain "fish/internal/domain/invoice"
+	paymentDomain "fish/internal/domain/payment"
 	"fish/internal/domain/transaction"
 	"fish/internal/utils/ptr"
 	"time"
@@ -25,8 +26,25 @@ func applyInvoiceFilter(query *gorm.DB, filter *domain.InvoiceFilter, table stri
 		query = query.Where("parties.name LIKE ?", "%"+*filter.PartyName+"%")
 	}
 
+	if filter.PartyID != nil {
+		query = query.Where("parties.id = ?", *filter.PartyID)
+	}
+
 	if filter.Status != nil {
-		query = query.Where(table+".status = ?", *filter.Status)
+		switch *filter.Status {
+
+		case paymentDomain.PaymentPending:
+			query = query.Where("paid_amount <= 0")
+
+		case paymentDomain.PaymentPartial:
+			query = query.Where(
+				"paid_amount > 0 AND paid_amount < total_amount",
+			)
+
+		case paymentDomain.PaymentPaid:
+			query = query.Where("paid_amount >= total_amount")
+		}
+
 	}
 
 	if filter.FromDate != nil {
@@ -38,10 +56,6 @@ func applyInvoiceFilter(query *gorm.DB, filter *domain.InvoiceFilter, table stri
 	}
 
 	return query
-}
-
-func countQuery(query *gorm.DB, total *int64) error {
-	return query.Count(total).Error
 }
 
 func (r *InvoiceRepository) applyStatusTransition(

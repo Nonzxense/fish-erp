@@ -103,7 +103,7 @@ const PurchaseInvoiceDetailModal = ({
 
               <div className="mt-1">
                 <Tag color={getPaidStatusColor(purchaseInvoice.status)}>
-                  {localT(`status.${purchaseInvoice.status}`)}
+                  {commonT(`invoice-status.${purchaseInvoice.status}`)}
                 </Tag>
               </div>
             </div>

@@ -60,7 +60,7 @@
   "invoice-status": {
     "pending": "ค้างชำระ",
     "cancelled": "ยกเลิก",
-    "paid": "จ่ายแล้ว",
+    "paid": "ชำระแล้ว",
     "partial": "ชำระบางส่วน"
   }
 }

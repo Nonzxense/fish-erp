@@ -73,14 +73,33 @@ func NewApp() *App {
 	truckInvoiceRepo := repository.NewTruckInvoiceRepository(db)
 	paymentRepo := repository.NewPaymentRepository(db)
 
+	transactionService := transaction.NewTransactionService(transactionRepo)
+	containerService := container.NewContainerService(containerRepo)
+	invoiceService := invoice.NewInvoiceService(
+		invoiceRepo,
+		partyRepo,
+		containerRepo,
+	)
+	truckInvoiceService := truckinvoice.NewTruckInvoiceService(
+		truckInvoiceRepo,
+	)
+	paymentService := payment.NewPaymentService(
+		paymentRepo,
+		transactionRepo,
+		db,
+	)
+	partyService := party.NewPartyService(
+		partyRepo,
+		paymentService,
+	)
 	return &App{
-		db:                  db,
-		transactionService:  transaction.NewTransactionService(transactionRepo),
-		containerService:    container.NewContainerService(containerRepo),
-		partyService:        party.NewPartyService(partyRepo),
-		invoiceService:      invoice.NewInvoiceService(invoiceRepo, partyRepo, containerRepo),
-		truckInvoiceService: truckinvoice.NewTruckInvoiceService(truckInvoiceRepo),
-		paymentService:      payment.NewPaymentService(paymentRepo, transactionRepo, db),
+		db: db,
+		transactionService:  transactionService,
+		containerService:    containerService,
+		invoiceService:      invoiceService,
+		truckInvoiceService: truckInvoiceService,
+		paymentService:      paymentService,
+		partyService:        partyService,
 	}
 }
 

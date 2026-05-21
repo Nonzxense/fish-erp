@@ -11,9 +11,10 @@ import (
 	"fish/internal/utils/count"
 	"fish/internal/utils/ptr"
 	"fmt"
-	"github.com/google/uuid"
 	"time"
 	_ "time/tzdata"
+
+	"github.com/google/uuid"
 )
 
 type InvoiceService struct {
@@ -185,7 +186,7 @@ func (s *InvoiceService) buildFishPurchaseInvoice(input CreateFishPurchaseInvoic
 
 func (s *InvoiceService) resolveParty(input PartyInput) (partyDomain.Party, error) {
 	if !input.IsNewParty {
-		party, err := s.partyRepo.FindOne(input.PartyID)
+		party, err := s.partyRepo.GetByID(input.PartyID)
 		if err != nil {
 			return partyDomain.Party{}, err
 		}

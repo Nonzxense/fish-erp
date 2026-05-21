@@ -1,7 +1,7 @@
 package payment
 
 import (
-	"fish/internal/constants"
+	paymentDomain "fish/internal/domain/payment"
 	"time"
 )
 
@@ -10,7 +10,7 @@ type PaymentInput struct {
 
 	Amount float64 `json:"amount" validate:"required"`
 
-	Direction constants.PaymentDirection `json:"direction" validate:"oneof=in out,required"`
+	Direction paymentDomain.PaymentDirection `json:"direction" validate:"oneof=in out,required"`
 
 	PaymentDate time.Time `json:"paymentDate" validate:"required"`
 	Method      string    `json:"method" validate:"required"`

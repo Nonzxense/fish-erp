@@ -112,7 +112,7 @@ func (r *PartyRepository) FindAll(
 	return parties, total, err
 }
 
-func (r *PartyRepository) FindOne(id string) (domain.Party, error) {
+func (r *PartyRepository) GetByID(id string) (domain.Party, error) {
 	var party domain.Party
 	err := r.db.Model(&domain.Party{}).
 		Where("id = ?", id).
@@ -120,6 +120,57 @@ func (r *PartyRepository) FindOne(id string) (domain.Party, error) {
 
 	if err != nil {
 		return domain.Party{}, err
+	}
+
+	return party, nil
+}
+
+func (r *PartyRepository) GetByIDWithDebt(id string) (domain.PartyWithDebt, error) {
+	var party domain.PartyWithDebt
+
+	fsiSubQuery := r.db.
+		Table("fish_sale_invoices").
+		Select(`
+			customer_id,
+			SUM(total_amount - paid_amount) as total_debt
+		`).
+		Where("paid_amount < total_amount").
+		Group("customer_id")
+
+	shiSubQuery := r.db.
+		Table("shipping_invoices").
+		Select(`
+			customer_id,
+			SUM(total_amount - paid_amount) as total_debt
+		`).
+		Where("paid_amount < total_amount").
+		Group("customer_id")
+
+	query := r.db.
+		Table("parties").
+		Select(`
+			parties.id,
+			parties.name,
+			parties.phone,
+			parties.note,
+			COALESCE(fsi.total_debt, 0) +
+			COALESCE(shi.total_debt, 0) as total_debt
+		`).
+		Joins(`
+			LEFT JOIN (?) fsi
+			ON parties.id = fsi.customer_id
+		`, fsiSubQuery).
+		Joins(`
+			LEFT JOIN (?) shi
+			ON parties.id = shi.customer_id
+		`, shiSubQuery)
+
+	err := query.
+		Where("id = ?", id).
+		First(&party).Error
+
+	if err != nil {
+		return domain.PartyWithDebt{}, err
 	}
 
 	return party, nil

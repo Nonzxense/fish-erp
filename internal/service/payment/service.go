@@ -1,9 +1,10 @@
 package payment
 
 import (
-	"fish/internal/constants"
+	"fish/internal/domain"
 	"fish/internal/domain/common"
 	"fish/internal/domain/payment"
+	paymentDomain "fish/internal/domain/payment"
 	"fish/internal/domain/transaction"
 	"fish/internal/repository"
 	"slices"
@@ -115,7 +116,7 @@ func (s *PaymentService) CreatePayment(
 
 	transactionType := "income"
 
-	if input.Direction == constants.PaymentOut {
+	if input.Direction == payment.PaymentOut {
 		transactionType = "expense"
 	}
 
@@ -135,4 +136,15 @@ func (s *PaymentService) CreatePayment(
 	}
 
 	return &p, nil
+}
+
+func (s *PaymentService) GetPaymentsByPartyID(partyID string) (domain.PageResult[paymentDomain.Payment], error) {
+	payments, total, err := s.paymentRepo.GetPaymentsByPartyID(partyID)
+
+	pageResult := domain.PageResult[paymentDomain.Payment]{
+		Data:  payments,
+		Total: total,
+	}
+
+	return pageResult, err
 }

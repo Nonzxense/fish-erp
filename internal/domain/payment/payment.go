@@ -1,35 +1,34 @@
 package payment
 
 import (
-	"fish/internal/constants"
 	"fish/internal/domain/common"
 	"time"
 )
 
 type Payment struct {
-	ID uint `gorm:"primaryKey"`
+	ID uint `json:"id" gorm:"primaryKey"`
 
-	PartyID string
+	PartyID string `json:"partyId"`
 
-	Amount common.Money
+	Amount common.Money `json:"amount"`
 
-	Direction constants.PaymentDirection
+	Direction PaymentDirection `json:"direction"`
 
-	PaymentDate time.Time
-	Method      string
-	Note        *string
+	PaymentDate time.Time `json:"paymentDate"`
+	Method      string    `json:"method"`
+	Note        *string   `json:"note"`
 }
 
 type PaymentAllocation struct {
-	ID uint `gorm:"primaryKey"`
+	ID uint `json:"id" gorm:"primaryKey"`
 
-	PaymentID uint
-	Payment   Payment
+	PaymentID uint    `json:"paymentId"`
+	Payment   Payment `json:"payment"`
 
-	ReferenceType string
-	ReferenceID   string
+	ReferenceType string `json:"referenceType"`
+	ReferenceID   string `json:"referenceId"`
 
-	AllocatedAmount common.Money
+	AllocatedAmount common.Money `json:"allocatedAmount"`
 }
 
 type UnpaidInvoice struct {
@@ -41,3 +40,25 @@ type UnpaidInvoice struct {
 
 	CreatedAt time.Time
 }
+
+const (
+	RefTruckInvoice        = "truck_invoice"
+	RefFishSaleInvoice     = "fish_sale_invoice"
+	RefFishPurchaseInvoice = "fish_purchase_invoice"
+)
+
+type PaymentDirection string
+
+const (
+	PaymentIn  PaymentDirection = "in"
+	PaymentOut PaymentDirection = "out"
+)
+
+type PaymentStatus string
+
+const (
+	PaymentPaid      = "paid"
+	PaymentPending   = "pending"
+	PaymentPartial   = "partial"
+	PaymentCancelled = "cancelled"
+)

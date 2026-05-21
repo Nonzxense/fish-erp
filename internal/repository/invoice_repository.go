@@ -3,6 +3,7 @@ package repository
 import (
 	containerDomain "fish/internal/domain/container"
 	domain "fish/internal/domain/invoice"
+	paymentDomain "fish/internal/domain/payment"
 	transaction "fish/internal/domain/transaction"
 	"fmt"
 
@@ -104,6 +105,13 @@ func (r *InvoiceRepository) FindAllFishSaleInvoices(
 		Preload("Items.Fishes").
 		Order("fish_sale_invoices.id DESC").
 		Find(&invoices).Error
+
+	for i := range invoices {
+		invoices[i].Status = paymentDomain.GetPaymentStatus(
+			invoices[i].TotalAmount,
+			invoices[i].PaidAmount,
+		)
+	}
 
 	return invoices, total, err
 }

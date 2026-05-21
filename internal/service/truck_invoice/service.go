@@ -113,7 +113,7 @@ func (s *TruckInvoiceService) GetTruckInvoices(filter truckInvoiceDomain.TruckIn
 }
 
 func (s *TruckInvoiceService) GetTruckInvoice(id string) (truckInvoiceDomain.TruckInvoice, error) {
-	return s.repo.FindOne(id)
+	return s.repo.GetByID(id)
 }
 
 func (s *TruckInvoiceService) CalculateTotal(invoice truckInvoiceDomain.TruckInvoice) (common.Money, common.Money) {

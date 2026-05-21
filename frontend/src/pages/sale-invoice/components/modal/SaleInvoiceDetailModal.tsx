@@ -6,6 +6,7 @@ import {
   Modal,
   Skeleton,
   Table,
+  TableColumnsType,
   Tag,
   Typography
 } from 'antd'
@@ -15,6 +16,7 @@ import { formatDate, formatTHB } from '../../../../utils/formatter'
 import { getPaidStatusColor } from '../../../../utils/getTagColor'
 import dayjs from 'dayjs'
 import ModalHeader from '../../../../components/invoice-modal-title/ModalHeader'
+import { useMemo } from 'react'
 
 const { Title, Text } = Typography
 
@@ -56,6 +58,52 @@ const SaleInvoiceDetailModal = ({
 
       return [header, ...fishes]
     }) ?? []
+
+  const columns: TableColumnsType = useMemo(
+    () => [
+      {
+        title: localT('table.description'),
+        render: (_, record) => {
+          if (record.type === 'header') {
+            return (
+              <Text strong className="text-blue-500">
+                {commonT('container')} #{record.containerId}
+              </Text>
+            )
+          }
+
+          return (
+            <span className="pl-6">
+              {record.name}
+            </span>
+          )
+        }
+      },
+      {
+        title: localT('table.weight'),
+        align: 'right',
+        render: (_, record) =>
+          record.type === 'fish'
+            ? record.weightKg.toFixed(2)
+            : null
+      },
+      {
+        title: localT('table.rate'),
+        align: 'right',
+        render: (_, record) =>
+          record.type === 'fish'
+            ? formatTHB(record.pricePerKg)
+            : null
+      },
+      {
+        title: localT('table.total'),
+        align: 'right',
+        render: (_, record) =>
+          record.type === 'fish'
+            ? formatTHB(record.amount)
+            : null
+      }
+    ], [commonT, localT])
 
   return (
     <Modal
@@ -112,7 +160,7 @@ const SaleInvoiceDetailModal = ({
               <Text type="secondary">{localT('table.status')}</Text>
               <div className="mt-1">
                 <Tag color={getPaidStatusColor(saleInvoice.status)}>
-                  {localT(`status.${saleInvoice.status}`)}
+                  {commonT(`invoice-status.${saleInvoice.status}`)}
                 </Tag>
               </div>
             </div>
@@ -130,50 +178,7 @@ const SaleInvoiceDetailModal = ({
             rowClassName={(record) =>
               record.type === 'header' ? 'bg-slate-50' : ''
             }
-            columns={[
-              {
-                title: localT('table.description'),
-                render: (_, record) => {
-                  if (record.type === 'header') {
-                    return (
-                      <Text strong className="text-blue-500">
-                        {commonT('container')} #{record.containerId}
-                      </Text>
-                    )
-                  }
-
-                  return (
-                    <span className="pl-6">
-                      {record.name}
-                    </span>
-                  )
-                }
-              },
-              {
-                title: localT('table.weight'),
-                align: 'right',
-                render: (_, record) =>
-                  record.type === 'fish'
-                    ? record.weightKg.toFixed(2)
-                    : null
-              },
-              {
-                title: localT('table.rate'),
-                align: 'right',
-                render: (_, record) =>
-                  record.type === 'fish'
-                    ? formatTHB(record.pricePerKg)
-                    : null
-              },
-              {
-                title: localT('table.total'),
-                align: 'right',
-                render: (_, record) =>
-                  record.type === 'fish'
-                    ? formatTHB(record.amount)
-                    : null
-              }
-            ]}
+            columns={columns}
           />
 
           {/* Note */}
@@ -203,19 +208,30 @@ const SaleInvoiceDetailModal = ({
 
                 <Flex justify="space-between" align="center">
                   <Text type="secondary">
-                    {localT('modal.total-containers')}
+                    {localT('modal.paid-amount')}
                   </Text>
-                  <Text strong>
-                    {saleInvoice.items.length}
+
+                  <Text strong className="text-green-600">
+                    {formatTHB(saleInvoice.paidAmount || 0)}
                   </Text>
                 </Flex>
 
                 <Flex justify="space-between" align="center">
                   <Text type="secondary">
-                    {localT('modal.total-weight')}
+                    {localT('modal.remaining-amount')}
                   </Text>
-                  <Text strong>
-                    {totalWeight.toFixed(2)}
+
+                  <Text
+                    strong
+                    className={
+                      saleInvoice.totalAmount - saleInvoice.paidAmount > 0
+                        ? 'text-orange-500'
+                        : 'text-green-600'
+                    }
+                  >
+                    {formatTHB(
+                      saleInvoice.totalAmount - saleInvoice.paidAmount
+                    )}
                   </Text>
                 </Flex>
 

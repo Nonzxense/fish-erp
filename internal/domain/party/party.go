@@ -1,6 +1,8 @@
 package party
 
-import "fish/internal/domain/common"
+import (
+	"fish/internal/domain/common"
+)
 
 type Party struct {
 	ID    string  `json:"id" gorm:"primaryKey"`

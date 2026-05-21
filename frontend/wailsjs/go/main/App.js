@@ -78,6 +78,14 @@ export function GetParties(arg1) {
   return window['go']['main']['App']['GetParties'](arg1);
 }
 
+export function GetParty(arg1) {
+  return window['go']['main']['App']['GetParty'](arg1);
+}
+
+export function GetPaymentsByPartyID(arg1) {
+  return window['go']['main']['App']['GetPaymentsByPartyID'](arg1);
+}
+
 export function GetTransactionSummary(arg1, arg2) {
   return window['go']['main']['App']['GetTransactionSummary'](arg1, arg2);
 }

@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fish/internal/constants"
 	"fish/internal/domain/common"
 	invoiceDomain "fish/internal/domain/invoice"
 	paymentDomain "fish/internal/domain/payment"
@@ -26,11 +25,11 @@ func (r *PaymentRepository) CreatePayment(tx *gorm.DB, payment *paymentDomain.Pa
 func (r *PaymentRepository) ApplyPayment(tx *gorm.DB, refType, refId string, allocation common.Money) error {
 	var model any
 	switch refType {
-	case constants.RefFishPurchaseInvoice:
+	case paymentDomain.RefFishPurchaseInvoice:
 		model = &invoiceDomain.FishPurchaseInvoice{}
-	case constants.RefFishSaleInvoice:
+	case paymentDomain.RefFishSaleInvoice:
 		model = &invoiceDomain.FishSaleInvoice{}
-	case constants.RefTruckInvoice:
+	case paymentDomain.RefTruckInvoice:
 		model = &truckInvoiceDomain.ShippingInvoice{}
 	default:
 		return fmt.Errorf("invalid reference type.")
@@ -110,7 +109,7 @@ func (r *PaymentRepository) GetUnpaidInvoicesByPartyID(
 
 	for _, s := range sales {
 		result = append(result, paymentDomain.UnpaidInvoice{
-			ReferenceType: constants.RefFishSaleInvoice,
+			ReferenceType: paymentDomain.RefFishSaleInvoice,
 			ReferenceID:   s.ID,
 
 			TotalAmount: s.TotalAmount,
@@ -122,7 +121,7 @@ func (r *PaymentRepository) GetUnpaidInvoicesByPartyID(
 
 	for _, p := range purchases {
 		result = append(result, paymentDomain.UnpaidInvoice{
-			ReferenceType: constants.RefFishPurchaseInvoice,
+			ReferenceType: paymentDomain.RefFishPurchaseInvoice,
 			ReferenceID:   p.ID,
 
 			TotalAmount: p.TotalAmount,
@@ -134,7 +133,7 @@ func (r *PaymentRepository) GetUnpaidInvoicesByPartyID(
 
 	for _, tc := range shipping {
 		result = append(result, paymentDomain.UnpaidInvoice{
-			ReferenceType: constants.RefTruckInvoice,
+			ReferenceType: paymentDomain.RefTruckInvoice,
 			ReferenceID:   tc.ID,
 
 			TotalAmount: tc.TotalAmount,
@@ -145,4 +144,27 @@ func (r *PaymentRepository) GetUnpaidInvoicesByPartyID(
 	}
 
 	return result, nil
+}
+
+func (r *PaymentRepository) GetPaymentsByPartyID(
+	partyID string,
+) ([]paymentDomain.Payment, int64, error) {
+	var payments []paymentDomain.Payment
+	var total int64
+
+	baseQuery := r.db.
+		Model(&paymentDomain.Payment{}).
+		Where("party_id = ?", partyID)
+
+	if err := baseQuery.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if err := baseQuery.
+		Order("payment_date ASC").
+		Find(&payments).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return payments, total, nil
 }

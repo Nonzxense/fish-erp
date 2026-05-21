@@ -137,7 +137,7 @@ func (r *TruckInvoiceRepository) FindAll(filter domain.TruckInvoiceFilter) ([]do
 	return invoices, total, err
 }
 
-func (r *TruckInvoiceRepository) FindOne(id string) (domain.TruckInvoice, error) {
+func (r *TruckInvoiceRepository) GetByID(id string) (domain.TruckInvoice, error) {
 	var invoice domain.TruckInvoice
 
 	err := r.db.
