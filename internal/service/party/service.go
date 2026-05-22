@@ -46,12 +46,24 @@ func (s *PartyService) GetParty(id string) (dto.PartyDetailDTO, error) {
 		return dto.PartyDetailDTO{}, err
 	}
 
+	paymentResult, err := s.paymentService.GetPaymentsByPartyID(id)
+	if err != nil {
+		return dto.PartyDetailDTO{}, err
+	}
+
+	totalPayments, err := s.paymentService.GetPaymentTotalByPartyID(id)
+	if err != nil {
+		return dto.PartyDetailDTO{}, err
+	}
+
 	partyDetail := dto.PartyDetailDTO{
-		ID:        party.ID,
-		Name:      party.Name,
-		Phone:     party.Phone,
-		Note:      party.Note,
-		TotalDebt: party.TotalDebt,
+		ID:            party.ID,
+		Name:          party.Name,
+		Phone:         party.Phone,
+		Note:          party.Note,
+		TotalDebt:     party.TotalDebt,
+		TotalPayments: totalPayments,
+		Payments:      paymentResult,
 	}
 
 	return partyDetail, nil

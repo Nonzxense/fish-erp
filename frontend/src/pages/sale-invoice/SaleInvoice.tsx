@@ -36,10 +36,11 @@ const SaleInvoice = () => {
 
   const segmentOptions = useMemo(() => [
     { label: localT('status.all'), value: 'all' },
-    { label: localT('status.pending'), value: 'pending' },
-    { label: localT('status.paid'), value: 'paid' },
-    { label: localT('status.cancelled'), value: 'cancelled' },
-  ], [localT])
+    { label: commonT('invoice-status.pending'), value: 'pending' },
+    { label: commonT('invoice-status.partial'), value: 'partial' },
+    { label: commonT('invoice-status.paid'), value: 'paid' },
+    { label: commonT('invoice-status.cancelled'), value: 'cancelled' },
+  ], [localT, commonT])
 
   const resetPagination = useCallback(() => {
     setPagination((prev) => ({

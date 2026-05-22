@@ -11,88 +11,103 @@ import {
   Typography
 } from 'antd'
 import dayjs from 'dayjs'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { dto } from '../../../../../wailsjs/go/models'
-import { AllocatePaymentFIFO } from '../../../../../wailsjs/go/main/App'
-
-import { formatTHB } from '../../../../utils/formatter'
-import {
-  PaymentFormValues,
-  PaymentModalProps
-} from './interface'
+import { formatTHB } from '../../utils/formatter'
+import { dto } from '../../../wailsjs/go/models'
+import { InvoicePaymentFormValues, InvoicePaymentModalProps } from './interface'
+import { REF_FISH_PURCHASE_INVOICE, REF_FISH_SALE_INVOICE, REF_TRUCK_INVOICE } from '../../utils/constants'
+import { PayInvoice } from '../../../wailsjs/go/main/App'
 
 const { Text } = Typography
 const { TextArea } = Input
 
-const PaymentModal = ({
+const InvoicePaymentModal = ({
   isOpen,
   onClose,
   onSuccess,
+  invoice,
   party
-}: PaymentModalProps) => {
-  const [form] = Form.useForm<PaymentFormValues>()
+}: InvoicePaymentModalProps) => {
+  const [form] = Form.useForm<InvoicePaymentFormValues>()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { message } = App.useApp()
 
   const { t: localT } = useTranslation('party')
   const { t: commonT } = useTranslation('common')
+  const { t: paymentT } = useTranslation('payment')
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || !invoice) {
       form.resetFields()
       return
     }
 
     form.setFieldsValue({
       paymentDate: dayjs(),
-      method: 'cash'
+      method: 'cash',
+      amount: invoice.remainingAmount / 100
     })
-  }, [form, isOpen])
-
-  const totalDebt = useMemo(() => {
-    return party?.totalDebt || 0
-  }, [party])
+  }, [form, isOpen, invoice])
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
 
-      if (!party) {
+      if (!invoice || !party) {
+        message.error(commonT('message.error-no-invoice-selected'))
         return
       }
 
-      if (values.amount > totalDebt) {
+      if (values.amount > invoice.remainingAmount) {
         message.error(
-          localT('message.overpaid', {
-            amount: formatTHB(values.amount - totalDebt)
+          paymentT('message.overpaid-invoice', {
+            amount: formatTHB(values.amount - invoice.remainingAmount)
           })
         )
-
         return
       }
 
       setIsSubmitting(true)
 
-      const payload = new dto.PaymentInput({
+      let direction = 'in'
+
+      switch (invoice.refType) {
+        case REF_FISH_SALE_INVOICE:
+        case REF_TRUCK_INVOICE:
+          direction = 'in'
+          break
+        case REF_FISH_PURCHASE_INVOICE:
+          direction = 'out'
+          break
+        default:
+          message.error(commonT('message.error-invalid-invoice-type'))
+          setIsSubmitting(false)
+          return
+      }
+
+      const payload = new dto.PayInvoiceInput({
         partyId: party.id,
         amount: values.amount,
-        direction: 'in',
+        direction: direction,
         paymentDate: values.paymentDate.toISOString(),
         method: values.method,
-        note: values.note
+        note: values.note,
+        referenceId: invoice.id,
+        referenceType: invoice.refType
       })
 
-      await AllocatePaymentFIFO(payload)
+      await PayInvoice(payload)
 
-      message.success(localT('message.payment-success'))
+      message.success(paymentT('message.payment-success'))
 
       onSuccess?.()
       onClose()
-    } catch {
-      // interceptor handles error
+    } catch (error) {
+      console.error(error)
+      message.error(commonT('message.error-payment-failed'))
     } finally {
       setIsSubmitting(false)
     }
@@ -103,7 +118,7 @@ const PaymentModal = ({
       open={isOpen}
       onCancel={onClose}
       confirmLoading={isSubmitting}
-      title={localT('modal.receive-payment-title')}
+      title={paymentT('modal.pay-invoice-title')}
       okText={commonT('button-save')}
       cancelText={commonT('button-cancel')}
       footer={null}
@@ -116,26 +131,33 @@ const PaymentModal = ({
               <Text type="secondary">
                 {localT('table.name')}
               </Text>
-
               <div>
                 <Text strong>
                   {party?.name || '-'}
                 </Text>
               </div>
             </div>
-
             <div className="text-right">
               <Text type="secondary">
-                {localT('table.overdue-amount')}
+                {paymentT('invoice.remaining-amount')}
               </Text>
-
               <div>
                 <Text strong className="text-red-500">
-                  {formatTHB(totalDebt)}
+                  {formatTHB(invoice.remainingAmount)}
                 </Text>
               </div>
             </div>
           </Flex>
+          <div className="mt-3">
+            <Text type="secondary">
+              {paymentT('invoice.id')}
+            </Text>
+            <div>
+              <Text strong>
+                {invoice?.id || '-'} ({invoice?.refType || '-'})
+              </Text>
+            </div>
+          </div>
         </div>
 
         <Form
@@ -150,11 +172,23 @@ const PaymentModal = ({
               {
                 required: true,
                 message: localT('form.amount.required')
+              },
+              {
+                validator: (_, value) => {
+                  if (value && value <= 0) {
+                    return Promise.reject(new Error(paymentT('validation.amount-positive')))
+                  }
+                  if (value && value > invoice.remainingAmount) {
+                    return Promise.reject(new Error(paymentT('validation.amount-exceeds-remaining')))
+                  }
+                  return Promise.resolve()
+                }
               }
             ]}
           >
             <InputNumber
               min={1}
+              max={invoice.remainingAmount}
               className="w-full"
               placeholder={localT('form.amount.placeholder')}
             />
@@ -221,4 +255,4 @@ const PaymentModal = ({
   )
 }
 
-export default PaymentModal
+export default InvoicePaymentModal

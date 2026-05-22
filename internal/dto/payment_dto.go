@@ -1,9 +1,15 @@
-package payment
+package dto
 
 import (
 	paymentDomain "fish/internal/domain/payment"
 	"time"
 )
+
+type PayInvoiceInput struct {
+	PaymentInput
+	ReferenceID   string `json:"referenceId"`
+	ReferenceType string `json:"referenceType"`
+}
 
 type PaymentInput struct {
 	PartyID string `json:"partyId" validate:"required"`

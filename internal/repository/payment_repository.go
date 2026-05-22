@@ -161,10 +161,31 @@ func (r *PaymentRepository) GetPaymentsByPartyID(
 	}
 
 	if err := baseQuery.
-		Order("payment_date ASC").
+		Order("payment_date DESC").
 		Find(&payments).Error; err != nil {
 		return nil, 0, err
 	}
 
 	return payments, total, nil
+}
+
+func (r *PaymentRepository) GetPaymentTotalByPartyID(partyID string) (common.Money, error) {
+	var totalAmount common.Money
+
+	if err := r.db.Model(&paymentDomain.Payment{}).
+		Where("party_id = ?", partyID).
+		Select("COALESCE(SUM(amount), 0)").
+		Scan(&totalAmount).Error; err != nil {
+		return 0, err
+	}
+
+	return totalAmount, nil
+}
+
+func (r *PaymentRepository) GetAllocationsByPaymentID(paymentID uint) ([]paymentDomain.PaymentAllocation, error) {
+	var allocations []paymentDomain.PaymentAllocation
+	if err := r.db.Where("payment_id = ?", paymentID).Find(&allocations).Error; err != nil {
+		return nil, err
+	}
+	return allocations, nil
 }

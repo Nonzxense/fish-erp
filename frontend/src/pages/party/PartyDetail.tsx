@@ -30,12 +30,12 @@ import PageTitle from '../../components/page-title/PageTitle'
 
 import {
   formatDate,
-  formatTHB
+  formatTHB,
 } from '../../utils/formatter'
 
 import {
+  dto,
   invoice as invoiceModel,
-  party as partyModel,
   payment as paymentModel,
   truckinvoice as truckinvoiceModel
 } from '../../../wailsjs/go/models'
@@ -47,147 +47,63 @@ import {
   GetFishSaleInvoices,
   GetParty,
   GetPaymentsByPartyID,
+  RollbackPayment,
 } from '../../../wailsjs/go/main/App'
 
 import { Pagination } from '../../utils/types'
 
 import {
   DEFAULT_PAGE,
-  DEFAULT_PAGE_SIZE
+  DEFAULT_PAGE_SIZE,
+  REF_FISH_SALE_INVOICE
 } from '../../utils/constants'
 
 import { getPaidStatusColor } from '../../utils/getTagColor'
+import { PayableInvoice } from '../../components/payment/interface'
+import InvoicePaymentModal from '../../components/payment/InvoicePaymentModal'
 
 const PartyDetail = () => {
+  const [activeTab, setActiveTab] = useState('sales')
+  const [isOpenPaymentModal, setIsOpenPaymentModal] = useState(false)
+  const [isOpenInvoicePaymentModal, setIsOpenInvoicePaymentModal] = useState(false)
+  const [selectedInvoiceToPay, setSelectedInvoiceToPay] = useState<PayableInvoice | null>(null)
+  const [isPartyLoading, setIsPartyLoading] = useState(false)
+  const [isSaleLoading, setIsSaleLoading] = useState(false)
+  const [isPurchaseLoading, setIsPurchaseLoading] = useState(false)
+  const [isTruckLoading, setIsTruckLoading] = useState(false)
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false)
+  const [partyDetail, setPartyDetail] = useState<dto.PartyDetailDTO>()
+  const [saleInvoices, setSaleInvoices] = useState<invoiceModel.FishSaleInvoice[]>([])
+  const [purchaseInvoices, setPurchaseInvoices] = useState<invoiceModel.FishPurchaseInvoice[]>([])
+  const [truckInvoices, setTruckInvoices] = useState<truckinvoiceModel.TruckInvoice[]>([])
+  const [payments, setPayments] = useState<paymentModel.Payment[]>([])
+  const [salePagination, setSalePagination] = useState<Pagination>({
+    page: DEFAULT_PAGE,
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: 0
+  })
+  const [purchasePagination, setPurchasePagination] = useState<Pagination>({
+    page: DEFAULT_PAGE,
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: 0
+  })
+  const [truckPagination, setTruckPagination] = useState<Pagination>({
+    page: DEFAULT_PAGE,
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: 0
+  })
+  const [paymentPagination, setPaymentPagination] = useState<Pagination>({
+    page: DEFAULT_PAGE,
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: 0
+  })
+
   const { id } = useParams()
-
   const navigate = useNavigate()
-
-  const { t: localT } =
-    useTranslation('party')
-
-  const { t: commonT } =
-    useTranslation('common')
-
-  const { modal, message } =
-    App.useApp()
-
-  // =========================
-  // UI
-  // =========================
-
-  const [activeTab, setActiveTab] =
-    useState('sales')
-
-  const [
-    isOpenPaymentModal,
-    setIsOpenPaymentModal
-  ] = useState(false)
-
-  // =========================
-  // LOADING
-  // =========================
-
-  const [isPartyLoading, setIsPartyLoading] =
-    useState(false)
-
-  const [isSaleLoading, setIsSaleLoading] =
-    useState(false)
-
-  const [
-    isPurchaseLoading,
-    setIsPurchaseLoading
-  ] = useState(false)
-
-  const [isTruckLoading, setIsTruckLoading] =
-    useState(false)
-
-  const [
-    isPaymentLoading,
-    setIsPaymentLoading
-  ] = useState(false)
-
-  // =========================
-  // DATA
-  // =========================
-
-  const [partyDetail, setPartyDetail] =
-    useState<partyModel.PartyWithDebt>()
-
-  const [saleInvoices, setSaleInvoices] =
-    useState<
-      invoiceModel.FishSaleInvoice[]
-    >([])
-
-  const [
-    purchaseInvoices,
-    setPurchaseInvoices
-  ] = useState<
-    invoiceModel.FishPurchaseInvoice[]
-  >([])
-
-  const [truckInvoices, setTruckInvoices] =
-    useState<
-      truckinvoiceModel.TruckInvoice[]
-    >([])
-
-  const [payments, setPayments] =
-    useState<
-      paymentModel.Payment[]
-    >([])
-
-  // =========================
-  // PAGINATION
-  // =========================
-
-  const [
-    salePagination,
-    setSalePagination
-  ] = useState<Pagination>({
-    page: DEFAULT_PAGE,
-    pageSize: DEFAULT_PAGE_SIZE,
-    total: 0
-  })
-
-  const [
-    purchasePagination,
-    setPurchasePagination
-  ] = useState<Pagination>({
-    page: DEFAULT_PAGE,
-    pageSize: DEFAULT_PAGE_SIZE,
-    total: 0
-  })
-
-  const [
-    truckPagination,
-    setTruckPagination
-  ] = useState<Pagination>({
-    page: DEFAULT_PAGE,
-    pageSize: DEFAULT_PAGE_SIZE,
-    total: 0
-  })
-
-  const [
-    paymentPagination,
-    setPaymentPagination
-  ] = useState<Pagination>({
-    page: DEFAULT_PAGE,
-    pageSize: DEFAULT_PAGE_SIZE,
-    total: 0
-  })
-
-  // =========================
-  // STATS
-  // =========================
-
-  const totalPayments = payments.reduce(
-    (sum, curr) => sum + curr.amount,
-    0
-  )
-
-  // =========================
-  // LOAD PARTY
-  // =========================
+  const { t: localT } = useTranslation('party')
+  const { t: paymentT } = useTranslation('payment')
+  const { t: commonT } = useTranslation('common')
+  const { modal, message } = App.useApp()
 
   const loadParty = useCallback(async () => {
     if (!id) return
@@ -208,10 +124,6 @@ const PartyDetail = () => {
       setIsPartyLoading(false)
     }
   }, [id, message, commonT])
-
-  // =========================
-  // LOAD SALE INVOICES
-  // =========================
 
   const loadSaleInvoices =
     useCallback(async () => {
@@ -256,10 +168,6 @@ const PartyDetail = () => {
       commonT
     ])
 
-  // =========================
-  // LOAD PURCHASE INVOICES
-  // =========================
-
   const loadPurchaseInvoices =
     useCallback(async () => {
       if (!id) return
@@ -303,40 +211,32 @@ const PartyDetail = () => {
       commonT
     ])
 
-  // =========================
-  // LOAD TRUCK INVOICES
-  // =========================
-
   const loadTruckInvoices =
     useCallback(async () => {
-      //     if (!id) return
+      if (!id) return
 
-      //     try {
-      //       setIsTruckLoading(true)
+      try {
+        setIsTruckLoading(true)
 
-      //       const result =
-      //         await GetTruckInvoicesByPartyID(id)
+        // const result =
+        // await GetTruckInvoicesByPartyID(id)
 
-      //       setTruckInvoices(result.data)
+        // setTruckInvoices(result.data)
 
-      //       setTruckPagination((prev) => ({
-      //         ...prev,
-      //         total: result.total
-      //       }))
-      //     } catch (err) {
-      //       console.error(err)
+        //   setTruckPagination((prev) => ({
+        //     ...prev,
+        //     total: result.total
+        //   }))
+        // } catch (err) {
+        //   console.error(err)
 
-      //       message.error(
-      //         commonT('message.error-load-data')
-      //       )
-      //     } finally {
-      //       setIsTruckLoading(false)
-      //     }
+        message.error(
+          commonT('message.error-load-data')
+        )
+      } finally {
+        setIsTruckLoading(false)
+      }
     }, [id, message, commonT])
-
-  // =========================
-  // LOAD PAYMENTS
-  // =========================
 
   const loadPayments =
     useCallback(async () => {
@@ -365,17 +265,14 @@ const PartyDetail = () => {
       }
     }, [id, message, commonT])
 
-  // =========================
-  // INITIAL LOAD
-  // =========================
+  const handlePaySpecificInvoice = useCallback((invoice: PayableInvoice) => {
+    setSelectedInvoiceToPay(invoice)
+    setIsOpenInvoicePaymentModal(true)
+  }, [])
 
   useEffect(() => {
     loadParty()
   }, [loadParty])
-
-  // =========================
-  // TAB LOAD
-  // =========================
 
   useEffect(() => {
     if (activeTab === 'sales') {
@@ -401,9 +298,29 @@ const PartyDetail = () => {
     loadPayments
   ])
 
-  // =========================
-  // DELETE
-  // =========================
+  const handleRollbackPayment = useCallback(async (record: paymentModel.Payment) => {
+    await modal.confirm({
+      title: paymentT('modal-rollback.title'),
+      content: paymentT('modal-rollback.desc', { amount: formatTHB(record.amount) }),
+      okText: commonT('modal-common.ok'),
+      cancelText: commonT('modal-common.cancel'),
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await RollbackPayment(record.id)
+
+          message.success(paymentT('message.rollback-success'))
+          loadPayments()
+        } catch (err) {
+          console.error(err)
+
+          message.error(
+            paymentT('message.rollback-error')
+          )
+        }
+      }
+    })
+  }, [commonT, loadPayments, message, modal, paymentT])
 
   const handleDelete =
     useCallback(() => {
@@ -434,9 +351,6 @@ const PartyDetail = () => {
 
         onOk: async () => {
           try {
-            // TODO:
-            // await DeleteParty(id)
-
             message.success(
               commonT(
                 'message.delete-success'
@@ -461,10 +375,6 @@ const PartyDetail = () => {
       message,
       navigate
     ])
-
-  // =========================
-  // COLUMNS
-  // =========================
 
   const commonInvoiceColumns: TableColumnsType =
     useMemo(
@@ -551,13 +461,70 @@ const PartyDetail = () => {
       [localT, commonT, navigate]
     )
 
+  const createInvoiceColumns = <
+    T extends {
+      id: string
+      totalAmount: number
+      paidAmount: number
+      status: string
+    }
+  >(onPay: (record: T) => void): TableColumnsType<T> => [
+      ...commonInvoiceColumns,
+      {
+        title: commonT('table.manage'),
+        key: 'manage',
+        align: 'center',
+
+        render: (_, record) => (
+          <Space>
+            <Tooltip
+              title={commonT(
+                'button-view'
+              )}
+            >
+              <Button
+                variant='text'
+                icon={<Eye size={16} />}
+                onClick={() => {
+                  navigate(
+                    `/invoices/${record.id}`
+                  )
+                }}
+              />
+            </Tooltip>
+
+            <Tooltip
+              title={localT(
+                'button.receive-payment'
+              )}
+            >
+              <Button
+                variant='text'
+                icon={<Wallet size={16} />}
+                onClick={() => onPay(record)}
+              />
+            </Tooltip>
+          </Space>
+        )
+      }
+    ]
+
+  const saleInvoiceColumns = createInvoiceColumns<invoiceModel.FishSaleInvoice>((invoice) => {
+    handlePaySpecificInvoice({
+      id: invoice.id,
+      refType: REF_FISH_SALE_INVOICE,
+      remainingAmount: invoice.totalAmount - invoice.paidAmount
+    })
+  })
+
+
   const paymentColumns:
     TableColumnsType<paymentModel.Payment> =
     useMemo(
       () => [
         {
-          title: localT(
-            'payment.date'
+          title: paymentT(
+            'table.date'
           ),
           dataIndex: 'paymentDate',
           key: 'paymentDate',
@@ -565,16 +532,16 @@ const PartyDetail = () => {
             formatDate(val)
         },
         {
-          title: localT(
-            'payment.direction'
+          title: paymentT(
+            'table.direction'
           ),
           dataIndex: 'direction',
           key: 'direction',
           render: (val) => val.toUpperCase()
         },
         {
-          title: localT(
-            'payment.amount'
+          title: paymentT(
+            'table.amount'
           ),
           dataIndex: 'amount',
           key: 'amount',
@@ -584,18 +551,19 @@ const PartyDetail = () => {
           ) => formatTHB(val)
         },
         {
-          title: localT(
-            'payment.method'
+          title: paymentT(
+            'table.method'
           ),
           dataIndex: 'method',
-          key: 'method'
+          key: 'method',
+          render: (val) => paymentT(`method.${val}`)
         },
         {
-          title: localT('table.manage'),
+          title: paymentT('table.manage'),
           key: 'manage',
           align: 'center',
           width: 100,
-          render: (_) => {
+          render: (_, record) => {
             return (
               <Space>
                 <Tooltip title={localT('button-rollback')}>
@@ -603,7 +571,7 @@ const PartyDetail = () => {
                     icon={<Undo2 size={16} />}
                     variant="text"
                     color="danger"
-                    // onClick={() => handleEditContainer(record)}
+                    onClick={() => handleRollbackPayment(record)}
                   />
                 </Tooltip>
               </Space>
@@ -611,7 +579,7 @@ const PartyDetail = () => {
           }
         }
       ],
-      [localT]
+      [handleRollbackPayment, localT, paymentT]
     )
 
   return (
@@ -624,6 +592,24 @@ const PartyDetail = () => {
         party={partyDetail}
         onSuccess={loadPayments}
       />
+
+      {selectedInvoiceToPay && partyDetail && (
+        <InvoicePaymentModal
+          isOpen={isOpenInvoicePaymentModal}
+          onClose={() => {
+            setIsOpenInvoicePaymentModal(false)
+            setSelectedInvoiceToPay(null)
+          }}
+          invoice={selectedInvoiceToPay}
+          party={partyDetail}
+          onSuccess={() => {
+            loadPayments()
+            loadSaleInvoices()
+            loadPurchaseInvoices()
+            loadTruckInvoices()
+          }}
+        />
+      )}
 
       <Space
         orientation='vertical'
@@ -761,7 +747,7 @@ const PartyDetail = () => {
                 title={localT(
                   'stats.total-payments'
                 )}
-                value={totalPayments}
+                value={partyDetail?.totalPayments || 0}
                 formatter={(val) =>
                   formatTHB(
                     Number(val)
@@ -789,7 +775,7 @@ const PartyDetail = () => {
                       isSaleLoading
                     }
                     columns={
-                      commonInvoiceColumns
+                      saleInvoiceColumns
                     }
                     dataSource={
                       saleInvoices

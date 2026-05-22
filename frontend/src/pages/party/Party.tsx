@@ -41,7 +41,6 @@ const Party = () => {
     { label: localT('overdue'), value: 'overdue' },
   ], [localT])
 
-  // --- Dummy Handlers ---
   const handleEdit = useCallback((record: party.Party) => {
     message.info(`${commonT('message.editing')} ${record.name}`)
   }, [message, commonT])

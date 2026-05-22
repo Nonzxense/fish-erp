@@ -4,3 +4,4 @@ export interface PartyFilter {
   phone?: string
   convertValues?: () => PartyFilter
 }
+

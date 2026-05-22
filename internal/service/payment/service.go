@@ -3,10 +3,14 @@ package payment
 import (
 	"fish/internal/domain"
 	"fish/internal/domain/common"
+	invoiceDomain "fish/internal/domain/invoice"
 	"fish/internal/domain/payment"
 	paymentDomain "fish/internal/domain/payment"
 	"fish/internal/domain/transaction"
+	truckInvoiceDomain "fish/internal/domain/truck_invoice"
+	"fish/internal/dto"
 	"fish/internal/repository"
+	"fmt"
 	"slices"
 
 	"github.com/google/uuid"
@@ -31,8 +35,41 @@ func NewPaymentService(
 	}
 }
 
+func (s *PaymentService) PayInvoice(
+	input dto.PayInvoiceInput,
+) error {
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		p, err := s.CreatePayment(tx, input.PaymentInput)
+		if err != nil {
+			return err
+		}
+
+		allocation := common.NewMoney(input.Amount)
+
+		err = s.paymentRepo.ApplyPayment(
+			tx,
+			input.ReferenceType,
+			input.ReferenceID,
+			allocation,
+		)
+		if err != nil {
+			return err
+		}
+
+		err = s.paymentRepo.CreateAllocation(
+			tx,
+			input.ReferenceType,
+			input.ReferenceID,
+			allocation,
+			p.ID,
+		)
+
+		return err
+	})
+}
+
 func (s *PaymentService) AllocatePaymentFIFO(
-	input PaymentInput,
+	input dto.PaymentInput,
 ) error {
 
 	invoices, err := s.paymentRepo.GetUnpaidInvoicesByPartyID(input.PartyID)
@@ -97,7 +134,7 @@ func (s *PaymentService) AllocatePaymentFIFO(
 
 func (s *PaymentService) CreatePayment(
 	tx *gorm.DB,
-	input PaymentInput,
+	input dto.PaymentInput,
 ) (*payment.Payment, error) {
 
 	p := payment.Payment{
@@ -105,6 +142,7 @@ func (s *PaymentService) CreatePayment(
 		PaymentDate: input.PaymentDate,
 		PartyID:     input.PartyID,
 		Direction:   input.Direction,
+		Method:      input.Method,
 		Note:        input.Note,
 	}
 
@@ -147,4 +185,54 @@ func (s *PaymentService) GetPaymentsByPartyID(partyID string) (domain.PageResult
 	}
 
 	return pageResult, err
+}
+
+func (s *PaymentService) GetPaymentTotalByPartyID(
+	partyID string,
+) (common.Money, error) {
+	return s.paymentRepo.GetPaymentTotalByPartyID(
+		partyID,
+	)
+}
+
+func (s *PaymentService) RollbackPayment(paymentID uint) error {
+	allocations, err := s.paymentRepo.GetAllocationsByPaymentID(paymentID)
+
+	if err != nil {
+		return err
+	}
+
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		for _, allocation := range allocations {
+			refType := allocation.ReferenceType
+			refId := allocation.ReferenceID
+
+			var model any
+			switch refType {
+			case paymentDomain.RefFishPurchaseInvoice:
+				model = &invoiceDomain.FishPurchaseInvoice{}
+			case paymentDomain.RefFishSaleInvoice:
+				model = &invoiceDomain.FishSaleInvoice{}
+			case paymentDomain.RefTruckInvoice:
+				model = &truckInvoiceDomain.ShippingInvoice{}
+			default:
+				return fmt.Errorf("invalid reference type.")
+			}
+
+			if err := tx.Model(model).
+				Where("id = ?", refId).
+				Update(
+					"paid_amount",
+					gorm.Expr("paid_amount - ?", allocation.AllocatedAmount),
+				).Error; err != nil {
+				return err
+			}
+		}
+
+		if err := tx.Delete(&allocations).Error; err != nil {
+			return err
+		}
+
+		return tx.Delete(&paymentDomain.Payment{}, paymentID).Error
+	})
 }

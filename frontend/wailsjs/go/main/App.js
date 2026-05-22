@@ -102,6 +102,14 @@ export function GetTruckInvoices(arg1) {
   return window['go']['main']['App']['GetTruckInvoices'](arg1);
 }
 
+export function PayInvoice(arg1) {
+  return window['go']['main']['App']['PayInvoice'](arg1);
+}
+
+export function RollbackPayment(arg1) {
+  return window['go']['main']['App']['RollbackPayment'](arg1);
+}
+
 export function RunUpdate(arg1) {
   return window['go']['main']['App']['RunUpdate'](arg1);
 }

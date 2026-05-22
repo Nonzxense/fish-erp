@@ -4,6 +4,12 @@
   "overdue": "ค้างชำระ",
   "overdue-amount": "ยอดค้างชำระ",
   "all": "ทั้งหมด",
+  "tabs": {
+    "sales": "บิลขาย",
+    "purchases": "บิลซื้อ",
+    "shipping": "บิลค่าบรรทุก",
+    "payments": "การชำระเงิน"
+  },
   "button": {
     "receive-payment": "ชำระเงิน"
   },
@@ -44,5 +50,9 @@
   },
   "modal": {
     "receive-payment-title": "ชำระเงิน"
+  },
+  "stats": {
+    "total-debt": "หนี้สินรวม",
+    "total-payments": "ยอดชำระรวม"
   }
 }
