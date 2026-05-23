@@ -3,6 +3,9 @@
   "subtitle": "จัดการลูกค้า",
   "overdue": "ค้างชำระ",
   "overdue-amount": "ยอดค้างชำระ",
+  "detail": {
+    "subtitle": "รายละเอียดลูกค้า"
+  },
   "all": "ทั้งหมด",
   "tabs": {
     "sales": "บิลขาย",
@@ -10,14 +13,22 @@
     "shipping": "บิลค่าบรรทุก",
     "payments": "การชำระเงิน"
   },
+  "invoice": {
+    "id": "เลขที่ใบแจ้งหนี้",
+    "date": "วันที่",
+    "total": "ยอดรวม",
+    "paid": "ชำระแล้ว"
+  },
   "button": {
     "receive-payment": "ชำระเงิน"
   },
+  "button-rollback": "ยกเลิกการชำระเงิน",
   "table": {
     "name": "ชื่อ",
     "phone": "เบอร์โทรศัพท์",
     "note": "หมายเหตุ",
     "overdue-amount": "ยอดค้างชำระ",
+    "status": "สถานะ",
     "manage": "การจัดการ"
   },
   "form": {
@@ -42,17 +53,24 @@
       "required": "กรุณากรอกจำนวนเงิน"
     },
     "payment-date": {
-      "label": "วันที่"
+      "label": "วันที่",
+      "required": "กรุณาเลือกวันที่ชำระเงิน"
     },
     "method": {
-      "label": "วิธีการชำระเงิน"
+      "label": "วิธีการชำระเงิน",
+      "required": "กรุณาเลือกวิธีการชำระเงิน"
     }
   },
   "modal": {
     "receive-payment-title": "ชำระเงิน"
   },
   "stats": {
-    "total-debt": "หนี้สินรวม",
-    "total-payments": "ยอดชำระรวม"
+    "total-debt": "ยอดค้างชำระรวม",
+    "total-payments-in": "ยอดรับเงินรวม",
+    "total-payments-out": "ยอดจ่ายเงินรวม"
+  },
+  "message": {
+    "overpaid": "คุณชำระเกินยอดค้างชำระจำนวน {{amount}}",
+    "payment-success": "บันทึกการชำระเงินสำเร็จ"
   }
 }

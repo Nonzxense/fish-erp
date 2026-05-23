@@ -447,7 +447,8 @@ export namespace dto {
 	    phone?: string;
 	    note?: string;
 	    totalDebt: number;
-	    totalPayments: number;
+	    totalPaymentsIn: number;
+	    totalPaymentsOut: number;
 	    payments: domain.PageResult_fish_internal_domain_payment_Payment_;
 	    saleInvoices: domain.PageResult_fish_internal_domain_invoice_FishSaleInvoice_;
 	    purchaseInvoice: domain.PageResult_fish_internal_domain_invoice_FishPurchaseInvoice_;
@@ -463,7 +464,8 @@ export namespace dto {
 	        this.phone = source["phone"];
 	        this.note = source["note"];
 	        this.totalDebt = source["totalDebt"];
-	        this.totalPayments = source["totalPayments"];
+	        this.totalPaymentsIn = source["totalPaymentsIn"];
+	        this.totalPaymentsOut = source["totalPaymentsOut"];
 	        this.payments = this.convertValues(source["payments"], domain.PageResult_fish_internal_domain_payment_Payment_);
 	        this.saleInvoices = this.convertValues(source["saleInvoices"], domain.PageResult_fish_internal_domain_invoice_FishSaleInvoice_);
 	        this.purchaseInvoice = this.convertValues(source["purchaseInvoice"], domain.PageResult_fish_internal_domain_invoice_FishPurchaseInvoice_);

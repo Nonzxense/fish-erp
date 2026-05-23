@@ -37,6 +37,7 @@ const PaymentModal = ({
 
   const { message } = App.useApp()
 
+  const { t: paymentT } = useTranslation('payment')
   const { t: localT } = useTranslation('party')
   const { t: commonT } = useTranslation('common')
 
@@ -189,11 +190,11 @@ const PaymentModal = ({
             <Select
               options={[
                 {
-                  label: commonT('payment-method.cash'),
+                  label: paymentT('method.cash'),
                   value: 'cash'
                 },
                 {
-                  label: commonT('payment-method.transfer'),
+                  label: paymentT('method.transfer'),
                   value: 'transfer'
                 }
               ]}

@@ -169,11 +169,11 @@ func (r *PaymentRepository) GetPaymentsByPartyID(
 	return payments, total, nil
 }
 
-func (r *PaymentRepository) GetPaymentTotalByPartyID(partyID string) (common.Money, error) {
+func (r *PaymentRepository) GetPaymentTotalByPartyID(direction paymentDomain.PaymentDirection, partyID string) (common.Money, error) {
 	var totalAmount common.Money
 
 	if err := r.db.Model(&paymentDomain.Payment{}).
-		Where("party_id = ?", partyID).
+		Where("party_id = ? AND direction = ?", partyID, direction).
 		Select("COALESCE(SUM(amount), 0)").
 		Scan(&totalAmount).Error; err != nil {
 		return 0, err

@@ -139,6 +139,13 @@ func (r *InvoiceRepository) FindAllFishPurchaseInvoices(
 		Find(&invoices).
 		Error
 
+	for i := range invoices {
+		invoices[i].Status = paymentDomain.GetPaymentStatus(
+			invoices[i].TotalAmount,
+			invoices[i].PaidAmount,
+		)
+	}
+
 	return invoices, total, err
 }
 

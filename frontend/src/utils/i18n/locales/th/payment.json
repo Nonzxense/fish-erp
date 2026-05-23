@@ -13,6 +13,43 @@
     "method": "วิธีการ",
     "total": "ยอดรวม",
     "amount": "จำนวนเงิน",
-    "manage": "การจัดการ"
+    "manage": "การจัดการ",
+    "name": "ชื่อ"
+  },
+  "modal": {
+    "pay-invoice-title": "ชำระเงินตามใบแจ้งหนี้"
+  },
+  "invoice": {
+    "remaining-amount": "ยอดค้างชำระ",
+    "id": "เลขที่ใบแจ้งหนี้"
+  },
+  "form": {
+    "amount": {
+      "label": "จำนวนเงิน",
+      "required": "กรุณาระบุจำนวนเงิน",
+      "placeholder": "ระบุจำนวนเงิน"
+    },
+    "payment-date": {
+      "label": "วันที่ชำระ",
+      "required": "กรุณาเลือกวันที่ชำระ"
+    },
+    "method": {
+      "label": "วิธีการชำระ",
+      "required": "กรุณาเลือกวิธีการชำระ"
+    },
+    "note": {
+      "label": "หมายเหตุ",
+      "placeholder": "ระบุหมายเหตุ (ถ้ามี)"
+    }
+  },
+  "validation": {
+    "amount-positive": "จำนวนเงินต้องมากกว่า 0",
+    "amount-exceeds-remaining": "จำนวนเงินเกินยอดค้างชำระ"
+  },
+  "message": {
+    "payment-success": "บันทึกการชำระเงินสำเร็จ",
+    "overpaid-invoice": "คุณชำระเกินยอดค้างชำระจำนวน {{amount}}",
+    "rollback-success": "ยกเลิกการชำระเงินสำเร็จ",
+    "rollback-error": "เกิดข้อผิดพลาดในการยกเลิกการชำระเงิน"
   }
 }

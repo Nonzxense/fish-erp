@@ -3,6 +3,7 @@ package party
 import (
 	"fish/internal/domain"
 	partyDomain "fish/internal/domain/party"
+	paymentDomain "fish/internal/domain/payment"
 	"fish/internal/dto"
 	"fish/internal/repository"
 	"fish/internal/service/invoice"
@@ -51,19 +52,25 @@ func (s *PartyService) GetParty(id string) (dto.PartyDetailDTO, error) {
 		return dto.PartyDetailDTO{}, err
 	}
 
-	totalPayments, err := s.paymentService.GetPaymentTotalByPartyID(id)
+	totalPaymentsIn, err := s.paymentService.GetPaymentTotalByPartyID(paymentDomain.PaymentIn, id)
+	if err != nil {
+		return dto.PartyDetailDTO{}, err
+	}
+
+	totalPaymentsOut, err := s.paymentService.GetPaymentTotalByPartyID(paymentDomain.PaymentOut, id)
 	if err != nil {
 		return dto.PartyDetailDTO{}, err
 	}
 
 	partyDetail := dto.PartyDetailDTO{
-		ID:            party.ID,
-		Name:          party.Name,
-		Phone:         party.Phone,
-		Note:          party.Note,
-		TotalDebt:     party.TotalDebt,
-		TotalPayments: totalPayments,
-		Payments:      paymentResult,
+		ID:               party.ID,
+		Name:             party.Name,
+		Phone:            party.Phone,
+		Note:             party.Note,
+		TotalDebt:        party.TotalDebt,
+		TotalPaymentsIn:  totalPaymentsIn,
+		TotalPaymentsOut: totalPaymentsOut,
+		Payments:         paymentResult,
 	}
 
 	return partyDetail, nil

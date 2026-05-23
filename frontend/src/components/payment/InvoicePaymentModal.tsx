@@ -35,9 +35,8 @@ const InvoicePaymentModal = ({
 
   const { message } = App.useApp()
 
-  const { t: localT } = useTranslation('party')
+  const { t: localT } = useTranslation('payment')
   const { t: commonT } = useTranslation('common')
-  const { t: paymentT } = useTranslation('payment')
 
   useEffect(() => {
     if (!isOpen || !invoice) {
@@ -63,7 +62,7 @@ const InvoicePaymentModal = ({
 
       if (values.amount > invoice.remainingAmount) {
         message.error(
-          paymentT('message.overpaid-invoice', {
+          localT('message.overpaid-invoice', {
             amount: formatTHB(values.amount - invoice.remainingAmount)
           })
         )
@@ -101,7 +100,7 @@ const InvoicePaymentModal = ({
 
       await PayInvoice(payload)
 
-      message.success(paymentT('message.payment-success'))
+      message.success(localT('message.payment-success'))
 
       onSuccess?.()
       onClose()
@@ -118,7 +117,7 @@ const InvoicePaymentModal = ({
       open={isOpen}
       onCancel={onClose}
       confirmLoading={isSubmitting}
-      title={paymentT('modal.pay-invoice-title')}
+      title={localT('modal.pay-invoice-title')}
       okText={commonT('button-save')}
       cancelText={commonT('button-cancel')}
       footer={null}
@@ -139,7 +138,7 @@ const InvoicePaymentModal = ({
             </div>
             <div className="text-right">
               <Text type="secondary">
-                {paymentT('invoice.remaining-amount')}
+                {localT('invoice.remaining-amount')}
               </Text>
               <div>
                 <Text strong className="text-red-500">
@@ -150,7 +149,7 @@ const InvoicePaymentModal = ({
           </Flex>
           <div className="mt-3">
             <Text type="secondary">
-              {paymentT('invoice.id')}
+              {localT('invoice.id')}
             </Text>
             <div>
               <Text strong>
@@ -176,10 +175,10 @@ const InvoicePaymentModal = ({
               {
                 validator: (_, value) => {
                   if (value && value <= 0) {
-                    return Promise.reject(new Error(paymentT('validation.amount-positive')))
+                    return Promise.reject(new Error(localT('validation.amount-positive')))
                   }
                   if (value && value > invoice.remainingAmount) {
-                    return Promise.reject(new Error(paymentT('validation.amount-exceeds-remaining')))
+                    return Promise.reject(new Error(localT('validation.amount-exceeds-remaining')))
                   }
                   return Promise.resolve()
                 }
@@ -223,11 +222,11 @@ const InvoicePaymentModal = ({
             <Select
               options={[
                 {
-                  label: commonT('payment-method.cash'),
+                  label: localT('method.cash'),
                   value: 'cash'
                 },
                 {
-                  label: commonT('payment-method.transfer'),
+                  label: localT('method.transfer'),
                   value: 'transfer'
                 }
               ]}

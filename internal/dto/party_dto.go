@@ -8,12 +8,13 @@ import (
 )
 
 type PartyDetailDTO struct {
-	ID            string       `json:"id"`
-	Name          string       `json:"name"`
-	Phone         *string      `json:"phone"`
-	Note          *string      `json:"note"`
-	TotalDebt     common.Money `json:"totalDebt"`
-	TotalPayments common.Money `json:"totalPayments"`
+	ID               string       `json:"id"`
+	Name             string       `json:"name"`
+	Phone            *string      `json:"phone"`
+	Note             *string      `json:"note"`
+	TotalDebt        common.Money `json:"totalDebt"`
+	TotalPaymentsIn  common.Money `json:"totalPaymentsIn"`
+	TotalPaymentsOut common.Money `json:"totalPaymentsOut"`
 
 	Payments         domain.PageResult[paymentDomain.Payment]             `json:"payments"`
 	SaleInvoices     domain.PageResult[invoiceDomain.FishSaleInvoice]     `json:"saleInvoices"`

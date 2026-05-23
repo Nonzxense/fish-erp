@@ -4,6 +4,7 @@
   "button-filter": "กรอง",
   "button-delete": "ลบรายการ",
   "button-edit": "แก้ไขรายการ",
+  "button-back": "กลับ",
   "button-view": "ดูรายการ",
   "plastic-l": "พลาสติกใหญ่",
   "plastic-s": "พลาสติกเล็ก",
@@ -17,14 +18,10 @@
   "yellow": "สีเหลือง",
   "red": "สีแดง",
   "kg": "กก.",
-  "invoice-no": "เลขที่บิล",
+  "invoice-no": "เลขที่ใบแจ้งหนี้",
   "total-income": "รายรับทั้งหมด",
   "total-expense": "ค่าใช้จ่ายทั้งหมด",
   "net-profit": "กำไรสุทธิ",
-  "payment-method": {
-    "cash": "เงินสด",
-    "transfer": "เงินโอน"
-  },
   "message": {
     "delete-success": "ลบรายการสำเร็จ"
   },

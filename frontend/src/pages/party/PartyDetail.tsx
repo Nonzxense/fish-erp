@@ -55,6 +55,7 @@ import { Pagination } from '../../utils/types'
 import {
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
+  REF_FISH_PURCHASE_INVOICE,
   REF_FISH_SALE_INVOICE
 } from '../../utils/constants'
 
@@ -311,6 +312,7 @@ const PartyDetail = () => {
 
           message.success(paymentT('message.rollback-success'))
           loadPayments()
+          loadParty()
         } catch (err) {
           console.error(err)
 
@@ -320,7 +322,7 @@ const PartyDetail = () => {
         }
       }
     })
-  }, [commonT, loadPayments, message, modal, paymentT])
+  }, [commonT, loadParty, loadPayments, message, modal, paymentT])
 
   const handleDelete =
     useCallback(() => {
@@ -382,7 +384,8 @@ const PartyDetail = () => {
         {
           title: localT('invoice.id'),
           dataIndex: 'id',
-          key: 'id'
+          key: 'id',
+          width: 150
         },
         {
           title: localT(
@@ -390,6 +393,7 @@ const PartyDetail = () => {
           ),
           dataIndex: 'createdAt',
           key: 'createdAt',
+          width: 120,
           render: (val) =>
             formatDate(val)
         },
@@ -400,6 +404,7 @@ const PartyDetail = () => {
           dataIndex: 'totalAmount',
           key: 'totalAmount',
           align: 'right',
+          width: 150,
           render: (val: number) =>
             formatTHB(val)
         },
@@ -410,15 +415,17 @@ const PartyDetail = () => {
           dataIndex: 'paidAmount',
           key: 'paidAmount',
           align: 'right',
+          width: 150,
           render: (val: number) =>
             formatTHB(val)
         },
         {
           title:
-            commonT('table.status'),
+            localT('table.status'),
           dataIndex: 'status',
           key: 'status',
           align: 'center',
+          width: 120,
           render: (
             status: string
           ) => (
@@ -434,31 +441,8 @@ const PartyDetail = () => {
             </Tag>
           )
         },
-        {
-          title:
-            commonT('table.manage'),
-          key: 'manage',
-          align: 'center',
-          render: (_, record) => (
-            <Tooltip
-              title={commonT(
-                'button-view'
-              )}
-            >
-              <Button
-                variant='text'
-                icon={<Eye size={16} />}
-                onClick={() => {
-                  navigate(
-                    `/invoices/${record.id}`
-                  )
-                }}
-              />
-            </Tooltip>
-          )
-        }
       ],
-      [localT, commonT, navigate]
+      [localT, commonT]
     )
 
   const createInvoiceColumns = <
@@ -468,44 +452,57 @@ const PartyDetail = () => {
       paidAmount: number
       status: string
     }
-  >(onPay: (record: T) => void): TableColumnsType<T> => [
+  >(
+    onPay: (record: T) => void
+  ): TableColumnsType<T> => [
       ...commonInvoiceColumns,
+
       {
-        title: commonT('table.manage'),
+        title: localT('table.manage'),
         key: 'manage',
         align: 'center',
+        width: 100,
 
-        render: (_, record) => (
-          <Space>
-            <Tooltip
-              title={commonT(
-                'button-view'
-              )}
-            >
-              <Button
-                variant='text'
-                icon={<Eye size={16} />}
-                onClick={() => {
-                  navigate(
-                    `/invoices/${record.id}`
-                  )
-                }}
-              />
-            </Tooltip>
+        render: (_, record) => {
+          const isFullyPaid = record.paidAmount >= record.totalAmount
 
-            <Tooltip
-              title={localT(
-                'button.receive-payment'
+          return (
+            <Space>
+              <Tooltip
+                title={commonT(
+                  'button-view'
+                )}
+              >
+                <Button
+                  variant='text'
+                  icon={<Eye size={16} />}
+                  onClick={() => {
+                    navigate(
+                      `/invoices/${record.id}`
+                    )
+                  }}
+                />
+              </Tooltip>
+
+              {!isFullyPaid && (
+                <Tooltip
+                  title={localT(
+                    'button.receive-payment'
+                  )}
+                >
+                  <Button
+                    variant='text'
+                    color='green'
+                    icon={<Wallet size={16} />}
+                    onClick={() =>
+                      onPay(record)
+                    }
+                  />
+                </Tooltip>
               )}
-            >
-              <Button
-                variant='text'
-                icon={<Wallet size={16} />}
-                onClick={() => onPay(record)}
-              />
-            </Tooltip>
-          </Space>
-        )
+            </Space>
+          )
+        }
       }
     ]
 
@@ -517,6 +514,13 @@ const PartyDetail = () => {
     })
   })
 
+  const purchaseInvoiceColumns = createInvoiceColumns<invoiceModel.FishPurchaseInvoice>((invoice) => {
+    handlePaySpecificInvoice({
+      id: invoice.id,
+      refType: REF_FISH_PURCHASE_INVOICE,
+      remainingAmount: invoice.totalAmount - invoice.paidAmount
+    })
+  })
 
   const paymentColumns:
     TableColumnsType<paymentModel.Payment> =
@@ -590,7 +594,13 @@ const PartyDetail = () => {
           setIsOpenPaymentModal(false)
         }
         party={partyDetail}
-        onSuccess={loadPayments}
+        onSuccess={() => {
+          loadParty()
+          loadPayments()
+          loadSaleInvoices()
+          loadPurchaseInvoices()
+          loadTruckInvoices()
+        }}
       />
 
       {selectedInvoiceToPay && partyDetail && (
@@ -603,6 +613,7 @@ const PartyDetail = () => {
           invoice={selectedInvoiceToPay}
           party={partyDetail}
           onSuccess={() => {
+            loadParty()
             loadPayments()
             loadSaleInvoices()
             loadPurchaseInvoices()
@@ -744,15 +755,29 @@ const PartyDetail = () => {
           <Col xs={24} md={6}>
             <Card>
               <Statistic
-                title={localT(
-                  'stats.total-payments'
-                )}
-                value={partyDetail?.totalPayments || 0}
+                title={localT('stats.total-payments-in')}
+                value={partyDetail?.totalPaymentsIn || 0}
                 formatter={(val) =>
                   formatTHB(
                     Number(val)
                   )
                 }
+                valueStyle={{ color: '#3f8600' }}
+              />
+            </Card>
+          </Col>
+
+          <Col xs={24} md={6}>
+            <Card>
+              <Statistic
+                title={localT('stats.total-payments-out')}
+                value={partyDetail?.totalPaymentsOut || 0}
+                formatter={(val) =>
+                  formatTHB(
+                    Number(val)
+                  )
+                }
+                valueStyle={{ color: '#cf1322' }}
               />
             </Card>
           </Col>
@@ -825,7 +850,7 @@ const PartyDetail = () => {
                       isPurchaseLoading
                     }
                     columns={
-                      commonInvoiceColumns
+                      purchaseInvoiceColumns
                     }
                     dataSource={
                       purchaseInvoices

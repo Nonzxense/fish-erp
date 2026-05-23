@@ -188,9 +188,11 @@ func (s *PaymentService) GetPaymentsByPartyID(partyID string) (domain.PageResult
 }
 
 func (s *PaymentService) GetPaymentTotalByPartyID(
+	direction paymentDomain.PaymentDirection,
 	partyID string,
 ) (common.Money, error) {
 	return s.paymentRepo.GetPaymentTotalByPartyID(
+		direction,
 		partyID,
 	)
 }
