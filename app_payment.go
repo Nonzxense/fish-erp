@@ -21,4 +21,3 @@ func (a *App) GetPaymentsByPartyID(partyID string) (domain.PageResult[paymentDom
 func (a *App) RollbackPayment(paymentID uint) error {
 	return a.paymentService.RollbackPayment(paymentID)
 }
-

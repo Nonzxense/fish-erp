@@ -906,6 +906,26 @@ export namespace party {
 
 export namespace payment {
 	
+	export class PaymentAllocation {
+	    id: number;
+	    paymentId: number;
+	    referenceType: string;
+	    referenceId: string;
+	    allocatedAmount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PaymentAllocation(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.paymentId = source["paymentId"];
+	        this.referenceType = source["referenceType"];
+	        this.referenceId = source["referenceId"];
+	        this.allocatedAmount = source["allocatedAmount"];
+	    }
+	}
 	export class Payment {
 	    id: number;
 	    partyId: string;
@@ -914,6 +934,7 @@ export namespace payment {
 	    paymentDate: time.Time;
 	    method: string;
 	    note?: string;
+	    allocations: PaymentAllocation[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Payment(source);
@@ -928,6 +949,7 @@ export namespace payment {
 	        this.paymentDate = this.convertValues(source["paymentDate"], time.Time);
 	        this.method = source["method"];
 	        this.note = source["note"];
+	        this.allocations = this.convertValues(source["allocations"], PaymentAllocation);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

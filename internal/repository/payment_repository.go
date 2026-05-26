@@ -66,81 +66,70 @@ func (r *PaymentRepository) CreateAllocation(tx *gorm.DB, refType, refId string,
 
 func (r *PaymentRepository) GetUnpaidInvoicesByPartyID(
 	partyID string,
+	direction paymentDomain.PaymentDirection,
 ) ([]paymentDomain.UnpaidInvoice, error) {
-
 	var result []paymentDomain.UnpaidInvoice
 
-	var sales []invoiceDomain.FishSaleInvoice
-	var purchases []invoiceDomain.FishPurchaseInvoice
-	var shipping []truckInvoiceDomain.ShippingInvoice
+	if direction == paymentDomain.PaymentIn {
+		var sales []invoiceDomain.FishSaleInvoice
+		var shipping []truckInvoiceDomain.ShippingInvoice
 
-	err := r.db.
-		Where("paid_amount < total_amount").
-		Where("customer_id = ?", partyID).
-		Order("created_at ASC").
-		Find(&sales).Error
+		if err := r.db.
+			Where("paid_amount < total_amount").
+			Where("customer_id = ?", partyID).
+			Order("created_at ASC").
+			Find(&sales).Error; err != nil {
+			return nil, err
+		}
 
-	if err != nil {
-		return nil, err
-	}
+		if err := r.db.
+			Model(&truckInvoiceDomain.ShippingInvoice{}).
+			Joins("JOIN truck_invoices ON truck_invoices.id = shipping_invoices.invoice_id").
+			Where("shipping_invoices.paid_amount < shipping_invoices.total_amount").
+			Where("shipping_invoices.customer_id = ?", partyID).
+			Preload("TruckInvoice").
+			Order("truck_invoices.created_at ASC").
+			Find(&shipping).Error; err != nil {
+			return nil, err
+		}
 
-	err = r.db.
-		Where("paid_amount < total_amount").
-		Where("supplier_id = ?", partyID).
-		Order("created_at ASC").
-		Find(&purchases).Error
+		for _, s := range sales {
+			result = append(result, paymentDomain.UnpaidInvoice{
+				ReferenceType: paymentDomain.RefFishSaleInvoice,
+				ReferenceID:   s.ID,
+				TotalAmount:   s.TotalAmount,
+				PaidAmount:    s.PaidAmount,
+				CreatedAt:     s.CreatedAt,
+			})
+		}
+		for _, tc := range shipping {
+			result = append(result, paymentDomain.UnpaidInvoice{
+				ReferenceType: paymentDomain.RefTruckInvoice,
+				ReferenceID:   tc.ID,
+				TotalAmount:   tc.TotalAmount,
+				PaidAmount:    tc.PaidAmount,
+				CreatedAt:     tc.TruckInvoice.CreatedAt,
+			})
+		}
+	} else {
+		var purchases []invoiceDomain.FishPurchaseInvoice
+		if err := r.db.
+			Where("paid_amount < total_amount").
+			Where("supplier_id = ?", partyID).
+			Order("created_at ASC").
+			Find(&purchases).Error; err != nil {
+			return nil, err
+		}
 
-	if err != nil {
-		return nil, err
-	}
-
-	err = r.db.
-		Model(&truckInvoiceDomain.ShippingInvoice{}).
-		Joins("JOIN truck_invoices ON truck_invoices.id = shipping_invoices.invoice_id").
-		Where("shipping_invoices.paid_amount < shipping_invoices.total_amount").
-		Where("shipping_invoices.customer_id = ?", partyID).
-		Preload("TruckInvoice").
-		Order("truck_invoices.created_at ASC").
-		Find(&shipping).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	for _, s := range sales {
-		result = append(result, paymentDomain.UnpaidInvoice{
-			ReferenceType: paymentDomain.RefFishSaleInvoice,
-			ReferenceID:   s.ID,
-
-			TotalAmount: s.TotalAmount,
-			PaidAmount:  s.PaidAmount,
-
-			CreatedAt: s.CreatedAt,
-		})
-	}
-
-	for _, p := range purchases {
-		result = append(result, paymentDomain.UnpaidInvoice{
-			ReferenceType: paymentDomain.RefFishPurchaseInvoice,
-			ReferenceID:   p.ID,
-
-			TotalAmount: p.TotalAmount,
-			PaidAmount:  p.PaidAmount,
-
-			CreatedAt: p.CreatedAt,
-		})
-	}
-
-	for _, tc := range shipping {
-		result = append(result, paymentDomain.UnpaidInvoice{
-			ReferenceType: paymentDomain.RefTruckInvoice,
-			ReferenceID:   tc.ID,
-
-			TotalAmount: tc.TotalAmount,
-			PaidAmount:  tc.PaidAmount,
-
-			CreatedAt: tc.TruckInvoice.CreatedAt,
-		})
+		for _, p := range purchases {
+			result = append(result, paymentDomain.UnpaidInvoice{
+				ReferenceType: paymentDomain.RefFishPurchaseInvoice,
+				ReferenceID:   p.ID,
+				TotalAmount:   p.TotalAmount,
+				PaidAmount:    p.PaidAmount,
+				CreatedAt:     p.CreatedAt,
+			})
+		}
 	}
 
 	return result, nil
@@ -161,6 +150,7 @@ func (r *PaymentRepository) GetPaymentsByPartyID(
 	}
 
 	if err := baseQuery.
+		Preload("Allocations").
 		Order("payment_date DESC").
 		Find(&payments).Error; err != nil {
 		return nil, 0, err

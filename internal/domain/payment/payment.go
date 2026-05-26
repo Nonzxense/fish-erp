@@ -17,13 +17,15 @@ type Payment struct {
 	PaymentDate time.Time `json:"paymentDate"`
 	Method      string    `json:"method"`
 	Note        *string   `json:"note"`
+
+	Allocations []PaymentAllocation `json:"allocations"`
 }
 
 type PaymentAllocation struct {
 	ID uint `json:"id" gorm:"primaryKey"`
 
 	PaymentID uint    `json:"paymentId"`
-	Payment   Payment `json:"payment"`
+	Payment   Payment `json:"-"`
 
 	ReferenceType string `json:"referenceType"`
 	ReferenceID   string `json:"referenceId"`

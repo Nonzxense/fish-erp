@@ -72,7 +72,7 @@ func (s *PaymentService) AllocatePaymentFIFO(
 	input dto.PaymentInput,
 ) error {
 
-	invoices, err := s.paymentRepo.GetUnpaidInvoicesByPartyID(input.PartyID)
+	invoices, err := s.paymentRepo.GetUnpaidInvoicesByPartyID(input.PartyID, input.Direction)
 
 	if err != nil {
 		return err

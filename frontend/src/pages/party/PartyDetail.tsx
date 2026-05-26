@@ -960,6 +960,28 @@ const PartyDetail = () => {
                     scroll={{
                       x: 'max-content'
                     }}
+                    expandable={{
+                      expandedRowRender: (record) => (
+                        <Table
+                          dataSource={record.allocations}
+                          pagination={false}
+                          size="small"
+                          columns={[
+                            { title: localT('allocation.ref-type'), dataIndex: 'referenceType', key: 'type' },
+                            { title: localT('allocation.ref-id'), dataIndex: 'referenceId', key: 'id' },
+                            {
+                              title: localT('allocation.amount'),
+                              dataIndex: 'allocatedAmount',
+                              key: 'amount',
+                              align: 'right',
+                              render: (val) => formatTHB(val)
+                            },
+                          ]}
+                          rowKey={(item) => `${item.referenceType}-${item.referenceId}`}
+                        />
+                      ),
+                      rowExpandable: (record) => !!record.allocations && record.allocations.length > 0,
+                    }}
                     pagination={{
                       current:
                         paymentPagination.page,
