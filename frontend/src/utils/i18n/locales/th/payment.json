@@ -7,6 +7,10 @@
     "cash": "เงินสด",
     "transfer": "ธนาคาร"
   },
+  "direction": {
+    "in": "เงินเข้า",
+    "out": "เงินออก"
+  },
   "table": {
     "date": "วันที่ชำระ",
     "direction": "ประเภท",
@@ -17,11 +21,11 @@
     "name": "ชื่อ"
   },
   "modal": {
-    "pay-invoice-title": "ชำระเงินตามใบแจ้งหนี้"
+    "pay-invoice-title": "ชำระเงินตามบิล"
   },
   "invoice": {
     "remaining-amount": "ยอดค้างชำระ",
-    "id": "เลขที่ใบแจ้งหนี้"
+    "id": "เลขที่บิล"
   },
   "form": {
     "amount": {

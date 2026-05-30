@@ -17,3 +17,7 @@ func (a *App) GetTruckInvoices(filter truckInvoiceDomain.TruckInvoiceFilter) (do
 func (a *App) GetTruckInvoice(id string) (truckInvoiceDomain.TruckInvoice, error) {
 	return a.truckInvoiceService.GetTruckInvoice(id)
 }
+
+func (a *App) GetShippingInvoicesByPartyID(partyID string) (domain.PageResult[truckInvoiceDomain.ShippingInvoice], error) {
+	return a.truckInvoiceService.GetShippingInvoicesByPartyID(partyID)
+}

@@ -12,7 +12,8 @@ import {
   Tabs,
   Tag,
   TableColumnsType,
-  Tooltip
+  Tooltip,
+  Typography
 } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -47,6 +48,7 @@ import {
   GetFishSaleInvoices,
   GetParty,
   GetPaymentsByPartyID,
+  GetShippingInvoicesByPartyID,
   RollbackPayment,
 } from '../../../wailsjs/go/main/App'
 
@@ -56,12 +58,15 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
   REF_FISH_PURCHASE_INVOICE,
-  REF_FISH_SALE_INVOICE
+  REF_FISH_SALE_INVOICE,
+  REF_TRUCK_INVOICE
 } from '../../utils/constants'
 
-import { getPaidStatusColor } from '../../utils/getTagColor'
+import { getPaidStatusColor, getPaymentDirectionType } from '../../utils/getTagColor'
 import { PayableInvoice } from '../../components/payment/interface'
 import InvoicePaymentModal from '../../components/payment/InvoicePaymentModal'
+
+const { Text } = Typography
 
 const PartyDetail = () => {
   const [activeTab, setActiveTab] = useState('sales')
@@ -76,7 +81,7 @@ const PartyDetail = () => {
   const [partyDetail, setPartyDetail] = useState<dto.PartyDetailDTO>()
   const [saleInvoices, setSaleInvoices] = useState<invoiceModel.FishSaleInvoice[]>([])
   const [purchaseInvoices, setPurchaseInvoices] = useState<invoiceModel.FishPurchaseInvoice[]>([])
-  const [truckInvoices, setTruckInvoices] = useState<truckinvoiceModel.TruckInvoice[]>([])
+  const [shippingInvoices, setShippingInvoices] = useState<truckinvoiceModel.ShippingInvoice[]>([])
   const [payments, setPayments] = useState<paymentModel.Payment[]>([])
   const [salePagination, setSalePagination] = useState<Pagination>({
     page: DEFAULT_PAGE,
@@ -219,17 +224,16 @@ const PartyDetail = () => {
       try {
         setIsTruckLoading(true)
 
-        // const result =
-        // await GetTruckInvoicesByPartyID(id)
+        const result = await GetShippingInvoicesByPartyID(id)
 
-        // setTruckInvoices(result.data)
+        setShippingInvoices(result.data)
 
-        //   setTruckPagination((prev) => ({
-        //     ...prev,
-        //     total: result.total
-        //   }))
-        // } catch (err) {
-        //   console.error(err)
+        setTruckPagination((prev) => ({
+          ...prev,
+          total: result.total
+        }))
+      } catch (err) {
+        console.error(err)
 
         message.error(
           commonT('message.error-load-data')
@@ -461,7 +465,7 @@ const PartyDetail = () => {
         title: localT('table.manage'),
         key: 'manage',
         align: 'center',
-        width: 100,
+        width: 120,
 
         render: (_, record) => {
           const isFullyPaid = record.paidAmount >= record.totalAmount
@@ -522,6 +526,14 @@ const PartyDetail = () => {
     })
   })
 
+  const shippingInvoiceColumns = createInvoiceColumns<truckinvoiceModel.ShippingInvoice>((invoice) => {
+    handlePaySpecificInvoice({
+      id: invoice.id,
+      refType: REF_TRUCK_INVOICE,
+      remainingAmount: invoice.totalAmount - invoice.paidAmount
+    })
+  })
+
   const paymentColumns:
     TableColumnsType<paymentModel.Payment> =
     useMemo(
@@ -541,7 +553,10 @@ const PartyDetail = () => {
           ),
           dataIndex: 'direction',
           key: 'direction',
-          render: (val) => val.toUpperCase()
+          render: (val) =>
+            <Text type={getPaymentDirectionType(val)}>
+              {paymentT(`direction.${val}`)}
+            </Text>
         },
         {
           title: paymentT(
@@ -901,10 +916,10 @@ const PartyDetail = () => {
                       isTruckLoading
                     }
                     columns={
-                      commonInvoiceColumns
+                      shippingInvoiceColumns
                     }
                     dataSource={
-                      truckInvoices
+                      shippingInvoices
                     }
                     scroll={{
                       x: 'max-content'

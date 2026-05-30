@@ -52,6 +52,8 @@ export function GetParty(arg1:string):Promise<dto.PartyDetailDTO>;
 
 export function GetPaymentsByPartyID(arg1:string):Promise<domain.PageResult_fish_internal_domain_payment_Payment_>;
 
+export function GetShippingInvoicesByPartyID(arg1:string):Promise<domain.PageResult_fish_internal_domain_truck_invoice_ShippingInvoice_>;
+
 export function GetTransactionSummary(arg1:time.Time,arg2:time.Time):Promise<transaction.TransactionSummary>;
 
 export function GetTransactions(arg1:transaction.TransactionFilter):Promise<domain.PageResult_fish_internal_domain_transaction_Transaction_>;

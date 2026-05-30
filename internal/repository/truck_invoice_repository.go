@@ -86,8 +86,10 @@ func (r *TruckInvoiceRepository) Create(ti *domain.TruckInvoice) error {
 			}
 		}
 
-		if err := tx.Create(&t).Error; err != nil {
-			return err
+		if len(t) > 0 {
+			if err := tx.Create(&t).Error; err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -273,4 +275,25 @@ func (r *TruckInvoiceRepository) Update(id string, newInvoice *domain.TruckInvoi
 
 		return nil
 	})
+}
+
+func (r *TruckInvoiceRepository) GetShippingInvoicesByPartyID(partyID string) ([]domain.ShippingInvoice, int64, error) {
+	var invoices []domain.ShippingInvoice
+	var total int64
+
+	query := r.db.
+		Model(&domain.ShippingInvoice{}).
+		Preload("TruckInvoice").
+		Joins("JOIN truck_invoices ON truck_invoices.id = shipping_invoices.invoice_id").
+		Where("shipping_invoices.customer_id = ?", partyID)
+
+	err := query.
+		Order("truck_invoices.created_at DESC").
+		Find(&invoices).Error
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return invoices, total, err
 }

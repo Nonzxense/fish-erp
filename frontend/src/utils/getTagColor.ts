@@ -1,5 +1,5 @@
 import { TagProps } from "antd"
-import { PAYMENT_CANCELLED, PAYMENT_PAID, PAYMENT_PARTIAL, PAYMENT_PENDING } from "./constants"
+import { PAYMENT_CANCELLED, PAYMENT_IN, PAYMENT_OUT, PAYMENT_PAID, PAYMENT_PARTIAL, PAYMENT_PENDING } from "./constants"
 
 export const getTransactionTypeColor = (
   type?: string
@@ -32,5 +32,18 @@ export const getPaidStatusColor = (
       return 'error'
     default:
       return 'default'
+  }
+}
+
+export const getPaymentDirectionType = (
+  direction: string
+): 'success' | 'danger' | 'secondary' => {
+  switch (direction) {
+    case PAYMENT_IN:
+      return 'success'
+    case PAYMENT_OUT:
+      return 'danger'
+    default:
+      return 'secondary'
   }
 }

@@ -404,6 +404,38 @@ export namespace domain {
 		    return a;
 		}
 	}
+	export class PageResult_fish_internal_domain_truck_invoice_ShippingInvoice_ {
+	    data: truckinvoice.ShippingInvoice[];
+	    total: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PageResult_fish_internal_domain_truck_invoice_ShippingInvoice_(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.data = this.convertValues(source["data"], truckinvoice.ShippingInvoice);
+	        this.total = source["total"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class PageResult_fish_internal_domain_truck_invoice_TruckInvoice_ {
 	    data: truckinvoice.TruckInvoice[];
 	    total: number;

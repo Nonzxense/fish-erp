@@ -86,6 +86,10 @@ export function GetPaymentsByPartyID(arg1) {
   return window['go']['main']['App']['GetPaymentsByPartyID'](arg1);
 }
 
+export function GetShippingInvoicesByPartyID(arg1) {
+  return window['go']['main']['App']['GetShippingInvoicesByPartyID'](arg1);
+}
+
 export function GetTransactionSummary(arg1, arg2) {
   return window['go']['main']['App']['GetTransactionSummary'](arg1, arg2);
 }

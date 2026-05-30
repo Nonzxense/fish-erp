@@ -116,6 +116,17 @@ func (s *TruckInvoiceService) GetTruckInvoice(id string) (truckInvoiceDomain.Tru
 	return s.repo.GetByID(id)
 }
 
+func (s *TruckInvoiceService) GetShippingInvoicesByPartyID(partyID string) (domain.PageResult[truckInvoiceDomain.ShippingInvoice], error) {
+	invoices, total, err := s.repo.GetShippingInvoicesByPartyID(partyID)
+
+	pageResult := domain.PageResult[truckInvoiceDomain.ShippingInvoice]{
+		Data:  invoices,
+		Total: total,
+	}
+
+	return pageResult, err
+}
+
 func (s *TruckInvoiceService) CalculateTotal(invoice truckInvoiceDomain.TruckInvoice) (common.Money, common.Money) {
 	var totalIncome common.Money
 	var totalExpense common.Money = invoice.DriverWage
