@@ -26,7 +26,7 @@ func (r *ContainerRepository) FindAll(filter *domain.ContainerFilter) ([]domain.
 
 	if filter != nil {
 		if filter.ID != nil {
-			query = query.Where("id = ?", *filter.ID)
+			query = query.Where("ContainerNo = ?", *filter.ID)
 		}
 
 		if filter.Type != nil {

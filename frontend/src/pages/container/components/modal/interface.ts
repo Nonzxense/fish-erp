@@ -8,7 +8,8 @@ export interface ContainerFormModalProp {
 }
 
 export type ContainerFormValues = {
-  id: number
+  containerNo: number
+  name: string
   type: string
   color: string
   status?: string

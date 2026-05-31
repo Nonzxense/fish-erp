@@ -16,10 +16,11 @@ func NewContainerService(repo *repository.ContainerRepository) *ContainerService
 
 func (s *ContainerService) CreateContainer(input CreateContainerInput) error {
 	container := &containerDomain.Container{
-		ID:     input.ID,
-		Color:  input.Color,
-		Type:   input.Type,
-		Status: input.Status,
+		ContainerNo: input.ContainerNo,
+		Name:        input.Name,
+		Color:       input.Color,
+		Type:        input.Type,
+		Status:      input.Status,
 	}
 	return s.repo.CreateContainer(container)
 }
@@ -41,10 +42,11 @@ func (s *ContainerService) GetContainerSummary() (containerDomain.ContainerSumma
 
 func (s *ContainerService) UpdateContainer(id uint, input CreateContainerInput) error {
 	container := &containerDomain.Container{
-		ID:     id,
-		Color:  input.Color,
-		Type:   input.Type,
-		Status: input.Status,
+		ContainerNo: input.ContainerNo,
+		Name:        input.Name,
+		Color:       input.Color,
+		Type:        input.Type,
+		Status:      input.Status,
 	}
 	return s.repo.UpdateContainer(id, container)
 }

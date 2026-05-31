@@ -1,10 +1,11 @@
 package container
 
 type CreateContainerInput struct {
-	ID     uint    `json:"id"`
-	Color  string  `json:"color"`
-	Type   string  `json:"type"`
-	Status *string `json:"status"`
+	Name        string  `json:"name"`
+	ContainerNo uint    `json:"containerNo"`
+	Color       string  `json:"color"`
+	Type        string  `json:"type"`
+	Status      *string `json:"status"`
 }
 
 type CreateFishContainerInput struct {

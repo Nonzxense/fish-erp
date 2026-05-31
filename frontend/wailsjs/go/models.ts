@@ -2,6 +2,8 @@ export namespace container {
 	
 	export class Container {
 	    id: number;
+	    name: string;
+	    containerNo: number;
 	    color: string;
 	    type: string;
 	    status?: string;
@@ -13,6 +15,8 @@ export namespace container {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.containerNo = source["containerNo"];
 	        this.color = source["color"];
 	        this.type = source["type"];
 	        this.status = source["status"];
@@ -57,7 +61,8 @@ export namespace container {
 	    }
 	}
 	export class CreateContainerInput {
-	    id: number;
+	    name: string;
+	    containerNo: number;
 	    color: string;
 	    type: string;
 	    status?: string;
@@ -68,7 +73,8 @@ export namespace container {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.containerNo = source["containerNo"];
 	        this.color = source["color"];
 	        this.type = source["type"];
 	        this.status = source["status"];

@@ -1,4 +1,4 @@
-import { Button, Form, InputNumber, Modal, Select } from "antd"
+import { Button, Form, Input, InputNumber, Modal, Select } from "antd"
 import { ContainerFormValues, ContainerFormModalProp } from "./interface"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -18,7 +18,8 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
 
   const handleSubmit = async (values: ContainerFormValues) => {
     const payload = new containerModel.CreateContainerInput({
-      id: Number(values.id),
+      containerNo: Number(values.containerNo),
+      name: values.name,
       type: values.type,
       color: values.color,
       status: values.status ?? undefined
@@ -46,13 +47,17 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
   useEffect(() => {
     if (isOpen && container) {
       form.setFieldsValue({
-        id: container.id,
+        containerNo: container.containerNo,
+        name: container.name,
         type: container.type,
         color: container.color,
         status: container.status ?? undefined
       })
     } else if (isOpen && !container) {
       form.resetFields()
+      form.setFieldsValue({
+        status: 'at_store'
+      })
     }
   }, [isOpen, container, form])
 
@@ -75,14 +80,20 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
         disabled={isLoading}
       >
         <Form.Item
-          name="id"
+          name="name"
+          label={localT('form.name.label')}
+          rules={[{ required: true, message: localT('form.name.validate.required') }]}
+        >
+          <Input placeholder={localT('form.name.placeholder')} />
+        </Form.Item>
+        <Form.Item
+          name="containerNo"
           label={localT('form.id.label')}
           rules={[{ required: true, message: localT('form.id.validate.required') }]}
         >
           <InputNumber
             className="w-full"
             placeholder={localT('form.id.placeholder')}
-            disabled={isEdit}
           />
         </Form.Item>
         <Form.Item
@@ -98,6 +109,7 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
         <Form.Item
           name="color"
           label={localT('form.color.label')}
+          rules={[{ required: true, message: localT('form.color.validate.required') }]}
         >
           <Select
             allowClear

@@ -14,17 +14,33 @@
     "edit": "แก้ไข"
   },
   "form": {
+    "name": {
+      "label": "ชื่อ",
+      "placeholder": "กรอกชื่อ",
+      "validate": {
+        "required": "กรุณากรอกชื่อ"
+      }
+    },
     "id": {
       "label": "เลขลัง",
-      "placeholder": "เลขลัง"
+      "placeholder": "เลขลัง",
+      "validate": {
+        "required": "กรุณากรอกเลขลัง"
+      }
     },
     "type": {
       "label": "ประเภท",
-      "placeholder": "เลือกประเภท"
+      "placeholder": "เลือกประเภท",
+      "validate": {
+        "required": "กรุณาเลือกประเภท"
+      }
     },
     "color": {
       "label": "สี",
-      "placeholder": "เลือกสี"
+      "placeholder": "เลือกสี",
+      "validate": {
+        "required": "กรุณาเลือกสี"
+      }
     },
     "status": {
       "label": "สถานะ",
