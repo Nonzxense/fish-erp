@@ -12,7 +12,8 @@ type PartyDetailDTO struct {
 	Name             string       `json:"name"`
 	Phone            *string      `json:"phone"`
 	Note             *string      `json:"note"`
-	TotalDebt        common.Money `json:"totalDebt"`
+	TotalReceivable  common.Money `json:"totalReceivable"`
+	TotalPayable     common.Money `json:"totalPayable"`
 	TotalPaymentsIn  common.Money `json:"totalPaymentsIn"`
 	TotalPaymentsOut common.Money `json:"totalPaymentsOut"`
 

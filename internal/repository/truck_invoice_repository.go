@@ -1,6 +1,7 @@
 package repository
 
 import (
+	paymentDomain "fish/internal/domain/payment"
 	"fish/internal/domain/transaction"
 	domain "fish/internal/domain/truck_invoice"
 	"fish/internal/utils/ptr"
@@ -293,6 +294,13 @@ func (r *TruckInvoiceRepository) GetShippingInvoicesByPartyID(partyID string) ([
 
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
+	}
+
+	for i := range invoices {
+		invoices[i].Status = paymentDomain.GetPaymentStatus(
+			invoices[i].TotalAmount,
+			invoices[i].PaidAmount,
+		)
 	}
 
 	return invoices, total, err

@@ -12,9 +12,10 @@ type Party struct {
 }
 
 type PartyWithDebt struct {
-	ID        string       `json:"id"`
-	Name      string       `json:"name"`
-	Phone     *string      `json:"phone"`
-	Note      *string      `json:"note"`
-	TotalDebt common.Money `json:"totalDebt"`
+	ID              string       `json:"id"`
+	Name            string       `json:"name"`
+	Phone           *string      `json:"phone"`
+	Note            *string      `json:"note"`
+	TotalReceivable common.Money `json:"totalReceivable"`
+	TotalPayable    common.Money `json:"totalPayable"`
 }

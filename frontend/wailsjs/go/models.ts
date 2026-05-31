@@ -478,7 +478,8 @@ export namespace dto {
 	    name: string;
 	    phone?: string;
 	    note?: string;
-	    totalDebt: number;
+	    totalReceivable: number;
+	    totalPayable: number;
 	    totalPaymentsIn: number;
 	    totalPaymentsOut: number;
 	    payments: domain.PageResult_fish_internal_domain_payment_Payment_;
@@ -495,7 +496,8 @@ export namespace dto {
 	        this.name = source["name"];
 	        this.phone = source["phone"];
 	        this.note = source["note"];
-	        this.totalDebt = source["totalDebt"];
+	        this.totalReceivable = source["totalReceivable"];
+	        this.totalPayable = source["totalPayable"];
 	        this.totalPaymentsIn = source["totalPaymentsIn"];
 	        this.totalPaymentsOut = source["totalPaymentsOut"];
 	        this.payments = this.convertValues(source["payments"], domain.PageResult_fish_internal_domain_payment_Payment_);
@@ -918,7 +920,8 @@ export namespace party {
 	    name: string;
 	    phone?: string;
 	    note?: string;
-	    totalDebt: number;
+	    totalReceivable: number;
+	    totalPayable: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new PartyWithDebt(source);
@@ -930,7 +933,8 @@ export namespace party {
 	        this.name = source["name"];
 	        this.phone = source["phone"];
 	        this.note = source["note"];
-	        this.totalDebt = source["totalDebt"];
+	        this.totalReceivable = source["totalReceivable"];
+	        this.totalPayable = source["totalPayable"];
 	    }
 	}
 

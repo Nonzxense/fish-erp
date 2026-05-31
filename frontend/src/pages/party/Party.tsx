@@ -100,8 +100,8 @@ const Party = () => {
       },
       {
         title: localT('table.overdue-amount'),
-        key: 'totalDebt',
-        dataIndex: 'totalDebt',
+        key: 'totalReceivable',
+        dataIndex: 'totalReceivable',
         ellipsis: true,
         align: 'right',
         render: (val) => (

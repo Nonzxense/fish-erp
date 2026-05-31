@@ -66,8 +66,18 @@
   },
   "stats": {
     "total-debt": "ยอดค้างชำระรวม",
+    "party-debt": "ยอดค้างรับ (ลูกหนี้)",
+    "party-debt-tooltip": "ยอดรวมที่ลูกค้ายังไม่ได้ชำระเงินให้เรา (จากบิลขายและบิลค่าบรรทุก)",
+    "receivable-desc": "เงินที่เราจะได้รับ",
+    "user-debt": "ยอดค้างจ่าย (เจ้าหนี้)",
+    "user-debt-tooltip": "ยอดรวมที่เรายังไม่ได้ชำระเงินให้ลูกค้า (จากบิลซื้อ)",
+    "payable-desc": "เงินที่เราต้องจ่าย",
     "total-payments-in": "ยอดรับเงินรวม",
-    "total-payments-out": "ยอดจ่ายเงินรวม"
+    "total-payments-in-desc": "เงินที่เราได้รับ",
+    "total-payments-in-tooltip": "จำนวนเงินสด/โอนที่ได้รับจริงทั้งหมด",
+    "total-payments-out": "ยอดจ่ายเงินรวม",
+    "total-payments-out-desc": "เงินที่เราจ่าย",
+    "total-payments-out-tooltip": "จำนวนเงินสด/โอนที่จ่ายจริงทั้งหมด"
   },
   "message": {
     "overpaid": "คุณชำระเกินยอดค้างชำระจำนวน {{amount}}",

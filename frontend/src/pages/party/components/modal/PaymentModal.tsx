@@ -53,8 +53,8 @@ const PaymentModal = ({
     })
   }, [form, isOpen])
 
-  const totalDebt = useMemo(() => {
-    return party?.totalDebt || 0
+  const totalReceivable = useMemo(() => {
+    return party?.totalReceivable || 0
   }, [party])
 
   const handleSubmit = async () => {
@@ -65,10 +65,10 @@ const PaymentModal = ({
         return
       }
 
-      if (values.amount > totalDebt) {
+      if (values.amount > totalReceivable) {
         message.error(
           localT('message.overpaid', {
-            amount: formatTHB(values.amount - totalDebt)
+            amount: formatTHB(values.amount - totalReceivable)
           })
         )
 
@@ -132,7 +132,7 @@ const PaymentModal = ({
 
               <div>
                 <Text strong className="text-red-500">
-                  {formatTHB(totalDebt)}
+                  {formatTHB(totalReceivable)}
                 </Text>
               </div>
             </div>

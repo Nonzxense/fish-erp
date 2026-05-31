@@ -18,7 +18,9 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
+  ArrowDownLeft,
   ArrowLeft,
+  ArrowUpRight,
   Eye,
   PencilLine,
   Trash2,
@@ -748,52 +750,91 @@ const PartyDetail = () => {
         </Card>
 
         <Row gutter={[16, 16]}>
-          <Col xs={24} md={6}>
-            <Card>
-              <Statistic
-                title={localT(
-                  'stats.total-debt'
-                )}
-                value={
-                  partyDetail?.totalDebt ||
-                  0
-                }
-                formatter={(val) =>
-                  formatTHB(
-                    Number(val)
-                  )
-                }
-              />
+          <Col xs={24} sm={12} md={6}>
+            <Card variant="borderless">
+              <Tooltip title={localT('stats.party-debt-tooltip')}>
+                <Statistic
+                  title={
+                    <Space size={4}>
+                      <ArrowUpRight size={16} className="text-green-500" />
+                      <span>{localT('stats.party-debt')}</span>
+                    </Space>
+                  }
+                  value={partyDetail?.totalReceivable || 0}
+                  precision={2}
+                  styles={{ content: { color: '#3f8600' } }}
+                  formatter={(val) => formatTHB(Number(val))}
+                />
+                <Text type="secondary" className="text-xs">
+                  {localT('stats.receivable-desc')}
+                </Text>
+              </Tooltip>
             </Card>
           </Col>
 
-          <Col xs={24} md={6}>
-            <Card>
-              <Statistic
-                title={localT('stats.total-payments-in')}
-                value={partyDetail?.totalPaymentsIn || 0}
-                formatter={(val) =>
-                  formatTHB(
-                    Number(val)
-                  )
-                }
-                valueStyle={{ color: '#3f8600' }}
-              />
+          <Col xs={24} sm={12} md={6}>
+            <Card variant="borderless">
+              <Tooltip title={localT('stats.user-debt-tooltip')}>
+                <Statistic
+                  title={
+                    <Space size={4}>
+                      <ArrowDownLeft size={16} className="text-red-500" />
+                      <span>{localT('stats.user-debt')}</span>
+                    </Space>
+                  }
+                  value={partyDetail?.totalPayable || 0}
+                  precision={2}
+                  styles={{ content: { color: '#cf1322' } }}
+                  formatter={(val) => formatTHB(Number(val))}
+                />
+                <Text type="secondary" className="text-xs">
+                  {localT('stats.payable-desc')}
+                </Text>
+              </Tooltip>
             </Card>
           </Col>
 
-          <Col xs={24} md={6}>
-            <Card>
-              <Statistic
-                title={localT('stats.total-payments-out')}
-                value={partyDetail?.totalPaymentsOut || 0}
-                formatter={(val) =>
-                  formatTHB(
-                    Number(val)
-                  )
-                }
-                valueStyle={{ color: '#cf1322' }}
-              />
+          <Col xs={24} sm={12} md={6}>
+            <Card variant="borderless">
+              <Tooltip title={localT('stats.total-payments-in-tooltip')}>
+                <Statistic
+                  title={
+                    <Space size={4}>
+                      <ArrowUpRight size={16} className="text-green-500" />
+                      <span>{localT('stats.total-payments-in')}</span>
+                    </Space>
+                  }
+                  value={partyDetail?.totalPaymentsIn || 0}
+                  precision={2}
+                  styles={{ content: { color: '#3f8600' } }}
+                  formatter={(val) => formatTHB(Number(val))}
+                />
+                <Text type="secondary" className="text-xs">
+                  {localT('stats.total-payments-in-desc')}
+                </Text>
+              </Tooltip>
+            </Card>
+          </Col>
+
+          <Col xs={24} sm={12} md={6}>
+            <Card variant="borderless">
+              <Tooltip title={localT('stats.total-payments-out-tooltip')}>
+                <Statistic
+                  title={
+                    <Space size={4}>
+                      <ArrowDownLeft size={16} className="text-red-500" />
+                      <span>{localT('stats.total-payments-out')}</span>
+                    </Space>
+                  }
+                  value={partyDetail?.totalPaymentsOut || 0}
+                  precision={2}
+                  styles={{ content: { color: '#cf1322' } }}
+                  formatter={(val) => formatTHB(Number(val))}
+                />
+                <Text type="secondary" className="text-xs">
+                  {localT('stats.total-payments-out-desc')}
+                </Text>
+              </Tooltip>
             </Card>
           </Col>
         </Row>

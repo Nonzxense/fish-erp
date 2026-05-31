@@ -56,6 +56,15 @@ func (r *PartyRepository) FindAll(
 		Where("paid_amount < total_amount").
 		Group("customer_id")
 
+	fpiSubQuery := r.db.
+		Table("fish_purchase_invoices").
+		Select(`
+			supplier_id,
+			SUM(total_amount - paid_amount) as total_debt
+		`).
+		Where("paid_amount < total_amount").
+		Group("supplier_id")
+
 	query := r.db.
 		Table("parties").
 		Select(`
@@ -63,8 +72,8 @@ func (r *PartyRepository) FindAll(
 			parties.name,
 			parties.phone,
 			parties.note,
-			COALESCE(fsi.total_debt, 0) +
-			COALESCE(shi.total_debt, 0) as total_debt
+			COALESCE(fsi.total_debt, 0) + COALESCE(shi.total_debt, 0) as total_receivable,
+			COALESCE(fpi.total_debt, 0) as total_payable
 		`).
 		Joins(`
 			LEFT JOIN (?) fsi
@@ -73,7 +82,11 @@ func (r *PartyRepository) FindAll(
 		Joins(`
 			LEFT JOIN (?) shi
 			ON parties.id = shi.customer_id
-		`, shiSubQuery)
+		`, shiSubQuery).
+		Joins(`
+			LEFT JOIN (?) fpi
+			ON parties.id = fpi.supplier_id
+		`, fpiSubQuery)
 
 	if filter != nil {
 		if filter.Name != nil {
@@ -146,6 +159,15 @@ func (r *PartyRepository) GetByIDWithDebt(id string) (domain.PartyWithDebt, erro
 		Where("paid_amount < total_amount").
 		Group("customer_id")
 
+	fpiSubQuery := r.db.
+		Table("fish_purchase_invoices").
+		Select(`
+			supplier_id,
+			SUM(total_amount - paid_amount) as total_debt
+		`).
+		Where("paid_amount < total_amount").
+		Group("supplier_id")
+
 	query := r.db.
 		Table("parties").
 		Select(`
@@ -153,8 +175,8 @@ func (r *PartyRepository) GetByIDWithDebt(id string) (domain.PartyWithDebt, erro
 			parties.name,
 			parties.phone,
 			parties.note,
-			COALESCE(fsi.total_debt, 0) +
-			COALESCE(shi.total_debt, 0) as total_debt
+			COALESCE(fsi.total_debt, 0) + COALESCE(shi.total_debt, 0) as total_receivable,
+			COALESCE(fpi.total_debt, 0) as total_payable
 		`).
 		Joins(`
 			LEFT JOIN (?) fsi
@@ -163,7 +185,11 @@ func (r *PartyRepository) GetByIDWithDebt(id string) (domain.PartyWithDebt, erro
 		Joins(`
 			LEFT JOIN (?) shi
 			ON parties.id = shi.customer_id
-		`, shiSubQuery)
+		`, shiSubQuery).
+		Joins(`
+			LEFT JOIN (?) fpi
+			ON parties.id = fpi.supplier_id
+		`, fpiSubQuery)
 
 	err := query.
 		Where("id = ?", id).
