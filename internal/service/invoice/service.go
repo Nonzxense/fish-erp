@@ -136,7 +136,7 @@ func (s *InvoiceService) buildFishSaleInvoice(input CreateFishSaleInvoiceInput) 
 	}
 
 	for _, containerInput := range input.Items {
-		containerID, err := s.resolveContainerID(containerInput)
+		containerID, err := s.resolveContainerID(containerInput, customer, input.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -206,11 +206,15 @@ func (s *InvoiceService) resolveParty(input PartyInput) (partyDomain.Party, erro
 	return party, err
 }
 
-func (s *InvoiceService) resolveContainerID(input container.CreateFishContainerInput) (uint, error) {
+func (s *InvoiceService) resolveContainerID(input container.CreateFishContainerInput, customer partyDomain.Party, assignedAt time.Time) (uint, error) {
 	if !input.IsNewContainer {
-		err := s.containerRepo.UpdateContainerStatus(
+		err := s.containerRepo.UpdateContainer(
 			input.ContainerID,
-			"with_customer",
+			&containerDomain.Container{
+				Status:              ptr.String("with_customer"),
+				CurrentCustomerID:   &customer.ID,
+				AssignedAt:          &assignedAt,
+			},
 		)
 		if err != nil {
 			return 0, err
@@ -224,8 +228,14 @@ func (s *InvoiceService) resolveContainerID(input container.CreateFishContainerI
 	}
 
 	newContainer := containerDomain.Container{
-		ID:     *input.NewContainerID,
-		Status: ptr.String("with_customer"),
+		ContainerNo:         *input.NewContainerID,
+		Status:              ptr.String("with_customer"),
+		CurrentCustomerID:   &customer.ID,
+		AssignedAt:          &assignedAt,
+	}
+
+	if input.NewcontainerName != nil {
+		newContainer.Name = *input.NewcontainerName
 	}
 
 	if input.NewContainerColor != nil {

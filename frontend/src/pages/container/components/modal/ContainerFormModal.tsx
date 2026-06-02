@@ -51,13 +51,9 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
         name: container.name,
         type: container.type,
         color: container.color,
-        status: container.status ?? undefined
       })
     } else if (isOpen && !container) {
       form.resetFields()
-      form.setFieldsValue({
-        status: 'at_store'
-      })
     }
   }, [isOpen, container, form])
 
@@ -115,20 +111,6 @@ const ContainerFormModal = ({ isOpen, onClose, onChange, container }: ContainerF
             allowClear
             options={containerColorOptions}
             placeholder={localT('form.color.placeholder')}
-          />
-        </Form.Item>
-        <Form.Item
-          name="status"
-          label={localT('form.status.label')}
-        >
-          <Select
-            placeholder={localT('form.status.placeholder')}
-            allowClear
-            options={[
-              { label: localT('at-store'), value: 'at_store' },
-              { label: localT('with-customer'), value: 'with_customer' },
-              { label: localT('lost'), value: 'lost' },
-            ]}
           />
         </Form.Item>
         <Form.Item noStyle>

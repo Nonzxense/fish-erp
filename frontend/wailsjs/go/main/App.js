@@ -106,6 +106,14 @@ export function GetTruckInvoices(arg1) {
   return window['go']['main']['App']['GetTruckInvoices'](arg1);
 }
 
+export function ListAtCustomer() {
+  return window['go']['main']['App']['ListAtCustomer']();
+}
+
+export function ListAtStore() {
+  return window['go']['main']['App']['ListAtStore']();
+}
+
 export function PayInvoice(arg1) {
   return window['go']['main']['App']['PayInvoice'](arg1);
 }

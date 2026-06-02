@@ -9,12 +9,16 @@ type CreateContainerInput struct {
 }
 
 type CreateFishContainerInput struct {
-	ContainerID       uint                    `json:"containerId" validate:"required_if=IsNewContainer false"`
-	IsNewContainer    bool                    `json:"isNewContainer"`
-	NewContainerID    *uint                   `json:"newContainerId" validate:"required_if=IsNewContainer true"`
-	NewContainerType  *string                 `json:"newContainerType"`
-	NewContainerColor *string                 `json:"newContainerColor"`
-	Fishes            []CreateFishDetailInput `json:"fishes" validate:"required,dive"`
+	ContainerID uint `json:"containerId" validate:"required_if=IsNewContainer false"`
+
+	IsNewContainer bool `json:"isNewContainer"`
+
+	NewcontainerName  *string `json:"newContainerName" validate:"required_if=IsNewContainer true"`
+	NewContainerID    *uint   `json:"newContainerId" validate:"required_if=IsNewContainer true"`
+	NewContainerType  *string `json:"newContainerType" validate:"required_if=IsNewContainer true"`
+	NewContainerColor *string `json:"newContainerColor" validate:"required_if=IsNewContainer true"`
+
+	Fishes []CreateFishDetailInput `json:"fishes" validate:"required,dive"`
 }
 
 type CreateFishDetailInput struct {

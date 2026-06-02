@@ -62,6 +62,10 @@ export function GetTruckInvoice(arg1:string):Promise<truckinvoice.TruckInvoice>;
 
 export function GetTruckInvoices(arg1:truckinvoice.TruckInvoiceFilter):Promise<domain.PageResult_fish_internal_domain_truck_invoice_TruckInvoice_>;
 
+export function ListAtCustomer():Promise<Array<dto.CustomerWithContainerDTO>>;
+
+export function ListAtStore():Promise<Array<dto.ContainerListDTO>>;
+
 export function PayInvoice(arg1:dto.PayInvoiceInput):Promise<void>;
 
 export function RollbackPayment(arg1:number):Promise<void>;

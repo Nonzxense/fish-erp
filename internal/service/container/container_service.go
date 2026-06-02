@@ -3,6 +3,7 @@ package container
 import (
 	"fish/internal/domain"
 	containerDomain "fish/internal/domain/container"
+	"fish/internal/dto"
 	"fish/internal/repository"
 )
 
@@ -25,8 +26,8 @@ func (s *ContainerService) CreateContainer(input CreateContainerInput) error {
 	return s.repo.CreateContainer(container)
 }
 
-func (s *ContainerService) GetContainers(filter *containerDomain.ContainerFilter) (domain.PageResult[containerDomain.Container], error) {
-	containers, total, err := s.repo.FindAll(filter)
+func (s *ContainerService) List(filter *containerDomain.ContainerFilter) (domain.PageResult[containerDomain.Container], error) {
+	containers, total, err := s.repo.List(filter)
 
 	pageResult := domain.PageResult[containerDomain.Container]{
 		Data:  containers,
@@ -36,8 +37,16 @@ func (s *ContainerService) GetContainers(filter *containerDomain.ContainerFilter
 	return pageResult, err
 }
 
-func (s *ContainerService) GetContainerSummary() (containerDomain.ContainerSummary, error) {
-	return s.repo.FindSummary()
+func (s *ContainerService) ListAtStore() ([]dto.ContainerListDTO, error) {
+	return s.repo.ListAtStore()
+}
+
+func (s *ContainerService) ListAtCustomer() ([]dto.CustomerWithContainerDTO, error) {
+	return s.repo.ListAtCustomer()
+}
+
+func (s *ContainerService) GetSummary() (containerDomain.ContainerSummary, error) {
+	return s.repo.GetSummary()
 }
 
 func (s *ContainerService) UpdateContainer(id uint, input CreateContainerInput) error {

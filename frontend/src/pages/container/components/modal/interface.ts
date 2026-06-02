@@ -1,10 +1,10 @@
-import { container } from "../../../../../wailsjs/go/models"
+import { dto } from "../../../../../wailsjs/go/models"
 
 export interface ContainerFormModalProp {
   isOpen: boolean
   onClose: () => void
   onChange: () => Promise<void>
-  container?: container.Container | null
+  container?: dto.ContainerListDTO | null
 }
 
 export type ContainerFormValues = {

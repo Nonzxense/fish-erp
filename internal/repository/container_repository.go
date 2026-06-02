@@ -2,9 +2,26 @@ package repository
 
 import (
 	domain "fish/internal/domain/container"
+	"fish/internal/dto"
+	"slices"
+	"strings"
+	"time"
 
 	"gorm.io/gorm"
 )
+
+type containerWithCustomerRow struct {
+	ContainerID   uint
+	ContainerName string
+	ContainerNo   uint
+	Color         string
+	Type          string
+	Status        *string
+
+	CustomerID   string
+	CustomerName string
+	AssignedAt   time.Time
+}
 
 type ContainerRepository struct {
 	db *gorm.DB
@@ -18,7 +35,7 @@ func (r *ContainerRepository) CreateContainer(container *domain.Container) error
 	return r.db.Create(container).Error
 }
 
-func (r *ContainerRepository) FindAll(filter *domain.ContainerFilter) ([]domain.Container, int64, error) {
+func (r *ContainerRepository) List(filter *domain.ContainerFilter) ([]domain.Container, int64, error) {
 	var containers []domain.Container
 	var total int64
 
@@ -58,15 +75,83 @@ func (r *ContainerRepository) FindAll(filter *domain.ContainerFilter) ([]domain.
 	return containers, total, err
 }
 
-func (r *ContainerRepository) FindSummary() (domain.ContainerSummary, error) {
+func (r *ContainerRepository) ListAtStore() ([]dto.ContainerListDTO, error) {
+	var containers []dto.ContainerListDTO
+
+	if err := r.db.Model(&domain.Container{}).
+		Where("current_customer_id IS NULL").
+		Find(&containers).Error; err != nil {
+		return nil, err
+	}
+
+	return containers, nil
+}
+
+func (r *ContainerRepository) ListAtCustomer() ([]dto.CustomerWithContainerDTO, error) {
+	var rows []containerWithCustomerRow
+
+	if err := r.db.
+		Table("containers c").
+		Select(`
+			c.id as container_id,
+			c.name as container_name,
+			c.container_no,
+			c.color,
+			c.type,
+			c.assigned_at,
+			p.id as customer_id,
+			p.name as customer_name
+		`).
+		Joins("JOIN parties p ON p.id = c.current_customer_id").
+		Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	customerMap := make(map[string]*dto.CustomerWithContainerDTO)
+
+	for _, row := range rows {
+		customer, exists := customerMap[row.CustomerID]
+		if !exists {
+			customer = &dto.CustomerWithContainerDTO{
+				ID:         row.CustomerID,
+				Name:       row.CustomerName,
+				Containers: []dto.ContainerAtCustomerDTO{},
+			}
+			customerMap[row.CustomerID] = customer
+		}
+
+		customer.Containers = append(customer.Containers, dto.ContainerAtCustomerDTO{
+			ID:          row.ContainerID,
+			Name:        row.ContainerName,
+			ContainerNo: row.ContainerNo,
+			Color:       row.Color,
+			Type:        row.Type,
+			AssignedAt:  &row.AssignedAt,
+		})
+	}
+
+	customers := make([]dto.CustomerWithContainerDTO, 0, len(customerMap))
+
+	for _, customer := range customerMap {
+		customers = append(customers, *customer)
+	}
+
+	slices.SortFunc(customers, func(a, b dto.CustomerWithContainerDTO) int {
+		return strings.Compare(b.Name, a.Name)
+	})
+
+	return customers, nil
+}
+
+func (r *ContainerRepository) GetSummary() (domain.ContainerSummary, error) {
 	var summary domain.ContainerSummary
 	query := r.db.Model(&domain.Container{})
 
 	err := query.
 		Select(`
 			COUNT(*) as total,
-			COUNT(CASE WHEN status = 'at_store' THEN 0 END) as at_store,
-			COUNT(CASE WHEN status = 'with_customer' THEN 0 END) as with_customer
+			COUNT(CASE WHEN current_customer_id IS NULL THEN 1 END) AS at_store,
+			COUNT(CASE WHEN current_customer_id IS NOT NULL THEN 1 END) AS with_customer
 		`).
 		Scan(&summary).Error
 

@@ -7,6 +7,8 @@ export namespace container {
 	    color: string;
 	    type: string;
 	    status?: string;
+	    currentCustomerId?: string;
+	    assignedAt?: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new Container(source);
@@ -20,7 +22,27 @@ export namespace container {
 	        this.color = source["color"];
 	        this.type = source["type"];
 	        this.status = source["status"];
+	        this.currentCustomerId = source["currentCustomerId"];
+	        this.assignedAt = this.convertValues(source["assignedAt"], time.Time);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class ContainerFilter {
 	    id?: number;
@@ -99,6 +121,7 @@ export namespace container {
 	export class CreateFishContainerInput {
 	    containerId: number;
 	    isNewContainer: boolean;
+	    newContainerName?: string;
 	    newContainerId?: number;
 	    newContainerType?: string;
 	    newContainerColor?: string;
@@ -112,6 +135,7 @@ export namespace container {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.containerId = source["containerId"];
 	        this.isNewContainer = source["isNewContainer"];
+	        this.newContainerName = source["newContainerName"];
 	        this.newContainerId = source["newContainerId"];
 	        this.newContainerType = source["newContainerType"];
 	        this.newContainerColor = source["newContainerColor"];
@@ -479,6 +503,100 @@ export namespace domain {
 
 export namespace dto {
 	
+	export class ContainerAtCustomerDTO {
+	    id: number;
+	    name: string;
+	    containerNo: number;
+	    color: string;
+	    type: string;
+	    assignedAt?: time.Time;
+	
+	    static createFrom(source: any = {}) {
+	        return new ContainerAtCustomerDTO(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.containerNo = source["containerNo"];
+	        this.color = source["color"];
+	        this.type = source["type"];
+	        this.assignedAt = this.convertValues(source["assignedAt"], time.Time);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ContainerListDTO {
+	    id: number;
+	    name: string;
+	    containerNo: number;
+	    color: string;
+	    type: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ContainerListDTO(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.containerNo = source["containerNo"];
+	        this.color = source["color"];
+	        this.type = source["type"];
+	    }
+	}
+	export class CustomerWithContainerDTO {
+	    id: string;
+	    name: string;
+	    containers: ContainerAtCustomerDTO[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CustomerWithContainerDTO(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.containers = this.convertValues(source["containers"], ContainerAtCustomerDTO);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class PartyDetailDTO {
 	    id: string;
 	    name: string;
