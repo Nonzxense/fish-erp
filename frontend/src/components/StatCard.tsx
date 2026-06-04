@@ -1,48 +1,91 @@
-import { Flex, Typography } from "antd";
+import { Flex, Typography } from 'antd'
 import React from 'react'
 
 const { Text } = Typography
 
+type Variant = 'info' | 'success' | 'purple'
+
+const variants = {
+  info: {
+    card: 'bg-blue-50 border-blue-200',
+    bubble: 'bg-blue-100',
+    icon: 'text-blue-600',
+  },
+  success: {
+    card: 'bg-green-50 border-green-200',
+    bubble: 'bg-green-100',
+    icon: 'text-green-600',
+  },
+  purple: {
+    card: 'bg-purple-50 border-purple-200',
+    bubble: 'bg-purple-100',
+    icon: 'text-purple-600',
+  },
+}
+
+interface Props {
+  title: string
+  value: number
+  icon: React.ReactNode
+  variant: Variant
+}
+
 const StatCard = ({
-  title, value, icon, accent, bg,
-}: { title: string; value: number; icon: React.ReactNode; accent: string; bg: string }) => (
-  <div style={{
-    background: bg,
-    border: `1.5px solid ${accent}30`,
-    borderRadius: 12,
-    padding: '20px 24px',
-    position: 'relative',
-    overflow: 'hidden',
-    height: '100%',
-  }}>
-    <div style={{
-      position: 'absolute', bottom: -20, right: -20,
-      width: 100, height: 100, borderRadius: '50%',
-      background: `${accent}12`,
-    }} />
-    <Flex align="center" gap={10} style={{ marginBottom: 14 }}>
-      <span style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        width: 36, height: 36, borderRadius: 10,
-        background: `${accent}18`, color: accent,
-      }}>
-        {icon}
-      </span>
-      <Text style={{
-        color: '#64748b', fontSize: 12,
-        letterSpacing: '0.07em', textTransform: 'uppercase',
-        fontFamily: "'DM Mono', monospace", fontWeight: 500,
-      }}>
-        {title}
-      </Text>
-    </Flex>
-    <div style={{
-      fontSize: 28, fontWeight: 700, color: '#1e293b',
-      fontFamily: "'DM Mono', monospace", lineHeight: 1,
-    }}>
-      {value.toLocaleString()}
+  title,
+  value,
+  icon,
+  variant,
+}: Props) => {
+  const styles = variants[variant]
+
+  return (
+    <div
+      className={`
+        relative
+        overflow-hidden
+        h-full
+        rounded-xl
+        border
+        p-5
+        ${styles.card}
+      `}
+    >
+      <div
+        className={`
+          absolute
+          -bottom-5
+          -right-5
+          h-24
+          w-24
+          rounded-full
+          opacity-100
+          ${styles.bubble}
+        `}
+      />
+      <Flex align="center" gap={10} className="mb-3.5">
+        <span
+          className={`
+            flex
+            h-9
+            w-9
+            items-center
+            justify-center
+            rounded-lg
+            ${styles.bubble}
+            ${styles.icon}
+          `}
+        >
+          {icon}
+        </span>
+        <Text className="font-mono text-xs font-medium uppercase tracking-wider text-slate-500">
+          {title}
+        </Text>
+      </Flex>
+      <div className="font-mono text-3xl font-bold leading-none text-slate-800">
+        {value.toLocaleString()}
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 export default StatCard

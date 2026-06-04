@@ -42,8 +42,12 @@ func (r *ContainerRepository) List(filter *domain.ContainerFilter) ([]domain.Con
 	query := r.db.Model(&domain.Container{})
 
 	if filter != nil {
-		if filter.ID != nil {
-			query = query.Where("ContainerNo = ?", *filter.ID)
+		if filter.Name != nil {
+			query = query.Where("name LIKE ?", "%"+*filter.Name+"%")
+		}
+
+		if filter.ContainerNo != nil {
+			query = query.Where("container_no = ?", *filter.ContainerNo)
 		}
 
 		if filter.Type != nil {

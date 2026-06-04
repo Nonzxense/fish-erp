@@ -1,9 +1,9 @@
-import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker, TableProps, Dropdown } from 'antd'
+import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker, TableProps } from 'antd'
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
-import { ListFilter, PencilLine, Plus, Eye } from 'lucide-react'
+import { ListFilter, PencilLine, Plus, Eye, Wallet } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, REF_FISH_SALE_INVOICE } from '../../utils/constants'
 import { formatDate, formatTHB } from '../../utils/formatter'
 import SaleInvoiceFormModal from './components/modal/SaleInvoiceFormModal'
 import { invoice as invoiceModel } from '../../../wailsjs/go/models'
@@ -13,6 +13,8 @@ import { ChangeInvoiceStatus, GetFishSaleInvoices, GetFishTradeInvoiceSummary } 
 import { getPaidStatusColor } from '../../utils/getTagColor'
 import SaleInvoiceDetailModal from './components/modal/SaleInvoiceDetailModal'
 import dayjs from 'dayjs'
+import { PayableInvoice } from '../../components/payment/interface'
+import InvoicePaymentModal from '../../components/payment/InvoicePaymentModal'
 
 const SaleInvoice = () => {
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
@@ -23,6 +25,8 @@ const SaleInvoice = () => {
   const [invoices, setInvoices] = useState<invoiceModel.FishSaleInvoice[]>([])
   const [invoiceSummary, setInvoiceSummary] = useState<invoiceModel.FishTradeInvoiceSummary>()
   const [selectedInvoice, setSelectedInvoice] = useState<invoiceModel.FishSaleInvoice>()
+  const [isOpenInvoicePaymentModal, setIsOpenInvoicePaymentModal] = useState<boolean>(false)
+  const [selectedInvoiceToPay, setSelectedInvoiceToPay] = useState<PayableInvoice | null>(null)
   const [segmentStatus, setSegmentStatus] = useState<string>('all')
   const [pagination, setPagination] = useState<Pagination>({
     page: DEFAULT_PAGE,
@@ -58,6 +62,16 @@ const SaleInvoice = () => {
   const handleViewDetail = useCallback((record: invoiceModel.FishSaleInvoice) => {
     setSelectedInvoice(record)
     setIsOpenModalDetail(true)
+  }, [])
+
+  const handlePayInvoice = useCallback((record: invoiceModel.FishSaleInvoice) => {
+    setSelectedInvoice(record)
+    setSelectedInvoiceToPay({
+      id: record.id,
+      refType: REF_FISH_SALE_INVOICE,
+      remainingAmount: record.totalAmount - record.paidAmount
+    })
+    setIsOpenInvoicePaymentModal(true)
   }, [])
 
   const loadInvoices = useCallback(async () => {
@@ -244,11 +258,21 @@ const SaleInvoice = () => {
                 hidden={record.status !== 'pending'}
               />
             </Tooltip>
+            {record.status !== 'paid' && record.status !== 'cancelled' && (
+              <Tooltip title={commonT('button-pay')}>
+                <Button
+                  icon={<Wallet size={16} />}
+                  variant="text"
+                  color="green"
+                  onClick={() => handlePayInvoice(record)}
+                />
+              </Tooltip>
+            )}
           </Space>
         )
       }
     ],
-    [localT, commonT, handleViewDetail, handleEdit]
+    [localT, commonT, handleViewDetail, handleEdit, handlePayInvoice]
   )
 
   useEffect(() => {
@@ -258,6 +282,18 @@ const SaleInvoice = () => {
 
   return (
     <>
+      {selectedInvoiceToPay && selectedInvoice?.customer && (
+        <InvoicePaymentModal
+          isOpen={isOpenInvoicePaymentModal}
+          onClose={() => {
+            setIsOpenInvoicePaymentModal(false)
+            setSelectedInvoiceToPay(null)
+          }}
+          invoice={selectedInvoiceToPay}
+          party={selectedInvoice.customer}
+          onSuccess={handleFormModalChange}
+        />
+      )}
       <SaleInvoiceFormModal
         isOpen={isOpenModalForm}
         onChange={handleFormModalChange}

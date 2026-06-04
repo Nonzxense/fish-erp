@@ -1,5 +1,6 @@
 export type ContainerFilter = {
-  id?: number
+  name?: string
+  containerNo?: number
   type?: string
   color?: string
   status?: string

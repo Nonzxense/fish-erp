@@ -45,7 +45,8 @@ export namespace container {
 		}
 	}
 	export class ContainerFilter {
-	    id?: number;
+	    name?: string;
+	    containerNo?: number;
 	    type?: string;
 	    color?: string;
 	    status?: string;
@@ -58,7 +59,8 @@ export namespace container {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.containerNo = source["containerNo"];
 	        this.type = source["type"];
 	        this.color = source["color"];
 	        this.status = source["status"];

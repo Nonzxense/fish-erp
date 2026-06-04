@@ -15,7 +15,7 @@ export interface InvoicePaymentModalProps {
   onClose: () => void
   onSuccess: () => void
   invoice: PayableInvoice
-  party: partyModel.PartyWithDebt
+  party: partyModel.PartyWithDebt | partyModel.Party
 }
 
 export interface InvoicePaymentFormValues {

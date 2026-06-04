@@ -3,9 +3,9 @@ import PurchaseInvoiceFormModal from './components/modal/PurchaseInvoiceFormModa
 import { App, Button, Card, Col, DatePicker, Dropdown, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, TableProps, Tag, Tooltip } from 'antd'
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
-import { Eye, ListFilter, PencilLine, Plus } from 'lucide-react'
+import { Eye, ListFilter, PencilLine, Plus, Wallet } from 'lucide-react'
 import { Pagination } from '../../utils/types'
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, REF_FISH_PURCHASE_INVOICE } from '../../utils/constants'
 import { InvoiceFilter, InvoiceFilterFormValues } from '../sale-invoice/interface'
 import dayjs from 'dayjs'
 import { invoice as invoiceModel } from '../../../wailsjs/go/models'
@@ -14,6 +14,8 @@ import { getPaidStatusColor } from '../../utils/getTagColor'
 import { ChangeInvoiceStatus, GetFishPurchaseInvoices, GetFishTradeInvoiceSummary } from '../../../wailsjs/go/main/App'
 import PurchaseInvoiceDetailModal from './components/modal/PurchaseInvoiceDetailModal'
 import { truncateString } from '../../utils/truncate'
+import { PayableInvoice } from '../../components/payment/interface'
+import InvoicePaymentModal from '../../components/payment/InvoicePaymentModal'
 
 const PurchaseInvoice = () => {
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
@@ -24,6 +26,8 @@ const PurchaseInvoice = () => {
   const [invoices, setInvoices] = useState<invoiceModel.FishPurchaseInvoice[]>([])
   const [selectedInvoice, setSelectedInvoice] = useState<invoiceModel.FishPurchaseInvoice>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isOpenInvoicePaymentModal, setIsOpenInvoicePaymentModal] = useState<boolean>(false)
+  const [selectedInvoiceToPay, setSelectedInvoiceToPay] = useState<PayableInvoice | null>(null)
   const [filter, setFilter] = useState<InvoiceFilter>({})
   const [pagination, setPagination] = useState<Pagination>({
     page: DEFAULT_PAGE,
@@ -90,6 +94,16 @@ const PurchaseInvoice = () => {
   const handleEdit = useCallback((record: invoiceModel.FishPurchaseInvoice) => {
     setSelectedInvoice(record)
     setIsOpenModalForm(true)
+  }, [])
+
+  const handlePayInvoice = useCallback((record: invoiceModel.FishPurchaseInvoice) => {
+    setSelectedInvoice(record)
+    setSelectedInvoiceToPay({
+      id: record.id,
+      refType: REF_FISH_PURCHASE_INVOICE,
+      remainingAmount: record.totalAmount - record.paidAmount
+    })
+    setIsOpenInvoicePaymentModal(true)
   }, [])
 
   const handleViewDetail = useCallback((record: invoiceModel.FishPurchaseInvoice) => {
@@ -256,11 +270,21 @@ const PurchaseInvoice = () => {
                 hidden={record.status !== 'pending'}
               />
             </Tooltip>
+            {record.status !== 'paid' && record.status !== 'cancelled' && (
+              <Tooltip title={commonT('button-pay')}>
+                <Button
+                  icon={<Wallet size={16} />}
+                  variant="text"
+                  color="green"
+                  onClick={() => handlePayInvoice(record)}
+                />
+              </Tooltip>
+            )}
           </Space>
         )
       }
     ],
-    [localT, handleChangeStatus, commonT, handleViewDetail, handleEdit]
+    [localT, handleChangeStatus, commonT, handleViewDetail, handleEdit, handlePayInvoice]
   )
 
   useEffect(() => {
@@ -270,6 +294,18 @@ const PurchaseInvoice = () => {
 
   return (
     <>
+      {selectedInvoiceToPay && selectedInvoice?.supplier && (
+        <InvoicePaymentModal
+          isOpen={isOpenInvoicePaymentModal}
+          onClose={() => {
+            setIsOpenInvoicePaymentModal(false)
+            setSelectedInvoiceToPay(null)
+          }}
+          invoice={selectedInvoiceToPay}
+          party={selectedInvoice.supplier}
+          onSuccess={handleFormModalChange}
+        />
+      )}
       <PurchaseInvoiceDetailModal
         isOpen={isOpenModalDetail}
         onClose={() => setIsOpenModalDetail(false)}

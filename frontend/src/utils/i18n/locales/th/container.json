@@ -6,6 +6,7 @@
   "with-customer": "อยู่ที่ลูกค้า",
   "lost": "หาย",
   "table": {
+    "name": "ชื่อลัง",
     "id": "เลขลัง",
     "type": "ประเภท",
     "color": "สี",
@@ -45,6 +46,10 @@
     "status": {
       "label": "สถานะ",
       "placeholder": "เลือกสถานะ"
+    },
+    "name_filter": {
+      "label": "ชื่อลัง",
+      "placeholder": "ค้นหาชื่อลัง"
     }
   }
 }
