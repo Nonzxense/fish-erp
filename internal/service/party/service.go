@@ -41,6 +41,15 @@ func (s *PartyService) GetParties(filter *partyDomain.PartyFilter) (domain.PageR
 	return pageResult, error
 }
 
+func (s *PartyService) UpdateParty(id string, input CreatePartyInput) error {
+	party := &partyDomain.Party{
+		Name:  input.Name,
+		Phone: input.Phone,
+		Note:  input.Note,
+	}
+	return s.repo.UpdateParty(id, party)
+}
+
 func (s *PartyService) GetParty(id string) (dto.PartyDetailDTO, error) {
 	party, err := s.repo.GetByIDWithDebt(id)
 	if err != nil {

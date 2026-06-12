@@ -78,4 +78,6 @@ export function UpdateFishPurchaseInvoice(arg1:string,arg2:invoice.CreateFishPur
 
 export function UpdateFishSaleInvoice(arg1:string,arg2:invoice.CreateFishSaleInvoiceInput):Promise<void>;
 
+export function UpdateParty(arg1:string,arg2:party.CreatePartyInput):Promise<void>;
+
 export function UpdateTransaction(arg1:string,arg2:transaction.CreateTransactionInput):Promise<void>;

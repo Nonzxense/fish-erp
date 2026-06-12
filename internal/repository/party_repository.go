@@ -18,7 +18,7 @@ func (r *PartyRepository) CreateParty(party *domain.Party) error {
 	return r.db.Create(party).Error
 }
 
-func (r *PartyRepository) UpdateParty(id int, party *domain.Party) error {
+func (r *PartyRepository) UpdateParty(id string, party *domain.Party) error {
 	return r.db.
 		Model(&domain.Party{}).
 		Where("id = ?", id).

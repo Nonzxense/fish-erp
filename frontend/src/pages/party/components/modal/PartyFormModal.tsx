@@ -2,7 +2,7 @@ import { App, Button, Flex, Form, Input, Modal } from "antd"
 import { PartyFormModalProp, PartyFormValues } from "./interface"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { CreateParty } from "../../../../../wailsjs/go/main/App"
+import { CreateParty, UpdateParty } from "../../../../../wailsjs/go/main/App"
 import { party as partyModel } from "../../../../../wailsjs/go/models"
 
 const PartyFormModal = ({ isOpen, onClose, onChange, party }: PartyFormModalProp) => {
@@ -23,7 +23,7 @@ const PartyFormModal = ({ isOpen, onClose, onChange, party }: PartyFormModalProp
       })
 
       if (isEdit && party) {
-        // await UpdateParty(party.id, payload)
+        await UpdateParty(party.id, payload)
         message.success(commonT('message.update-success'))
       } else {
         await CreateParty(payload)

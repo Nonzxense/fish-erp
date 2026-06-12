@@ -138,6 +138,10 @@ export function UpdateFishSaleInvoice(arg1, arg2) {
   return window['go']['main']['App']['UpdateFishSaleInvoice'](arg1, arg2);
 }
 
+export function UpdateParty(arg1, arg2) {
+  return window['go']['main']['App']['UpdateParty'](arg1, arg2);
+}
+
 export function UpdateTransaction(arg1, arg2) {
   return window['go']['main']['App']['UpdateTransaction'](arg1, arg2);
 }

@@ -23,7 +23,6 @@ import {
   ArrowUpRight,
   Eye,
   PencilLine,
-  Trash2,
   Undo2,
   Wallet
 } from 'lucide-react'
@@ -39,11 +38,13 @@ import {
 import {
   dto,
   invoice as invoiceModel,
+  party as partyModel,
   payment as paymentModel,
   truckinvoice as truckinvoiceModel
 } from '../../../wailsjs/go/models'
 
 import PaymentModal from '../party/components/modal/PaymentModal'
+import PartyFormModal from './components/modal/PartyFormModal'
 
 import {
   GetFishPurchaseInvoices,
@@ -74,6 +75,7 @@ const PartyDetail = () => {
   const [activeTab, setActiveTab] = useState('sales')
   const [isOpenPaymentModal, setIsOpenPaymentModal] = useState(false)
   const [isOpenInvoicePaymentModal, setIsOpenInvoicePaymentModal] = useState(false)
+  const [isOpenModalForm, setIsOpenModalForm] = useState(false)
   const [selectedInvoiceToPay, setSelectedInvoiceToPay] = useState<PayableInvoice | null>(null)
   const [isPartyLoading, setIsPartyLoading] = useState(false)
   const [isSaleLoading, setIsSaleLoading] = useState(false)
@@ -330,60 +332,6 @@ const PartyDetail = () => {
     })
   }, [commonT, loadParty, loadPayments, message, modal, paymentT])
 
-  const handleDelete =
-    useCallback(() => {
-      modal.confirm({
-        title:
-          commonT(
-            'modal-delete.title'
-          ),
-
-        content: commonT(
-          'modal-delete.desc',
-          {
-            amount: 1
-          }
-        ),
-
-        okText:
-          commonT('modal-common.ok'),
-
-        cancelText:
-          commonT(
-            'modal-common.cancel'
-          ),
-
-        okButtonProps: {
-          danger: true
-        },
-
-        onOk: async () => {
-          try {
-            message.success(
-              commonT(
-                'message.delete-success'
-              )
-            )
-
-            navigate('/parties')
-          } catch (err) {
-            console.error(err)
-
-            message.error(
-              commonT(
-                'message.delete-error'
-              )
-            )
-          }
-        }
-      })
-    }, [
-      modal,
-      commonT,
-      message,
-      navigate
-    ])
-
   const commonInvoiceColumns: TableColumnsType =
     useMemo(
       () => [
@@ -620,6 +568,13 @@ const PartyDetail = () => {
         }}
       />
 
+      <PartyFormModal
+        isOpen={isOpenModalForm}
+        onClose={() => setIsOpenModalForm(false)}
+        onChange={loadParty}
+        party={partyDetail as unknown as partyModel.Party}
+      />
+
       {selectedInvoiceToPay && partyDetail && (
         <InvoicePaymentModal
           isOpen={isOpenInvoicePaymentModal}
@@ -674,50 +629,26 @@ const PartyDetail = () => {
               )}
             />
           </Flex>
+        </Flex>
 
-          <Space wrap>
+        <Card
+          loading={isPartyLoading}
+          styles={{
+            header: {
+              borderBottom: 'none',
+            },
+          }}
+          extra={
             <Button
-              icon={
-                <Wallet size={16} />
-              }
-              className='gradient-btn'
-              onClick={() =>
-                setIsOpenPaymentModal(
-                  true
-                )
-              }
-            >
-              {localT(
-                'button.receive-payment'
-              )}
-            </Button>
-
-            <Button
-              icon={
-                <PencilLine size={16} />
-              }
+              icon={<PencilLine size={16} />}
               color='primary'
               variant='outlined'
+              onClick={() => setIsOpenModalForm(true)}
             >
               {commonT('button-edit')}
             </Button>
-
-            <Button
-              danger
-              icon={
-                <Trash2 size={16} />
-              }
-              variant='outlined'
-              onClick={handleDelete}
-            >
-              {commonT(
-                'button-delete'
-              )}
-            </Button>
-          </Space>
-        </Flex>
-
-        <Card loading={isPartyLoading}>
+          }
+        >
           <Descriptions
             bordered
             column={2}
@@ -839,7 +770,22 @@ const PartyDetail = () => {
           </Col>
         </Row>
 
-        <Card>
+        <Card
+          styles={{
+            header: {
+              borderBottom: 'none',
+            },
+          }}
+          extra={
+            <Button
+              icon={<Wallet size={16} />}
+              className='gradient-btn'
+              onClick={() => setIsOpenPaymentModal(true)}
+            >
+              {localT('button.receive-payment')}
+            </Button>
+          }
+        >
           <Tabs
             activeKey={activeTab}
             onChange={setActiveTab}

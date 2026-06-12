@@ -41,9 +41,20 @@ const Party = () => {
     { label: localT('overdue'), value: 'overdue' },
   ], [localT])
 
-  const handleEdit = useCallback((record: party.Party) => {
-    message.info(`${commonT('message.editing')} ${record.name}`)
-  }, [message, commonT])
+  const handleEdit = useCallback((record: party.PartyWithDebt) => {
+    setSelectedParty(record)
+    setIsOpenModalForm(true)
+  }, [])
+
+  const handleCloseModalForm = useCallback(() => {
+    setIsOpenModalForm(false)
+    setSelectedParty(undefined)
+  }, [])
+
+  const handleClosePaymentModal = useCallback(() => {
+    setIsOpenPaymentModal(false)
+    setSelectedParty(undefined)
+  }, [])
 
   const handleReceivePayment = useCallback(
     (record: party.PartyWithDebt) => {
@@ -183,14 +194,15 @@ const Party = () => {
     <>
       <PaymentModal
         isOpen={isOpenPaymentModal}
-        onClose={() => setIsOpenPaymentModal(false)}
+        onClose={handleClosePaymentModal}
         party={selectedParty}
         onSuccess={loadParties}
       />
       <PartyFormModal
         isOpen={isOpenModalForm}
-        onClose={() => setIsOpenModalForm(false)}
+        onClose={handleCloseModalForm}
         onChange={loadParties}
+        party={selectedParty}
       />
       <Space orientation="vertical" size="large" className="w-full">
         <Flex align="center" className="w-full">
