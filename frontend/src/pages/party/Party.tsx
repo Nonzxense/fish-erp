@@ -5,12 +5,11 @@ import { ListFilter, PencilLine, Plus, Trash2, Eye, Wallet } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
 import PartyFormModal from './components/modal/PartyFormModal'
-import { party, payment } from '../../../wailsjs/go/models'
+import { party } from '../../../wailsjs/go/models'
 import { PartyFilter } from './interface'
-import { AllocatePaymentFIFO, GetParties } from '../../../wailsjs/go/main/App'
+import { GetParties } from '../../../wailsjs/go/main/App'
 import { Pagination } from '../../utils/types'
 import { formatTHB } from '../../utils/formatter'
-import dayjs from 'dayjs'
 import PaymentModal from './components/modal/PaymentModal'
 import { useNavigate } from 'react-router-dom'
 
@@ -35,6 +34,23 @@ const Party = () => {
   const [form] = Form.useForm()
   const navigate = useNavigate()
   const { modal, message } = App.useApp()
+
+  const resetPagination = useCallback(() => {
+    setPagination((prev) => ({
+      ...prev,
+      page: DEFAULT_PAGE,
+      pageSize: DEFAULT_PAGE_SIZE,
+    }))
+  }, [])
+
+  const handleSearchFilter = useCallback((filters: PartyFilter) => {
+    setFilter(filters)
+    resetPagination()
+  }, [resetPagination])
+
+  const handleResetFilters = useCallback(() => {
+    setFilter({})
+  }, [])
 
   const segmentOptions = useMemo(() => [
     { label: localT('all'), value: 'all' },
@@ -110,10 +126,20 @@ const Party = () => {
         ellipsis: true,
       },
       {
-        title: localT('table.overdue-amount'),
+        title: localT('total-receivable'),
         key: 'totalReceivable',
         dataIndex: 'totalReceivable',
-        ellipsis: true,
+        align: 'right',
+        render: (val) => (
+          <span className="text-green-500">
+            {formatTHB(val)}
+          </span>
+        )
+      },
+      {
+        title: localT('total-payable'),
+        key: 'totalPayable',
+        dataIndex: 'totalPayable',
         align: 'right',
         render: (val) => (
           <span className="text-red-500">
@@ -220,7 +246,7 @@ const Party = () => {
             </Col>
             <Col xs={24} md={12}>
               <Card variant="borderless">
-                <Statistic title={localT('overdue-amount')} value={1} />
+                <Statistic title={localT('total-receivable')} value={1} />
               </Card>
             </Col>
           </Row>
@@ -268,7 +294,12 @@ const Party = () => {
           }`}
       >
         <Card>
-          <Form form={form} layout="vertical">
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSearchFilter}
+            onReset={handleResetFilters}
+          >
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Item label={localT('form.name.label')} name="name">
@@ -282,8 +313,16 @@ const Party = () => {
               </Col>
               <Col span={24}>
                 <Flex gap={16} justify="end">
-                  <Button type="primary">{commonT('filter.button-search')}</Button>
-                  <Button variant="outlined" onClick={() => form.resetFields()}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                  >
+                    {commonT('filter.button-search')}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    htmlType="reset"
+                  >
                     {commonT('filter.button-clear')}
                   </Button>
                 </Flex>

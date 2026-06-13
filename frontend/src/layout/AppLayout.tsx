@@ -1,6 +1,6 @@
 import { Avatar, Divider, Flex, Layout, Menu, MenuProps, Typography } from 'antd'
 import Sider from 'antd/es/layout/Sider'
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Boxes, Fish, HandCoins, House, ReceiptText, Settings, ShoppingCart, Truck, Users, } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -24,52 +24,57 @@ const AppLayout = () => {
   const { t: localT } = useTranslation('sidebar')
   const navigate = useNavigate()
   const location = useLocation()
+  const [collapsed, setCollapsed] = useState(false)
 
   const selectedKey = location.pathname.split('/')[1] || 'home'
+
+  const menuIconClass = 'w-5 h-5 shrink-0 min-w-5 min-h-5'
 
   const menuItems: MenuItem[] = useMemo(
     () => [
       {
         key: 'home',
-        icon: <House size={20} />,
+        icon: <House className={menuIconClass} />,
         label: localT('home'),
       },
       {
         key: 'income-and-expenses',
-        icon: <HandCoins size={20} />,
+        icon: <HandCoins className={menuIconClass} />,
         label: localT('income-and-expense'),
       },
       {
         key: 'sales-invoices',
-        icon: <ReceiptText size={20} />,
+        icon: <ReceiptText className={menuIconClass} />,
         label: localT('sales-invoice'),
       },
       {
         key: 'purchase-invoices',
-        icon: <ShoppingCart size={20} />,
+        icon: <ShoppingCart className={menuIconClass} />,
         label: localT('purchase-invoice'),
       },
       {
         key: 'truck-invoices',
-        icon: <Truck size={20} />,
+        icon: <Truck className={menuIconClass} />,
         label: localT('truck-invoice'),
       },
       {
         key: 'containers',
-        icon: <Boxes size={20} />,
+        icon: <Boxes className={menuIconClass} />,
         label: localT('container'),
       },
       {
         key: 'parties',
-        icon: <Users size={20} />,
+        icon: <Users className={menuIconClass} />,
         label: localT('party'),
       },
       {
         key: 'settings',
-        icon: <Settings size={20} />,
+        icon: <Settings className={menuIconClass} />,
         label: localT('settings'),
       },
-    ], [localT])
+    ],
+    [localT]
+  )
 
   const onClickMenuItem: MenuProps['onClick'] = async (e) => {
     if (e.key) {
@@ -79,12 +84,20 @@ const AppLayout = () => {
 
   return (
     <Layout className="min-h-screen! max-h-screen!">
-      <Sider width={300} theme="light" style={siderStyle} className='sidebar'>
-        <Flex className='justify-center'>
-          <Flex gap={10} className="items-center ">
+      <Sider
+        width={300}
+        theme="light"
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+        style={siderStyle}
+        className='sidebar'
+      >
+        <Flex className={collapsed ? 'justify-center' : 'px-6'}>
+          <Flex gap={12} className="items-center min-h-[48px]">
             <Avatar
               shape="square"
-              size={48}
+              size={collapsed ? 36 : 48}
               icon={<Fish className="text-white" />}
               className="
                 bg-blue-500
@@ -93,10 +106,12 @@ const AppLayout = () => {
                 !rounded-xl
               "
             />
-            <div className="flex flex-col items-start">
-              <Title level={4} className="!mb-0">{localT('title')}</Title>
-              <Text type="secondary">{localT('subtitle')}</Text>
-            </div>
+            {!collapsed && (
+              <div className="flex flex-col items-start overflow-hidden">
+                <Title level={4} className="!mb-0 whitespace-nowrap">{localT('title')}</Title>
+                <Text type="secondary" className="whitespace-nowrap">{localT('subtitle')}</Text>
+              </div>
+            )}
           </Flex>
         </Flex>
         <Divider size='small' />

@@ -923,7 +923,6 @@ export namespace invoice {
 		}
 	}
 	export class FishTradeInvoiceSummary {
-	    totalInvoice: number;
 	    pending: number;
 	    paid: number;
 	
@@ -933,7 +932,6 @@ export namespace invoice {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.totalInvoice = source["totalInvoice"];
 	        this.pending = source["pending"];
 	        this.paid = source["paid"];
 	    }

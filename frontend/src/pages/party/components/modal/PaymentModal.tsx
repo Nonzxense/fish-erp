@@ -7,6 +7,7 @@ import {
   Input,
   InputNumber,
   Modal,
+  Segmented,
   Select,
   Typography
 } from 'antd'
@@ -17,7 +18,7 @@ import { useTranslation } from 'react-i18next'
 import { dto } from '../../../../../wailsjs/go/models'
 import { AllocatePaymentFIFO } from '../../../../../wailsjs/go/main/App'
 
-import { formatTHB } from '../../../../utils/formatter'
+import { formatTHB, formatTHBRaw } from '../../../../utils/formatter'
 import {
   PaymentFormValues,
   PaymentModalProps
@@ -33,6 +34,7 @@ const PaymentModal = ({
   party
 }: PaymentModalProps) => {
   const [form] = Form.useForm<PaymentFormValues>()
+  const direction = Form.useWatch('direction', form)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { message } = App.useApp()
@@ -49,13 +51,17 @@ const PaymentModal = ({
 
     form.setFieldsValue({
       paymentDate: dayjs(),
-      method: 'cash'
+      method: 'cash',
+      direction: 'in'
     })
   }, [form, isOpen])
 
-  const totalReceivable = useMemo(() => {
+  const currentBalance = useMemo(() => {
+    if (direction === 'out') {
+      return party?.totalPayable || 0
+    }
     return party?.totalReceivable || 0
-  }, [party])
+  }, [party, direction])
 
   const handleSubmit = async () => {
     try {
@@ -65,10 +71,10 @@ const PaymentModal = ({
         return
       }
 
-      if (values.amount > totalReceivable) {
+      if (values.amount > currentBalance) {
         message.error(
           localT('message.overpaid', {
-            amount: formatTHB(values.amount - totalReceivable)
+            amount: formatTHBRaw(values.amount - currentBalance)
           })
         )
 
@@ -80,7 +86,7 @@ const PaymentModal = ({
       const payload = new dto.PaymentInput({
         partyId: party.id,
         amount: values.amount,
-        direction: 'in',
+        direction: values.direction,
         paymentDate: values.paymentDate.toISOString(),
         method: values.method,
         note: values.note
@@ -104,7 +110,7 @@ const PaymentModal = ({
       open={isOpen}
       onCancel={onClose}
       confirmLoading={isSubmitting}
-      title={localT('modal.receive-payment-title')}
+      title={direction === 'in' ? localT('modal.receive-payment-title') : localT('modal.make-payment-title')}
       okText={commonT('button-save')}
       cancelText={commonT('button-cancel')}
       footer={null}
@@ -127,12 +133,12 @@ const PaymentModal = ({
 
             <div className="text-right">
               <Text type="secondary">
-                {localT('table.overdue-amount')}
+                {direction === 'in' ? localT('total-receivable') : localT('total-payable')}
               </Text>
 
               <div>
-                <Text strong className="text-red-500">
-                  {formatTHB(totalReceivable)}
+                <Text strong className={direction === 'in' ? 'text-green-500' : 'text-red-500'}>
+                  {formatTHB(currentBalance)}
                 </Text>
               </div>
             </div>
@@ -144,6 +150,22 @@ const PaymentModal = ({
           layout="vertical"
           onFinish={handleSubmit}
         >
+          <Form.Item
+            name="direction"
+            className="mb-4"
+          >
+            <Segmented
+              block
+              options={[
+                { label: localT('direction.in'), value: 'in' },
+                { label: localT('direction.out'), value: 'out' }
+              ]}
+              onChange={(val) => {
+                form.setFieldValue('direction', val)
+              }}
+            />
+          </Form.Item>
+
           <Form.Item
             label={localT('form.amount.label')}
             name="amount"

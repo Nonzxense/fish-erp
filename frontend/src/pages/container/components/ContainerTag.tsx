@@ -1,5 +1,5 @@
 import { Typography } from "antd";
-import { getContainerTypeAbbreviation } from "../utils/getContainerTypeAbbreviation";
+import { getContainerTypeAbbreviation } from "../../../utils/getContainerTypeAbbreviation";
 
 const COLOR_MAP: Record<string, string> = {
   red: '#ef4444',

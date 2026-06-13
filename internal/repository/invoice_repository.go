@@ -310,11 +310,9 @@ func (r *InvoiceRepository) GetFishTradeInvoiceSummary(invoiceType string) (doma
 
 	err := query.
 		Select(`
-			COUNT(*) AS total_invoices,
-			SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END) AS paid,
-			SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending
+			SUM(CASE WHEN paid_amount >= total_amount THEN paid_amount ELSE 0 END) AS paid,
+			SUM(CASE WHEN paid_amount < total_amount THEN total_amount - paid_amount ELSE 0 END) AS pending
 		`).
 		Scan(&summary).Error
-
 	return summary, err
 }

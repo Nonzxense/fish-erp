@@ -22,6 +22,7 @@ export interface PaymentModalProps {
 }
 
 export interface PaymentFormValues {
+  direction: string
   amount: number
   paymentDate: Dayjs
   method: string

@@ -38,6 +38,8 @@ const InvoicePaymentModal = ({
   const { t: localT } = useTranslation('payment')
   const { t: commonT } = useTranslation('common')
 
+  const isReceivable = invoice?.refType === REF_FISH_SALE_INVOICE || invoice?.refType === REF_TRUCK_INVOICE
+
   useEffect(() => {
     if (!isOpen || !invoice) {
       form.resetFields()
@@ -138,10 +140,10 @@ const InvoicePaymentModal = ({
             </div>
             <div className="text-right">
               <Text type="secondary">
-                {localT('invoice.remaining-amount')}
+                {isReceivable ? localT('total-receivable') : localT('total-payable')}
               </Text>
               <div>
-                <Text strong className="text-red-500">
+                <Text strong className={isReceivable ? 'text-green-500' : 'text-red-500'}>
                   {formatTHB(invoice.remainingAmount)}
                 </Text>
               </div>

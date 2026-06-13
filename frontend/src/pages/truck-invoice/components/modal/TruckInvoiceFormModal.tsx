@@ -104,11 +104,13 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
   }, [form, onClose])
 
   const handleSubmit = useCallback(async (values: TruckInvoiceFormValues) => {
-    const helpers = values.helpers.map((helper) => (
-      new truckinvoiceModel.HelperWageInput({
-        ...helper
-      })
-    ))
+    const helpers = (values.helpers || [])
+      .filter((h) => h && h.name && h.amount)
+      .map((helper) => (
+        new truckinvoiceModel.HelperWageInput({
+          ...helper
+        })
+      ))
 
     const customers = values.shippingInvoices.map((customer) => (
       new truckinvoiceModel.ShippingInvoiceInput({
@@ -117,11 +119,13 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
       })
     ))
 
-    const expenses = values.otherExpenses.map((expense) => (
-      new truckinvoiceModel.OtherExpenseInput({
-        ...expense
-      })
-    ))
+    const expenses = (values.otherExpenses || [])
+      .filter((e) => e && e.description && e.amount)
+      .map((expense) => (
+        new truckinvoiceModel.OtherExpenseInput({
+          ...expense
+        })
+      ))
 
     const payload = new truckinvoiceModel.CreateTruckInvoiceInput({
       ...values,

@@ -1,7 +1,7 @@
 import { App, Button, Card, Col, Flex, Form, Input, Row, Segmented, Space, Statistic, Table, TableColumnsType, Tooltip, Tag, DatePicker, TableProps } from 'antd'
 import PageTitle from '../../components/page-title/PageTitle'
 import { useTranslation } from 'react-i18next'
-import { ListFilter, PencilLine, Plus, Eye, Wallet } from 'lucide-react'
+import { ListFilter, PencilLine, Plus, Eye, Wallet, FileClock, FileCheck } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, REF_FISH_SALE_INVOICE } from '../../utils/constants'
 import { formatDate, formatTHB } from '../../utils/formatter'
@@ -15,6 +15,7 @@ import SaleInvoiceDetailModal from './components/modal/SaleInvoiceDetailModal'
 import dayjs from 'dayjs'
 import { PayableInvoice } from '../../components/payment/interface'
 import InvoicePaymentModal from '../../components/payment/InvoicePaymentModal'
+import StatCard from '../../components/StatCard'
 
 const SaleInvoice = () => {
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
@@ -97,7 +98,6 @@ const SaleInvoice = () => {
   const loadInvoiceSummary = useCallback(async () => {
     const res = await GetFishTradeInvoiceSummary('sale')
     setInvoiceSummary({
-      totalInvoice: res.totalInvoice,
       pending: res.pending,
       paid: res.paid
     })
@@ -314,32 +314,21 @@ const SaleInvoice = () => {
         </Flex>
         <div className="w-full">
           <Row gutter={[16, 16]}>
-            <Col xs={24} md={8}>
-              <Card variant="borderless">
-                <Statistic
-                  title={localT('stat.total-invoices')}
-                  value={invoiceSummary?.totalInvoice}
-                  styles={{ content: { color: '#1677ff' } }}
-                />
-              </Card>
+            <Col xs={24} lg={12}>
+              <StatCard
+                variant="info"
+                title={localT('stat.pending')}
+                value={formatTHB(invoiceSummary?.pending)}
+                icon={<FileClock size={18} />}
+              />
             </Col>
-            <Col xs={24} md={8}>
-              <Card variant="borderless">
-                <Statistic
-                  title={localT('stat.pending')}
-                  value={invoiceSummary?.pending}
-                  styles={{ content: { color: '#faad14' } }}
-                />
-              </Card>
-            </Col>
-            <Col xs={24} md={8}>
-              <Card variant="borderless">
-                <Statistic
-                  title={localT('stat.paid')}
-                  value={invoiceSummary?.paid}
-                  styles={{ content: { color: '#00c951' } }}
-                />
-              </Card>
+            <Col xs={24} lg={12}>
+              <StatCard
+                variant="success"
+                title={localT('stat.paid')}
+                value={formatTHB(invoiceSummary?.paid)}
+                icon={<FileCheck size={18} />}
+              />
             </Col>
           </Row>
         </div>

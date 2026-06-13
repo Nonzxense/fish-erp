@@ -25,7 +25,7 @@ const variants = {
 
 interface Props {
   title: string
-  value: number
+  value: string
   icon: React.ReactNode
   variant: Variant
 }
@@ -41,48 +41,52 @@ const StatCard = ({
   return (
     <div
       className={`
-        relative
-        overflow-hidden
-        h-full
-        rounded-xl
-        border
-        p-5
-        ${styles.card}
-      `}
+    relative
+    overflow-hidden
+    h-full
+    rounded-xl
+    border
+    p-5
+    ${styles.card}
+  `}
     >
+      {/* Background circle */}
       <div
         className={`
-          absolute
-          -bottom-5
-          -right-5
-          h-24
-          w-24
-          rounded-full
-          opacity-100
-          ${styles.bubble}
-        `}
+      absolute
+      -bottom-5
+      -right-5
+      h-24
+      w-24
+      rounded-full
+      ${styles.bubble}
+      z-0
+    `}
       />
-      <Flex align="center" gap={10} className="mb-3.5">
-        <span
-          className={`
-            flex
-            h-9
-            w-9
-            items-center
-            justify-center
-            rounded-lg
-            ${styles.bubble}
-            ${styles.icon}
-          `}
-        >
-          {icon}
-        </span>
-        <Text className="font-mono text-xs font-medium uppercase tracking-wider text-slate-500">
-          {title}
-        </Text>
-      </Flex>
-      <div className="font-mono text-3xl font-bold leading-none text-slate-800">
-        {value.toLocaleString()}
+      {/* Content */}
+      <div className="relative z-10">
+        <Flex align="center" gap={10} className="mb-3.5">
+          <span
+            className={`
+          flex
+          h-9
+          w-9
+          items-center
+          justify-center
+          rounded-lg
+          ${styles.bubble}
+          ${styles.icon}
+        `}
+          >
+            {icon}
+          </span>
+          <Text className="font-mono text-xs font-medium uppercase tracking-wider text-slate-500">
+            {title}
+          </Text>
+        </Flex>
+        <div className="font-mono text-3xl font-bold leading-none text-slate-800">
+          {value.toLocaleString()}
+        </div>
       </div>
     </div>
   )

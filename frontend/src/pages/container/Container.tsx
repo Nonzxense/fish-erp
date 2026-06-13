@@ -15,7 +15,7 @@ import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
 import useContainerColorOptions from '../../hooks/useContainerColorOptions'
 import useContainerTypeOptions from '../../hooks/useContainerTypeOptions'
 import StatCard from '../../components/StatCard'
-import ContainerTag from '../../components/ContainerTag'
+import ContainerTag from './components/ContainerTag'
 
 const { Text } = Typography
 
@@ -235,7 +235,7 @@ const Container = () => {
           <StatCard
             variant="info"
             title={localT('all')}
-            value={totalContainer}
+            value={totalContainer.toString()}
             icon={<Package size={18} />}
           />
         </Col>
@@ -243,7 +243,7 @@ const Container = () => {
           <StatCard
             variant="success"
             title={localT('at-store')}
-            value={containerAtStoreCount}
+            value={containerAtStoreCount.toString()}
             icon={<PackageCheck size={18} />}
           />
         </Col>
@@ -251,7 +251,7 @@ const Container = () => {
           <StatCard
             variant="purple"
             title={localT('with-customer')}
-            value={containerWithCustomerCount}
+            value={containerWithCustomerCount.toString()}
             icon={<Users size={18} />}
           />
         </Col>

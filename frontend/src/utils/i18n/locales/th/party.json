@@ -2,7 +2,8 @@
   "title": "ลูกค้า",
   "subtitle": "จัดการลูกค้า",
   "overdue": "ค้างชำระ",
-  "overdue-amount": "ยอดค้างชำระ",
+  "total-receivable": "ยอดค้างรับ",
+  "total-payable": "ยอดค้างชำระ",
   "detail": {
     "subtitle": "รายละเอียดลูกค้า"
   },
@@ -27,7 +28,6 @@
     "name": "ชื่อ",
     "phone": "เบอร์โทรศัพท์",
     "note": "หมายเหตุ",
-    "overdue-amount": "ยอดค้างชำระ",
     "status": "สถานะ",
     "manage": "การจัดการ"
   },
