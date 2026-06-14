@@ -39,8 +39,7 @@ const PaymentModal = ({
 
   const { message } = App.useApp()
 
-  const { t: paymentT } = useTranslation('payment')
-  const { t: localT } = useTranslation('party')
+  const { t: localT } = useTranslation('payment')
   const { t: commonT } = useTranslation('common')
 
   useEffect(() => {
@@ -133,7 +132,7 @@ const PaymentModal = ({
 
             <div className="text-right">
               <Text type="secondary">
-                {direction === 'in' ? localT('total-receivable') : localT('total-payable')}
+                {direction === 'in' ? localT('modal.receive-payment-title') : localT('modal.make-payment-title')}
               </Text>
 
               <div>
@@ -212,11 +211,11 @@ const PaymentModal = ({
             <Select
               options={[
                 {
-                  label: paymentT('method.cash'),
+                  label: localT('method.cash'),
                   value: 'cash'
                 },
                 {
-                  label: paymentT('method.transfer'),
+                  label: localT('method.transfer'),
                   value: 'transfer'
                 }
               ]}

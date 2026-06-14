@@ -23,7 +23,8 @@
     "name": "ชื่อ"
   },
   "modal": {
-    "pay-invoice-title": "ชำระเงินตามบิล"
+    "receive-payment-title": "รับชำระเงิน",
+    "make-payment-title": "จ่ายเงิน"
   },
   "invoice": {
     "remaining-amount": "ยอดค้างชำระ",
@@ -54,6 +55,7 @@
   },
   "message": {
     "payment-success": "บันทึกการชำระเงินสำเร็จ",
+    "overpaid": "คุณชำระเกินยอดค้างชำระจำนวน {{amount}}",
     "overpaid-invoice": "คุณชำระเกินยอดค้างชำระจำนวน {{amount}}",
     "rollback-success": "ยกเลิกการชำระเงินสำเร็จ",
     "rollback-error": "เกิดข้อผิดพลาดในการยกเลิกการชำระเงิน"

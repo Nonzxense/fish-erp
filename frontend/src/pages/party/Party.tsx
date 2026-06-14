@@ -30,6 +30,7 @@ const Party = () => {
   })
 
   const { t: localT } = useTranslation('party')
+  const { t: paymentT } = useTranslation('payment')
   const { t: commonT } = useTranslation('common')
   const [form] = Form.useForm()
   const navigate = useNavigate()
@@ -126,7 +127,7 @@ const Party = () => {
         ellipsis: true,
       },
       {
-        title: localT('total-receivable'),
+        title: paymentT('total-receivable'),
         key: 'totalReceivable',
         dataIndex: 'totalReceivable',
         align: 'right',
@@ -137,7 +138,7 @@ const Party = () => {
         )
       },
       {
-        title: localT('total-payable'),
+        title: paymentT('total-payable'),
         key: 'totalPayable',
         dataIndex: 'totalPayable',
         align: 'right',
@@ -246,7 +247,7 @@ const Party = () => {
             </Col>
             <Col xs={24} md={12}>
               <Card variant="borderless">
-                <Statistic title={localT('total-receivable')} value={1} />
+                <Statistic title={paymentT('total-receivable')} value={1} />
               </Card>
             </Col>
           </Row>
