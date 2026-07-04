@@ -1,4 +1,6 @@
 {
+  "button-save": "บันทึก",
+  "button-cancel": "ยกเลิก",
   "button-create": "เพิ่มรายการ",
   "button-export": "ส่งออก",
   "button-filter": "กรอง",

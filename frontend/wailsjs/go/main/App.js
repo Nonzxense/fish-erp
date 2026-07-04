@@ -90,6 +90,14 @@ export function GetShippingInvoicesByPartyID(arg1) {
   return window['go']['main']['App']['GetShippingInvoicesByPartyID'](arg1);
 }
 
+export function GetShippingPrices() {
+  return window['go']['main']['App']['GetShippingPrices']();
+}
+
+export function GetSummary() {
+  return window['go']['main']['App']['GetSummary']();
+}
+
 export function GetTransactionSummary(arg1, arg2) {
   return window['go']['main']['App']['GetTransactionSummary'](arg1, arg2);
 }
@@ -142,6 +150,14 @@ export function UpdateParty(arg1, arg2) {
   return window['go']['main']['App']['UpdateParty'](arg1, arg2);
 }
 
+export function UpdateShippingPrices(arg1) {
+  return window['go']['main']['App']['UpdateShippingPrices'](arg1);
+}
+
 export function UpdateTransaction(arg1, arg2) {
   return window['go']['main']['App']['UpdateTransaction'](arg1, arg2);
+}
+
+export function UpdateTruckInvoice(arg1, arg2) {
+  return window['go']['main']['App']['UpdateTruckInvoice'](arg1, arg2);
 }

@@ -1532,6 +1532,26 @@ export namespace truckinvoice {
 	}
 	
 	
+	export class ShippingPrices {
+	    plasticLarge: number;
+	    plasticSmall: number;
+	    foamLarge: number;
+	    foamMedium: number;
+	    foamSmall: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ShippingPrices(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.plasticLarge = source["plasticLarge"];
+	        this.plasticSmall = source["plasticSmall"];
+	        this.foamLarge = source["foamLarge"];
+	        this.foamMedium = source["foamMedium"];
+	        this.foamSmall = source["foamSmall"];
+	    }
+	}
 	export class TruckInvoice {
 	    id: string;
 	    createdAt: time.Time;
@@ -1627,6 +1647,20 @@ export namespace truckinvoice {
 		    }
 		    return a;
 		}
+	}
+	export class TruckInvoiceSummary {
+	    pending: number;
+	    paid: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TruckInvoiceSummary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.pending = source["pending"];
+	        this.paid = source["paid"];
+	    }
 	}
 
 }

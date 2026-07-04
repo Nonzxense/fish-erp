@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { truckinvoice as truckinvoiceModel } from '../../../wailsjs/go/models'
-import { GetTruckInvoices } from '../../../wailsjs/go/main/App'
+import { GetSummary, GetTruckInvoices, } from '../../../wailsjs/go/main/App'
 import { Pagination } from '../../utils/types'
 import { TruckInvoiceFilter } from './interface'
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../../utils/constants'
@@ -10,16 +10,19 @@ import { useTranslation } from 'react-i18next'
 import { formatDate, formatTHB } from '../../utils/formatter'
 import { truncateString } from '../../utils/truncate'
 import { getPaidStatusColor } from '../../utils/getTagColor'
-import { Eye, ListFilter, PencilLine, Plus } from 'lucide-react'
+import { Eye, FileCheck, FileClock, ListFilter, PencilLine, Plus, Settings } from 'lucide-react'
 import PageTitle from '../../components/page-title/PageTitle'
 import TruckInvoiceDetailModal from './components/modal/TruckInvoiceDetailModal'
+import ShippingPriceModal from './components/modal/ShippingPriceModal'
+import StatCard from '../../components/StatCard'
 
 const TruckInvoice = () => {
   const [isOpenModalForm, setIsOpenModalForm] = useState<boolean>(false)
   const [isShowFilters, setIsShowFilters] = useState<boolean>(false)
   const [segmentStatus, setSegmentStatus] = useState<string>('all')
   const [isOpenModalDetail, setIsOpenModalDetail] = useState<boolean>(false)
-  // const [invoiceSummary, setInvoiceSummary] = useState<truckinvoice.TruckInvoiceSummary>()
+  const [isOpenModalShippingPrice, setIsOpenModalShippingPrice] = useState<boolean>(false)
+  const [invoiceSummary, setInvoiceSummary] = useState<truckinvoiceModel.TruckInvoiceSummary>()
   const [invoices, setInvoices] = useState<truckinvoiceModel.TruckInvoice[]>([])
   const [selectedInvoice, setSelectedInvoice] = useState<truckinvoiceModel.TruckInvoice>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -72,6 +75,15 @@ const TruckInvoice = () => {
     }
   }, [filter, pagination.page, pagination.pageSize, segmentStatus])
 
+  const loadSummary = useCallback(async () => {
+    try {
+      const res = await GetSummary()
+      setInvoiceSummary(res)
+    } catch (error) {
+      console.error('Failed to load truck invoice summary:', error)
+    }
+  }, [])
+
   const handleCloseFormModal = useCallback(() => {
     setIsOpenModalForm(false)
     setSelectedInvoice(undefined)
@@ -84,7 +96,13 @@ const TruckInvoice = () => {
 
   const handleFormModalChange = useCallback(async () => {
     loadInvoices()
-  }, [loadInvoices])
+    loadSummary()
+  }, [loadInvoices, loadSummary])
+
+  const handleEdit = useCallback((invoice: truckinvoiceModel.TruckInvoice) => {
+    setIsOpenModalForm(true)
+    setSelectedInvoice(invoice)
+  }, [])
 
   const columns: TableColumnsType<truckinvoiceModel.TruckInvoice> = useMemo(
     () => [
@@ -172,7 +190,7 @@ const TruckInvoice = () => {
                 type="text"
                 color="primary"
                 variant="filled"
-                // onClick={() => handleEdit(record)}
+                onClick={() => handleEdit(record)}
                 hidden={record.status !== 'pending'}
               />
             </Tooltip>
@@ -180,12 +198,13 @@ const TruckInvoice = () => {
         )
       }
     ],
-    [commonT, localT, handleViewDetail]
+    [commonT, localT, handleViewDetail, handleEdit]
   )
 
   useEffect(() => {
     loadInvoices()
-  }, [loadInvoices])
+    loadSummary()
+  }, [loadInvoices, loadSummary])
 
   return (
     <>
@@ -198,6 +217,11 @@ const TruckInvoice = () => {
         isOpen={isOpenModalForm}
         onClose={handleCloseFormModal}
         onChange={handleFormModalChange}
+        id={selectedInvoice?.id}
+      />
+      <ShippingPriceModal
+        isOpen={isOpenModalShippingPrice}
+        onClose={() => setIsOpenModalShippingPrice(false)}
       />
       <Space orientation="vertical" size="large" className="w-full">
         <Flex align="center" justify="space-between" className="w-full">
@@ -208,32 +232,21 @@ const TruckInvoice = () => {
         </Flex>
         <div className="w-full">
           <Row gutter={[16, 16]}>
-            <Col xs={24} md={8}>
-              <Card variant="borderless">
-                <Statistic
-                  title={localT('stat.total-invoices')}
-                  // value={invoiceSummary?.totalInvoice}
-                  styles={{ content: { color: '#1677ff' } }}
-                />
-              </Card>
+            <Col xs={24} lg={12}>
+              <StatCard
+                variant="info"
+                title={localT('stat.pending')}
+                value={formatTHB(invoiceSummary?.pending)}
+                icon={<FileClock size={18} />}
+              />
             </Col>
-            <Col xs={24} md={8}>
-              <Card variant="borderless">
-                <Statistic
-                  title={localT('stat.pending')}
-                  // value={invoiceSummary?.pending}
-                  styles={{ content: { color: '#faad14' } }}
-                />
-              </Card>
-            </Col>
-            <Col xs={24} md={8}>
-              <Card variant="borderless">
-                <Statistic
-                  title={localT('stat.paid')}
-                  // value={invoiceSummary?.paid}
-                  styles={{ content: { color: '#00c951' } }}
-                />
-              </Card>
+            <Col xs={24} lg={12}>
+              <StatCard
+                variant="success"
+                title={localT('stat.paid')}
+                value={formatTHB(invoiceSummary?.paid)}
+                icon={<FileCheck size={18} />}
+              />
             </Col>
           </Row>
         </div>
@@ -245,6 +258,13 @@ const TruckInvoice = () => {
             className="select-none"
           />
           <Space size="middle">
+            <Button
+              onClick={() => setIsOpenModalShippingPrice(true)}
+              size="large"
+              icon={<Settings size={16} />}
+            >
+              {localT('buttons.settings')}
+            </Button>
             <Button
               onClick={() => setIsShowFilters((isShow) => !isShow)}
               size="large"

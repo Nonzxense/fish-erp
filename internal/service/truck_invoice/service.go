@@ -23,14 +23,99 @@ func NewTruckInvoiceService(repo *repository.TruckInvoiceRepository) *TruckInvoi
 }
 
 func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
-	c, err := count.GetCountForMonth[truckInvoiceDomain.TruckInvoice](s.repo.GetDB(), input.OccurredAt)
+	invoice, err := s.initializeTruckInvoice(input)
 	if err != nil {
 		return err
 	}
 
-	loc, err := time.LoadLocation("Asia/Bangkok")
+	return s.repo.Create(invoice)
+}
+
+func (s *TruckInvoiceService) Update(id string, input CreateTruckInvoiceInput) error {
+	invoice, err := s.initializeTruckInvoice(input)
 	if err != nil {
 		return err
+	}
+
+	invoice.ID = id
+
+	return s.repo.Update(id, invoice)
+}
+
+func (s *TruckInvoiceService) GetTruckInvoices(filter truckInvoiceDomain.TruckInvoiceFilter) (domain.PageResult[truckInvoiceDomain.TruckInvoice], error) {
+	invoices, total, err := s.repo.FindAll(filter)
+
+	pageResult := domain.PageResult[truckInvoiceDomain.TruckInvoice]{
+		Data:  invoices,
+		Total: total,
+	}
+
+	return pageResult, err
+}
+
+func (s *TruckInvoiceService) GetTruckInvoice(id string) (truckInvoiceDomain.TruckInvoice, error) {
+	return s.repo.GetByID(id)
+}
+
+func (s *TruckInvoiceService) GetShippingInvoicesByPartyID(partyID string) (domain.PageResult[truckInvoiceDomain.ShippingInvoice], error) {
+	invoices, total, err := s.repo.GetShippingInvoicesByPartyID(partyID)
+
+	pageResult := domain.PageResult[truckInvoiceDomain.ShippingInvoice]{
+		Data:  invoices,
+		Total: total,
+	}
+
+	return pageResult, err
+}
+
+func (s *TruckInvoiceService) GetSummary() (truckInvoiceDomain.TruckInvoiceSummary, error) {
+	return s.repo.GetSummary()
+}
+
+func (s *TruckInvoiceService) GetShippingPrices() (truckInvoiceDomain.ShippingPrices, error) {
+	return s.repo.GetShippingPrices()
+}
+
+func (s *TruckInvoiceService) UpdateShippingPrices(prices truckInvoiceDomain.ShippingPrices) error {
+	return s.repo.UpdateShippingPrices(&prices)
+}
+
+func (s *TruckInvoiceService) CalculateTotal(invoice truckInvoiceDomain.TruckInvoice) (common.Money, common.Money) {
+	var totalIncome common.Money
+	var totalExpense common.Money = invoice.DriverWage
+
+	for _, customer := range invoice.ShippingInvoices {
+		for _, item := range customer.Items {
+			totalIncome += item.Price.Mul(item.Qty)
+		}
+	}
+
+	for _, otherExpense := range invoice.OtherExpenses {
+		if otherExpense.Amount > 0 {
+			totalExpense += otherExpense.Amount
+		}
+	}
+
+	for _, helper := range invoice.Helpers {
+		if helper.Amount > 0 {
+			totalExpense += helper.Amount
+		}
+	}
+
+	return totalIncome, totalExpense
+}
+
+// helpers
+
+func (s *TruckInvoiceService) initializeTruckInvoice(input CreateTruckInvoiceInput) (*truckInvoiceDomain.TruckInvoice, error) {
+	c, err := count.GetCountForMonth[truckInvoiceDomain.TruckInvoice](s.repo.GetDB(), input.OccurredAt)
+	if err != nil {
+		return nil, err
+	}
+
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		return nil, err
 	}
 
 	sequenceID := fmt.Sprintf("TI-%d%02d-%04d",
@@ -98,56 +183,5 @@ func (s *TruckInvoiceService) Create(input CreateTruckInvoiceInput) error {
 
 	invoice.TotalIncome, invoice.TotalExpense = s.CalculateTotal(*invoice)
 
-	return s.repo.Create(invoice)
-}
-
-func (s *TruckInvoiceService) GetTruckInvoices(filter truckInvoiceDomain.TruckInvoiceFilter) (domain.PageResult[truckInvoiceDomain.TruckInvoice], error) {
-	invoices, total, err := s.repo.FindAll(filter)
-
-	pageResult := domain.PageResult[truckInvoiceDomain.TruckInvoice]{
-		Data:  invoices,
-		Total: total,
-	}
-
-	return pageResult, err
-}
-
-func (s *TruckInvoiceService) GetTruckInvoice(id string) (truckInvoiceDomain.TruckInvoice, error) {
-	return s.repo.GetByID(id)
-}
-
-func (s *TruckInvoiceService) GetShippingInvoicesByPartyID(partyID string) (domain.PageResult[truckInvoiceDomain.ShippingInvoice], error) {
-	invoices, total, err := s.repo.GetShippingInvoicesByPartyID(partyID)
-
-	pageResult := domain.PageResult[truckInvoiceDomain.ShippingInvoice]{
-		Data:  invoices,
-		Total: total,
-	}
-
-	return pageResult, err
-}
-
-func (s *TruckInvoiceService) CalculateTotal(invoice truckInvoiceDomain.TruckInvoice) (common.Money, common.Money) {
-	var totalIncome common.Money
-	var totalExpense common.Money = invoice.DriverWage
-
-	for _, customer := range invoice.ShippingInvoices {
-		for _, item := range customer.Items {
-			totalIncome += item.Price.Mul(item.Qty)
-		}
-	}
-
-	for _, otherExpense := range invoice.OtherExpenses {
-		if otherExpense.Amount > 0 {
-			totalExpense += otherExpense.Amount
-		}
-	}
-
-	for _, helper := range invoice.Helpers {
-		if helper.Amount > 0 {
-			totalExpense += helper.Amount
-		}
-	}
-
-	return totalIncome, totalExpense
+	return invoice, nil
 }

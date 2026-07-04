@@ -1,11 +1,10 @@
 import { Dayjs } from "dayjs";
-import { truckinvoice } from "../../../../../wailsjs/go/models";
 
 export interface TruckInvoiceFormModalProps {
   isOpen: boolean
   onClose: () => void
   onChange: () => Promise<void>
-  truckInvoice?: truckinvoice.TruckInvoice
+  id?: string
 }
 
 export type TruckInvoiceFormValues = {

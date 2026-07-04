@@ -262,7 +262,7 @@ func (s *InvoiceService) initializeSaleInvoice(input CreateFishSaleInvoiceInput,
 
 	loc, err := time.LoadLocation("Asia/Bangkok")
 	if err != nil {
-		return nil, err
+		return nil, err 
 	}
 
 	sequenceID := fmt.Sprintf("FS-%d%02d-%04d",

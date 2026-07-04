@@ -25,14 +25,16 @@ import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ShippingInvoice, HelperWage, OtherExpense, TruckInvoiceFormModalProps, TruckInvoiceFormValues } from './interface'
 import { party as partyModel, truckinvoice as truckinvoiceModel } from '../../../../../wailsjs/go/models'
-import { CreateTruckInvoice, GetParties } from '../../../../../wailsjs/go/main/App'
+import { CreateTruckInvoice, GetParties, GetShippingPrices, GetTruckInvoice, UpdateTruckInvoice } from '../../../../../wailsjs/go/main/App'
 import { SHIPPING_CONTAINER_KEYS } from '../../../../utils/constants'
 import { formatTHBRaw } from '../../../../utils/formatter'
 
 const { Text } = Typography
 
-const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: TruckInvoiceFormModalProps) => {
+const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, id }: TruckInvoiceFormModalProps) => {
   const [customers, setCustomers] = useState<partyModel.Party[]>([])
+  const [truckInvoice, setTruckInvoice] = useState<truckinvoiceModel.TruckInvoice>()
+  const [shippingPrices, setShippingPrices] = useState<truckinvoiceModel.ShippingPrices>()
   const [form] = Form.useForm()
   const { t: localT } = useTranslation('truck-invoice')
   const { t: commonT } = useTranslation('common')
@@ -48,6 +50,8 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
   ]
 
   type ItemKey = typeof SHIPPING_CONTAINER_KEYS[number]
+
+  const isEdit = !!id
 
   const mapItems = useCallback((si: ShippingInvoice) =>
     SHIPPING_CONTAINER_KEYS
@@ -138,28 +142,103 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
     })
 
     try {
-      await CreateTruckInvoice(payload)
+      if (isEdit && id) {
+        await UpdateTruckInvoice(id, payload)
+      } else {
+        await CreateTruckInvoice(payload)
+      }
     } catch {
       // interceptor handles error
     }
 
     handleCloseModal()
     onChange()
-  }, [handleCloseModal, mapItems, onChange])
+  }, [handleCloseModal, isEdit, mapItems, onChange, id])
 
   useEffect(() => {
     if (!isOpen) return
-    const loadCustomers = async () => {
+    const loadData = async () => {
       try {
-        const res = await GetParties(new partyModel.PartyFilter())
-        setCustomers(res.data)
+        const [partiesRes, pricesRes] = await Promise.all([
+          GetParties(new partyModel.PartyFilter()),
+          GetShippingPrices()
+        ])
+        setCustomers(partiesRes.data)
+        setShippingPrices(pricesRes)
+
+        let currentInvoice: truckinvoiceModel.TruckInvoice | undefined = undefined
+        if (id) {
+          currentInvoice = await GetTruckInvoice(id)
+          setTruckInvoice(currentInvoice)
+        }
+
+        // Pre-fill default prices for the first row if creating new
+        if (!id && pricesRes) {
+          const currentInvoices = form.getFieldValue('shippingInvoices')
+          if (!currentInvoices || currentInvoices.length === 0 || (currentInvoices.length === 1 && !currentInvoices[0].customerId)) {
+            form.setFieldValue(['shippingInvoices', 0], {
+              status: 'pending',
+              'plastic-l': { qty: 0, price: pricesRes.plasticLarge },
+              'plastic-s': { qty: 0, price: pricesRes.plasticSmall },
+              'foam-l': { qty: 0, price: pricesRes.foamLarge },
+              'foam-m': { qty: 0, price: pricesRes.foamMedium },
+              'foam-s': { qty: 0, price: pricesRes.foamSmall },
+            })
+          }
+        }
+
+        if (isEdit && id && currentInvoice) {
+          form.setFieldsValue({
+            date: dayjs(String(currentInvoice.createdAt)),
+            carPlate: currentInvoice.carPlate,
+            note: currentInvoice.note,
+            driverName: currentInvoice.driverName,
+            driverWage: currentInvoice.driverWage / 100,
+            helpers: currentInvoice.helpers?.map((helper) => ({
+              name: helper.name,
+              amount: helper.amount / 100,
+            })) ?? [],
+            otherExpenses: currentInvoice.otherExpenses?.map((expense) => ({
+              description: expense.description,
+              amount: expense.amount / 100
+            })) ?? [],
+            shippingInvoices: currentInvoice.shippingInvoices?.map((shipping) => {
+              const siObj: any = {
+                customerId: shipping.customerId,
+                status: shipping.status,
+                'plastic-l': { qty: 0, price: pricesRes?.plasticLarge || 0 },
+                'plastic-s': { qty: 0, price: pricesRes?.plasticSmall || 0 },
+                'foam-l': { qty: 0, price: pricesRes?.foamLarge || 0 },
+                'foam-m': { qty: 0, price: pricesRes?.foamMedium || 0 },
+                'foam-s': { qty: 0, price: pricesRes?.foamSmall || 0 },
+              }
+
+              shipping.items?.forEach((item) => {
+                if (item.type && item.type in siObj) {
+                  siObj[item.type] = {
+                    qty: item.qty,
+                    price: item.price / 100,
+                  }
+                }
+              })
+
+              return siObj
+            }) ?? []
+          })
+        } else {
+          form.resetFields()
+          form.setFieldsValue({
+            date: dayjs(),
+          })
+        }
+
       } catch {
         // handle by interceptor
       }
     }
 
-    loadCustomers()
-  }, [isOpen])
+    loadData()
+  }, [isOpen, id, form, isEdit])
 
   return (
     <Modal
@@ -182,12 +261,6 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
         form={form}
         layout="vertical"
         className="space-y-4"
-        initialValues={{
-          date: dayjs(),
-          helpers: [{}],
-          otherExpenses: [{}],
-          shippingInvoices: [{}]
-        }}
         onFinish={handleSubmit}
         onFinishFailed={(err) => console.log(err)}
       >
@@ -397,7 +470,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                               <InputNumber min={0} precision={0} step={1} />
                             </Form.Item>
                             <span>x</span>
-                            <Form.Item name={[field.name, 'plastic-l', 'price']} noStyle initialValue={300}>
+                            <Form.Item name={[field.name, 'plastic-l', 'price']} noStyle initialValue={shippingPrices?.plasticLarge || 0}>
                               <InputNumber min={0} />
                             </Form.Item>
                           </Space>
@@ -411,7 +484,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                               <InputNumber min={0} precision={0} step={1} />
                             </Form.Item>
                             <span>x</span>
-                            <Form.Item name={[field.name, 'plastic-s', 'price']} noStyle initialValue={150}>
+                            <Form.Item name={[field.name, 'plastic-s', 'price']} noStyle initialValue={shippingPrices?.plasticSmall || 0}>
                               <InputNumber min={0} />
                             </Form.Item>
                           </Space>
@@ -431,7 +504,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                               <InputNumber min={0} precision={0} step={1} />
                             </Form.Item>
                             <span>x</span>
-                            <Form.Item name={[field.name, 'foam-l', 'price']} noStyle initialValue={200}>
+                            <Form.Item name={[field.name, 'foam-l', 'price']} noStyle initialValue={shippingPrices?.foamLarge || 0}>
                               <InputNumber min={0} />
                             </Form.Item>
                           </Space>
@@ -445,7 +518,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                               <InputNumber min={0} />
                             </Form.Item>
                             <span>x</span>
-                            <Form.Item name={[field.name, 'foam-m', 'price']} noStyle initialValue={150}>
+                            <Form.Item name={[field.name, 'foam-m', 'price']} noStyle initialValue={shippingPrices?.foamMedium || 0}>
                               <InputNumber min={0} />
                             </Form.Item>
                           </Space>
@@ -459,7 +532,7 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                               <InputNumber min={0} />
                             </Form.Item>
                             <span>x</span>
-                            <Form.Item name={[field.name, 'foam-s', 'price']} noStyle initialValue={100}>
+                            <Form.Item name={[field.name, 'foam-s', 'price']} noStyle initialValue={shippingPrices?.foamSmall || 0}>
                               <InputNumber min={0} />
                             </Form.Item>
                           </Space>
@@ -478,7 +551,14 @@ const TruckInvoiceFormModal = ({ isOpen, onClose, onChange, truckInvoice }: Truc
                   type="dashed"
                   block
                   icon={<Plus size={14} />}
-                  onClick={() => add()}
+                  onClick={() => add({
+                    status: 'pending',
+                    'plastic-l': { qty: 0, price: shippingPrices?.plasticLarge || 0 },
+                    'plastic-s': { qty: 0, price: shippingPrices?.plasticSmall || 0 },
+                    'foam-l': { qty: 0, price: shippingPrices?.foamLarge || 0 },
+                    'foam-m': { qty: 0, price: shippingPrices?.foamMedium || 0 },
+                    'foam-s': { qty: 0, price: shippingPrices?.foamSmall || 0 },
+                  })}
                 >
                   {localT('buttons.add-customer')}
                 </Button>

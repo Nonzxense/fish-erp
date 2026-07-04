@@ -54,6 +54,10 @@ export function GetPaymentsByPartyID(arg1:string):Promise<domain.PageResult_fish
 
 export function GetShippingInvoicesByPartyID(arg1:string):Promise<domain.PageResult_fish_internal_domain_truck_invoice_ShippingInvoice_>;
 
+export function GetShippingPrices():Promise<truckinvoice.ShippingPrices>;
+
+export function GetSummary():Promise<truckinvoice.TruckInvoiceSummary>;
+
 export function GetTransactionSummary(arg1:time.Time,arg2:time.Time):Promise<transaction.TransactionSummary>;
 
 export function GetTransactions(arg1:transaction.TransactionFilter):Promise<domain.PageResult_fish_internal_domain_transaction_Transaction_>;
@@ -80,4 +84,8 @@ export function UpdateFishSaleInvoice(arg1:string,arg2:invoice.CreateFishSaleInv
 
 export function UpdateParty(arg1:string,arg2:party.CreatePartyInput):Promise<void>;
 
+export function UpdateShippingPrices(arg1:truckinvoice.ShippingPrices):Promise<void>;
+
 export function UpdateTransaction(arg1:string,arg2:transaction.CreateTransactionInput):Promise<void>;
+
+export function UpdateTruckInvoice(arg1:string,arg2:truckinvoice.CreateTruckInvoiceInput):Promise<void>;

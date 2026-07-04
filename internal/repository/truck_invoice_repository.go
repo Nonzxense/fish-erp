@@ -156,16 +156,35 @@ func (r *TruckInvoiceRepository) GetByID(id string) (domain.TruckInvoice, error)
 	return invoice, err
 }
 
+func (r *TruckInvoiceRepository) GetSummary() (domain.TruckInvoiceSummary, error) {
+	var summary domain.TruckInvoiceSummary
+
+	err := r.db.Model(&domain.ShippingInvoice{}).
+		Select(`
+			SUM(CASE WHEN paid_amount >= total_amount THEN paid_amount ELSE 0 END) AS paid,
+			SUM(CASE WHEN paid_amount < total_amount THEN total_amount - paid_amount ELSE 0 END) AS pending
+		`).
+		Scan(&summary).Error
+	return summary, err
+}
+
 func (r *TruckInvoiceRepository) Update(id string, newInvoice *domain.TruckInvoice) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		var oldInvoice domain.TruckInvoice
 
 		if err := tx.
-			Preload("Customers").
-			Preload("Customers.Items").
+			Preload("ShippingInvoices").
+			Preload("ShippingInvoices.Items").
 			Preload("Helpers").
 			Preload("OtherExpenses").
 			First(&oldInvoice, "id = ?", id).Error; err != nil {
+			return err
+		}
+
+		// update main invoice
+		if err := tx.Model(&domain.TruckInvoice{}).
+			Where("id = ?", id).
+			Updates(newInvoice).Error; err != nil {
 			return err
 		}
 
@@ -202,25 +221,17 @@ func (r *TruckInvoiceRepository) Update(id string, newInvoice *domain.TruckInvoi
 			}
 		}
 
-		t := make([]transaction.Transaction, 0,
-			len(newInvoice.Helpers)+
-				len(newInvoice.OtherExpenses)+
-				len(newInvoice.ShippingInvoices),
-		)
-
 		// helpers
 		for i := range newInvoice.Helpers {
 			helper := &newInvoice.Helpers[i]
 			helper.InvoiceID = newInvoice.ID
 
 			if helper.ID == 0 {
-				// create new helper
 				if err := tx.Create(helper).Error; err != nil {
 					return err
 				}
 			} else {
-				// update existing helper
-				if err := tx.Model(helper).
+				if err := tx.Model(&domain.HelperWage{}).
 					Where("id = ?", helper.ID).
 					Updates(map[string]any{
 						"name":   helper.Name,
@@ -229,16 +240,6 @@ func (r *TruckInvoiceRepository) Update(id string, newInvoice *domain.TruckInvoi
 					return err
 				}
 			}
-
-			t = append(t, transaction.Transaction{
-				ID:         uuid.NewString(),
-				InvoiceID:  &newInvoice.ID,
-				Amount:     helper.Amount,
-				OccurredAt: newInvoice.CreatedAt,
-				Type:       "expense",
-				Category:   ptr.String("ค่าจ้างเด็กรถ"),
-				Note:       ptr.String("ใบเสร็จ " + newInvoice.ID + " เด็กรถ " + helper.Name),
-			})
 		}
 
 		// expenses
@@ -247,13 +248,11 @@ func (r *TruckInvoiceRepository) Update(id string, newInvoice *domain.TruckInvoi
 			expense.InvoiceID = newInvoice.ID
 
 			if expense.ID == 0 {
-				// create new expense
 				if err := tx.Create(expense).Error; err != nil {
 					return err
 				}
 			} else {
-				// update existing expense
-				if err := tx.Model(expense).
+				if err := tx.Model(&domain.OtherExpense{}).
 					Where("id = ?", expense.ID).
 					Updates(map[string]any{
 						"description": expense.Description,
@@ -262,16 +261,6 @@ func (r *TruckInvoiceRepository) Update(id string, newInvoice *domain.TruckInvoi
 					return err
 				}
 			}
-
-			t = append(t, transaction.Transaction{
-				ID:         uuid.NewString(),
-				InvoiceID:  &newInvoice.ID,
-				Amount:     expense.Amount,
-				OccurredAt: newInvoice.CreatedAt,
-				Type:       "expense",
-				Category:   ptr.String("ค่าใช้จ่ายรถบรรทุก"),
-				Note:       ptr.String("ใบเสร็จ " + newInvoice.ID + " " + expense.Description),
-			})
 		}
 
 		return nil
@@ -304,4 +293,15 @@ func (r *TruckInvoiceRepository) GetShippingInvoicesByPartyID(partyID string) ([
 	}
 
 	return invoices, total, err
+}
+
+func (r *TruckInvoiceRepository) GetShippingPrices() (domain.ShippingPrices, error) {
+	var prices domain.ShippingPrices
+	err := r.db.First(&prices).Error
+	return prices, err
+}
+
+func (r *TruckInvoiceRepository) UpdateShippingPrices(prices *domain.ShippingPrices) error {
+	prices.ID = 1
+	return r.db.Save(prices).Error
 }

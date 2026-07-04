@@ -2,6 +2,10 @@
   "title": "ระบบจัดการใบค่ารถ",
   "subtitle": "จัดการรายการขนส่ง",
   "modal-title": "รายละเอียดบิล",
+  "modal": {
+    "shipping-price-title": "ค่าขนส่ง",
+    "shipping-price-subtitle": "แก้ไขค่าขนส่ง"
+  },
   "card": {
     "general": "ข้อมูลทั่วไป",
     "helpers": "เด็กรถ",
@@ -27,7 +31,8 @@
     "add-helper": "เพิ่มเด็กรถ",
     "add-expense": "เพิ่มค่าใช้จ่าย",
     "add-customer": "เพิ่มลูกค้า",
-    "submit": "บันทึกใบค่ารถ"
+    "submit": "บันทึกใบค่ารถ",
+    "settings": "ตั้งค่า"
   },
   "fields": {
     "name": "ชื่อ",
